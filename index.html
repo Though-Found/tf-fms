@@ -42,7 +42,11 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .gdrive-status{font-size:11px;padding:6px 10px;border-radius:3px;margin-top:6px;text-align:center;display:none}
 .gdrive-status.connected{background:var(--green-bg);color:var(--green);display:block}
 .gdrive-status.error{background:var(--red-bg);color:var(--red);display:block}
-
+.loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:999}
+.loading-screen.hide{display:none}
+.loading-text{font-size:12px;color:var(--text3);letter-spacing:2px;text-transform:uppercase}
+.spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .topbar{height:44px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;background:var(--accent);position:sticky;top:0;z-index:20}
 .topbar-brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent-text);opacity:.9}
 .topbar-right{display:flex;align-items:center;gap:10px}
@@ -51,7 +55,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .drive-badge i{font-size:13px}
 .signout-btn{font-size:11px;color:var(--accent-text);opacity:.6;background:none;border:none;cursor:pointer}
 .signout-btn:hover{opacity:1}
-
 .app-body{display:flex;min-height:calc(100vh - 44px)}
 .sidebar{width:190px;border-right:1px solid var(--border);background:var(--bg2);padding:1rem 0;flex-shrink:0}
 .nav-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:0 1.25rem;margin:1rem 0 4px}
@@ -60,7 +63,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--bg3);font-weight:500}
 .nav-item i{font-size:15px}
 .content{flex:1;overflow:auto;background:var(--bg)}
-
 .back-bar{display:flex;align-items:center;border-bottom:1px solid var(--border);background:var(--bg2);min-height:38px;position:sticky;top:44px;z-index:10}
 .back-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;font-size:12px;color:var(--text2);cursor:pointer;background:none;border:none;border-right:1px solid var(--border);white-space:nowrap}
 .back-btn:hover{color:var(--accent);background:var(--bg3)}
@@ -70,7 +72,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .bc-seg span{cursor:pointer}.bc-seg span:hover{color:var(--accent)}
 .bc-seg.last span{color:var(--text2);cursor:default}
 .bc-sep{color:var(--border2);margin:0 4px;font-size:10px}
-
 .inner{padding:1.25rem}
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:1.5rem}
 .stat-cell{background:var(--bg2);padding:1rem 1.25rem}
@@ -85,7 +86,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .btn-add i,.btn-ghost i{font-size:13px}
 .btn-danger{background:none;border:1px solid var(--red);color:var(--red);padding:5px 12px;font-size:11px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
 .btn-danger:hover{background:var(--red-bg)}
-
 .tf-table{width:100%;border-collapse:collapse;border:1px solid var(--border)}
 .tf-table th{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg2);font-weight:400}
 .tf-table td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text2);vertical-align:middle}
@@ -108,20 +108,17 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .del-btn{background:none;border:1px solid var(--red);color:var(--red);padding:5px 10px;font-size:11px;cursor:pointer;letter-spacing:1px;text-transform:uppercase}
 .del-btn:hover{background:var(--red-bg)}
 .cancel-btn{background:none;border:1px solid var(--border);color:var(--text3);padding:5px 10px;font-size:11px;cursor:pointer;letter-spacing:1px;text-transform:uppercase}
-
 .client-hd-wrap{border:1px solid var(--border);background:var(--bg2);padding:1.25rem;margin-bottom:1rem}
 .client-hd-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
 .client-hd-name{font-size:17px;font-weight:400;color:var(--text);margin-bottom:3px}
 .client-hd-meta{font-size:11px;color:var(--text3)}
 .client-hd-actions{display:flex;gap:6px;flex-shrink:0}
 .client-edit-form{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-
 .pill{font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;font-weight:500}
 .pill-active{background:var(--green-bg);color:var(--green)}
 .pill-hold{background:var(--amber-bg);color:var(--amber)}
 .pill-done{background:var(--bg3);color:var(--text3)}
 .pill-new{background:var(--blue-bg);color:var(--blue)}
-
 .clients-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:var(--border);border:1px solid var(--border)}
 .client-card{background:var(--bg2);padding:1.25rem;transition:background .12s}
 .client-card:hover{background:var(--bg3)}
@@ -130,7 +127,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .cc-name:hover{color:var(--accent);text-decoration:underline}
 .cc-type{font-size:11px;color:var(--text3);margin-bottom:8px}
 .cc-meta{display:flex;gap:12px;font-size:10px;color:var(--text3)}
-
 .pipeline-scroll{overflow-x:auto;padding-bottom:4px}
 .pipeline-stages{display:flex;gap:1px;background:var(--border);border:1px solid var(--border);min-width:max-content}
 .stage-col{width:170px;background:var(--bg2);flex-shrink:0}
@@ -143,12 +139,10 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .kc-name{font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px}
 .kc-client{font-size:11px;color:var(--text3)}
 .kc-tag{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);padding:1px 5px;margin-top:5px;display:inline-block}
-
 .drive-tabs{display:flex;gap:1px;border:1px solid var(--border);background:var(--border);margin-bottom:1rem}
 .drive-tab{flex:1;padding:8px;text-align:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);cursor:pointer;background:var(--bg2);transition:all .12s}
 .drive-tab:hover{color:var(--text);background:var(--bg3)}
 .drive-tab.active{background:var(--accent);color:var(--accent-text)}
-
 .drive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:12px}
 .di{background:var(--bg2);padding:1.25rem 1rem;cursor:pointer;transition:background .12s;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;position:relative}
 .di:hover{background:var(--bg3)}.di:hover .di-acts{opacity:1}
@@ -158,7 +152,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .di-acts{position:absolute;top:5px;right:5px;opacity:0;display:flex;gap:2px;transition:opacity .12s}
 .di-act{background:var(--bg4);border:none;cursor:pointer;padding:3px 5px;color:var(--text3);display:flex}
 .di-act:hover{color:var(--accent)}.di-act i{font-size:12px}
-
 .file-list-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border);transition:background .1s}
 .file-list-row:hover{background:var(--bg2)}.file-list-row:last-child{border-bottom:none}
 .fl-icon{font-size:18px;color:var(--text3);flex-shrink:0}
@@ -170,12 +163,9 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .fl-act:hover{color:var(--accent)}.fl-act i{font-size:14px}
 .open-link{font-size:11px;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:3px;padding:3px 6px;border:1px solid var(--border)}
 .open-link:hover{background:var(--bg3)}
-
 .empty-state{text-align:center;padding:2.5rem;color:var(--text3);border:1px solid var(--border);margin-bottom:8px}
 .empty-state i{font-size:24px;display:block;margin-bottom:6px;opacity:.5}
 .empty-state p{font-size:12px}
-
-/* UPLOAD PANEL */
 .upload-panel{border:1px solid var(--border);background:var(--bg2);margin-bottom:12px}
 .upload-tabs{display:flex;gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
 .upload-tab{flex:1;padding:9px;text-align:center;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);cursor:pointer;background:var(--bg2);transition:all .12s}
@@ -205,9 +195,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .link-preview{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);margin-bottom:8px;font-size:11px;color:var(--text2)}
 .link-preview i{font-size:16px;color:#4285f4}
 .upload-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-.upload-progress{font-size:11px;color:var(--text3);padding:6px 0;display:none}
-.upload-progress.show{display:block}
-
 .mis-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border)}
 .mis-cell{background:var(--bg2);padding:1.25rem}
 .mis-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:1rem}
@@ -216,7 +203,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .btrack{flex:1;height:3px;background:var(--bg4)}
 .bfill{height:100%;background:var(--accent)}
 .bval{font-size:11px;color:var(--text3);width:18px;text-align:right}
-
 .modal-backdrop{position:fixed;inset:0;background:rgba(30,42,30,.5);display:flex;align-items:center;justify-content:center;z-index:100}
 .modal-box{background:var(--bg2);border:1px solid var(--border);width:90%;max-width:400px;padding:1.5rem;max-height:90vh;overflow-y:auto}
 .modal-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:1.25rem}
@@ -228,15 +214,20 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem}
 .btn-cancel{background:none;border:1px solid var(--border);color:var(--text3);padding:7px 14px;font-size:11px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
 .btn-cancel:hover{border-color:var(--border2);color:var(--text)}
-
-.toast{position:fixed;bottom:20px;right:20px;background:var(--accent);color:var(--accent-text);padding:10px 16px;font-size:12px;z-index:200;display:none;align-items:center;gap:8px;border-radius:2px}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--accent);color:var(--accent-text);padding:10px 16px;font-size:12px;z-index:200;display:none;align-items:center;gap:8px}
 .toast.show{display:flex}
 .toast i{font-size:16px}
 </style>
 </head>
 <body>
-<div id="app">
 
+<!-- LOADING -->
+<div class="loading-screen hide" id="loading-screen">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Loading data…</div>
+</div>
+
+<div id="app">
 <!-- LOGIN -->
 <div class="screen active" id="scr-login">
 <div class="login-outer"><div class="login-box">
@@ -254,7 +245,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   </div>
   <button class="login-btn" onclick="doLogin()">Enter →</button>
   <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
-    <span class="login-label">Connect Google Drive (optional)</span>
+    <span class="login-label">Connect Google Drive (for file uploads)</span>
     <button class="gdrive-connect" onclick="connectDrive()">
       <i class="ti ti-brand-google-drive"></i> Connect Google Drive
     </button>
@@ -268,7 +259,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   <div class="topbar">
     <div class="topbar-brand">T&F — FMS</div>
     <div class="topbar-right">
-      <div class="drive-badge" id="drive-badge" style="display:none"><i class="ti ti-brand-google-drive"></i> Drive connected</div>
+      <div class="drive-badge" id="drive-badge" style="display:none"><i class="ti ti-brand-google-drive"></i> Drive on</div>
       <span class="role-tag" id="role-tag">Owner</span>
       <button class="signout-btn" onclick="doLogout()">Sign out</button>
     </div>
@@ -317,9 +308,10 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 
 <script>
 // ── CONFIG ──
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwq7iZ0hnIOqO7senf931SlcowrZbVlvkecUNZs9gkCOOfeCo6Tr21Oq6mJXgLOv3_rlg/exec';
 const CLIENT_ID = '135763636344-dpefl07fnciqt59fphfp2475c9vnjh8a.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-const TF_ROOT_FOLDER = 'T&F FMS'; // root folder name in Drive
+const TF_ROOT = 'T&F FMS';
 
 const PASS={owner:'owner123',operations:'ops123',designer:'design123'};
 const STAGES=['Inquiry','Brief','Proposal','Active','Review','Delivered'];
@@ -331,126 +323,122 @@ let currentClientId=null,currentProjectId=null,driveStack=[];
 let expandedRow=null,driveTab='folders',clientEditOpen=null;
 let uploadTab='dragdrop';
 let queuedFiles=[];
-let accessToken=null; // Google Drive access token
+let accessToken=null;
 let driveConnected=false;
-let driveFolderCache={}; // path -> folderId cache
+let driveFolderCache={};
+let saveTimeout=null;
 
 let clients=[];
 let projects=[];
 let folders=[];
 let files=[];
 
-// ── GOOGLE DRIVE AUTH ──
+// ── GOOGLE SHEETS ──
+function showLoading(msg){
+  const el=document.getElementById('loading-screen');
+  document.getElementById('loading-text').textContent=msg||'Loading…';
+  el.classList.remove('hide');
+}
+function hideLoading(){document.getElementById('loading-screen').classList.add('hide')}
+
+async function loadFromSheets(){
+  showLoading('Loading your data…');
+  try{
+    const res=await fetch(SCRIPT_URL+'?action=load');
+    const data=await res.json();
+    if(data.clients) clients=data.clients;
+    if(data.projects) projects=data.projects;
+    if(data.folders) folders=data.folders;
+    if(data.files) files=data.files;
+    showToast('Data loaded ✓');
+  }catch(e){
+    console.error('Load error',e);
+    showToast('Could not load data — working offline');
+  }
+  hideLoading();
+}
+
+function scheduleSave(){
+  clearTimeout(saveTimeout);
+  saveTimeout=setTimeout(saveToSheets, 1500);
+}
+
+async function saveToSheets(){
+  try{
+    await fetch(SCRIPT_URL,{
+      method:'POST',
+      body:JSON.stringify({action:'save',clients,projects,folders,files}),
+      headers:{'Content-Type':'application/json'}
+    });
+    showToast('Saved ✓');
+  }catch(e){
+    console.error('Save error',e);
+  }
+}
+
+// ── GOOGLE DRIVE ──
 function connectDrive(){
-  const client = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
-    scope: SCOPES,
-    callback: (response) => {
-      if(response.error){
-        showDriveStatus('Connection failed: '+response.error, false);
-        return;
-      }
-      accessToken = response.access_token;
-      driveConnected = true;
-      showDriveStatus('Google Drive connected ✓', true);
-      localStorage.setItem('tf_drive_token', accessToken);
+  const client=google.accounts.oauth2.initTokenClient({
+    client_id:CLIENT_ID,
+    scope:SCOPES,
+    callback:(response)=>{
+      if(response.error){showDriveStatus('Connection failed: '+response.error,false);return;}
+      accessToken=response.access_token;
+      driveConnected=true;
+      showDriveStatus('Google Drive connected ✓',true);
+      localStorage.setItem('tf_drive_token',accessToken);
     },
   });
   client.requestAccessToken();
 }
-
-function showDriveStatus(msg, success){
+function showDriveStatus(msg,success){
   const el=document.getElementById('gdrive-status');
   el.textContent=msg;
   el.className='gdrive-status '+(success?'connected':'error');
 }
-
 function checkSavedToken(){
   const t=localStorage.getItem('tf_drive_token');
   if(t){accessToken=t;driveConnected=true;}
 }
-
-// ── DRIVE FOLDER CREATION ──
-async function getDriveFolder(folderName, parentId){
-  const cacheKey=(parentId||'root')+'/'+folderName;
-  if(driveFolderCache[cacheKey]) return driveFolderCache[cacheKey];
-
-  // search for existing folder
-  const q=`name='${folderName}' and mimeType='application/vnd.google-apps.folder' and '${parentId||'root'}' in parents and trashed=false`;
-  const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`,{
-    headers:{Authorization:'Bearer '+accessToken}
-  });
-  const searchData = await searchRes.json();
-  if(searchData.files && searchData.files.length>0){
-    driveFolderCache[cacheKey]=searchData.files[0].id;
-    return searchData.files[0].id;
-  }
-
-  // create folder
-  const createRes = await fetch('https://www.googleapis.com/drive/v3/files',{
-    method:'POST',
-    headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},
-    body: JSON.stringify({name:folderName,mimeType:'application/vnd.google-apps.folder',parents:[parentId||'root']})
-  });
-  const created = await createRes.json();
-  driveFolderCache[cacheKey]=created.id;
-  return created.id;
+async function getDriveFolder(name,parentId){
+  const key=(parentId||'root')+'/'+name;
+  if(driveFolderCache[key])return driveFolderCache[key];
+  const q=`name='${name}' and mimeType='application/vnd.google-apps.folder' and '${parentId||'root'}' in parents and trashed=false`;
+  const sr=await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`,{headers:{Authorization:'Bearer '+accessToken}});
+  const sd=await sr.json();
+  if(sd.files&&sd.files.length>0){driveFolderCache[key]=sd.files[0].id;return sd.files[0].id;}
+  const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({name,mimeType:'application/vnd.google-apps.folder',parents:[parentId||'root']})});
+  const cd=await cr.json();
+  driveFolderCache[key]=cd.id;return cd.id;
 }
-
-async function getProjectDrivePath(projectId, subFolderId){
+async function getProjectDrivePath(projectId,subFolderId){
   const p=projects.find(x=>x.id===projectId);
   const cl=clients.find(c=>c.id===p.clientId);
-
-  // T&F FMS root → Client folder → Project folder
-  const rootId = await getDriveFolder(TF_ROOT_FOLDER, null);
-  const clientFolderId = await getDriveFolder(cl.name, rootId);
-  const projectFolderId = await getDriveFolder(p.name, clientFolderId);
-
-  if(!subFolderId) return projectFolderId;
-
-  // build subfolder path
-  const buildSubPath = async (fid) => {
-    const fo=folders.find(f=>f.id===fid);
-    if(!fo) return projectFolderId;
-    const parentDriveId = fo.parentId ? await buildSubPath(fo.parentId) : projectFolderId;
-    return await getDriveFolder(fo.name, parentDriveId);
-  };
-  return await buildSubPath(subFolderId);
+  const rootId=await getDriveFolder(TF_ROOT,null);
+  const clientId2=await getDriveFolder(cl.name,rootId);
+  const projId=await getDriveFolder(p.name,clientId2);
+  if(!subFolderId)return projId;
+  const build=async(fid)=>{const fo=folders.find(f=>f.id===fid);if(!fo)return projId;const par=fo.parentId?await build(fo.parentId):projId;return await getDriveFolder(fo.name,par);};
+  return await build(subFolderId);
 }
-
-async function uploadToDrive(file, projectId, subFolderId){
-  if(!driveConnected||!accessToken) return null;
+async function uploadToDrive(file,projectId,subFolderId){
+  if(!driveConnected||!accessToken)return null;
   try{
     showToast('Uploading to Drive…');
-    const targetFolderId = await getProjectDrivePath(projectId, subFolderId);
-
-    const metadata={name:file.name,parents:[targetFolderId]};
+    const targetId=await getProjectDrivePath(projectId,subFolderId);
+    const meta={name:file.name,parents:[targetId]};
     const form=new FormData();
-    form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
+    form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
     form.append('file',file);
-
-    const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink',{
-      method:'POST',
-      headers:{Authorization:'Bearer '+accessToken},
-      body:form
-    });
+    const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+accessToken},body:form});
     const data=await res.json();
     showToast('Saved to Google Drive ✓');
-    return {driveId:data.id, driveLink:data.webViewLink};
-  }catch(e){
-    console.error('Drive upload error',e);
-    showToast('Drive upload failed — file saved locally');
-    return null;
-  }
+    return{driveId:data.id,driveLink:data.webViewLink};
+  }catch(e){console.error('Drive upload error',e);showToast('Drive upload failed');return null;}
 }
-
-async function createDriveFolder(folderName, projectId, parentSubFolderId){
-  if(!driveConnected||!accessToken) return;
-  try{
-    const parentDriveId = await getProjectDrivePath(projectId, parentSubFolderId);
-    await getDriveFolder(folderName, parentDriveId);
-    showToast('Folder created in Google Drive ✓');
-  }catch(e){console.error('Drive folder error',e);}
+async function createDriveFolder(name,projectId,parentSubId){
+  if(!driveConnected||!accessToken)return;
+  try{const par=await getProjectDrivePath(projectId,parentSubId);await getDriveFolder(name,par);showToast('Folder created in Drive ✓');}catch(e){console.error(e);}
 }
 
 // ── TOAST ──
@@ -470,17 +458,13 @@ function canManage(){return role==='owner'||role==='operations'}
 function om(id){document.getElementById(id).style.display='flex'}
 function cm(id){document.getElementById(id).style.display='none'}
 function folderPath(fid){if(!fid)return'Root';const fo=folders.find(f=>f.id===fid);if(!fo)return'Root';const p=folderPath(fo.parentId);return p==='Root'?fo.name:p+' / '+fo.name;}
-function fmtSize(b){if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
-function linkIcon(url){if(!url)return'ti-link';if(url.includes('drive.google'))return'ti-brand-google-drive';if(url.includes('dropbox'))return'ti-brand-dropbox';if(url.includes('figma'))return'ti-brand-figma';if(url.includes('notion'))return'ti-brand-notion';return'ti-link';}
+function fmtSize(b){if(!b)return'';if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
+function linkIcon(url){if(!url)return'ti-link';if(url.includes('drive.google'))return'ti-brand-google-drive';if(url.includes('dropbox'))return'ti-brand-dropbox';if(url.includes('figma'))return'ti-brand-figma';return'ti-link';}
 
 // ── DRAG DROP ──
 function handleDragOver(e){e.preventDefault();e.stopPropagation();const z=document.getElementById('dz');if(z)z.classList.add('drag-over')}
 function handleDragLeave(e){e.preventDefault();const z=document.getElementById('dz');if(z)z.classList.remove('drag-over')}
-function handleDrop(e){
-  e.preventDefault();e.stopPropagation();
-  const z=document.getElementById('dz');if(z)z.classList.remove('drag-over');
-  addToQueue(Array.from(e.dataTransfer.files));
-}
+function handleDrop(e){e.preventDefault();e.stopPropagation();const z=document.getElementById('dz');if(z)z.classList.remove('drag-over');addToQueue(Array.from(e.dataTransfer.files));}
 function handleFileSelect(e){addToQueue(Array.from(e.target.files));e.target.value='';}
 function addToQueue(list){list.forEach(f=>{if(!queuedFiles.find(q=>q.name===f.name))queuedFiles.push(f);});renderUploadPanel();}
 function removeFromQueue(i){queuedFiles.splice(i,1);renderUploadPanel();}
@@ -491,20 +475,12 @@ async function confirmUpload(){
   const fid=cfid();
   for(const f of queuedFiles){
     let driveInfo=null;
-    if(driveConnected) driveInfo=await uploadToDrive(f,currentProjectId,fid);
-    files.push({
-      id:'fi'+Date.now()+Math.random(),
-      projectId:currentProjectId,
-      folderId:fid,
-      name:f.name,
-      by,date:today(),
-      size:fmtSize(f.size),
-      link:driveInfo?driveInfo.driveLink:null,
-      driveId:driveInfo?driveInfo.driveId:null,
-      isLink:false
-    });
+    if(driveConnected)driveInfo=await uploadToDrive(f,currentProjectId,fid);
+    files.push({id:'fi'+Date.now()+Math.random(),projectId:currentProjectId,folderId:fid||'',name:f.name,by,date:today(),size:fmtSize(f.size),link:driveInfo?driveInfo.driveLink:'',isLink:'false'});
   }
-  queuedFiles=[];renderNav();
+  queuedFiles=[];
+  scheduleSave();
+  renderNav();
 }
 
 function confirmLink(){
@@ -512,7 +488,8 @@ function confirmLink(){
   const name=document.getElementById('up-lname')?document.getElementById('up-lname').value.trim():'';
   const by=document.getElementById('up-by')?document.getElementById('up-by').value.trim()||'Team':'Team';
   if(!url||!name)return;
-  files.push({id:'fi'+Date.now(),projectId:currentProjectId,folderId:cfid(),name,by,date:today(),size:null,link:url,isLink:true});
+  files.push({id:'fi'+Date.now(),projectId:currentProjectId,folderId:cfid()||'',name,by,date:today(),size:'',link:url,isLink:'true'});
+  scheduleSave();
   renderNav();
 }
 
@@ -522,65 +499,42 @@ function renderUploadPanel(){
   const byVal=document.getElementById('up-by')?document.getElementById('up-by').value:'';
   const lnVal=document.getElementById('up-link')?document.getElementById('up-link').value:'';
   const lnName=document.getElementById('up-lname')?document.getElementById('up-lname').value:'';
-
+  const p=projects.find(x=>x.id===currentProjectId);
+  const cl=clients.find(c=>c.id===p?.clientId);
   el.innerHTML=`
 <div class="upload-panel">
   <div class="upload-tabs">
-    <div class="upload-tab ${uploadTab==='dragdrop'?'active':''}" onclick="uploadTab='dragdrop';renderUploadPanel()"><i class="ti ti-upload" style="font-size:12px;margin-right:4px"></i>Upload File ${driveConnected?'<span style="font-size:9px;opacity:.7">→ auto-saves to Drive</span>':''}</div>
+    <div class="upload-tab ${uploadTab==='dragdrop'?'active':''}" onclick="uploadTab='dragdrop';renderUploadPanel()"><i class="ti ti-upload" style="font-size:12px;margin-right:4px"></i>Upload File</div>
     <div class="upload-tab ${uploadTab==='link'?'active':''}" onclick="uploadTab='link';renderUploadPanel()"><i class="ti ti-brand-google-drive" style="font-size:12px;margin-right:4px"></i>Attach Drive Link</div>
   </div>
   <div class="upload-body">
     <div class="by-row"><label class="by-lbl">Your name</label><input class="form-inp" id="up-by" type="text" placeholder="e.g. Aditi" value="${byVal}"></div>
     ${uploadTab==='dragdrop'?`
-      ${driveConnected?`<div style="font-size:11px;color:var(--green);background:var(--green-bg);padding:6px 10px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><i class="ti ti-brand-google-drive" style="font-size:14px"></i>Files will auto-save to Drive → T&F FMS / ${getCurrentClientName()} / ${getCurrentProjectName()}</div>`:''}
-      <div class="drop-zone" id="dz"
-        ondragover="handleDragOver(event)"
-        ondragleave="handleDragLeave(event)"
-        ondrop="handleDrop(event)"
-        onclick="document.getElementById('file-inp').click()">
+      ${driveConnected?`<div style="font-size:11px;color:var(--green);background:var(--green-bg);padding:6px 10px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><i class="ti ti-brand-google-drive" style="font-size:14px"></i>Files will save to: T&F FMS → ${cl?.name||''} → ${p?.name||''}</div>`:''}
+      <div class="drop-zone" id="dz" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="document.getElementById('file-inp').click()">
         <i class="ti ti-cloud-upload"></i>
         <div class="dz-title">Drag & drop files here</div>
         <div class="dz-sub">PDF, PPTX, DOCX, JPG, PNG and more</div>
         <span class="browse-btn">Browse Files</span>
       </div>
       <input type="file" id="file-inp" multiple style="display:none" onchange="handleFileSelect(event)">
-      <div class="queued-files">
-        ${queuedFiles.map((f,i)=>`<div class="qf">
-          <i class="ti ${ficon(f.name)} qf-icon"></i>
-          <span class="qf-name">${f.name}</span>
-          <span class="qf-size">${fmtSize(f.size)}</span>
-          <button class="qf-rm" onclick="removeFromQueue(${i})"><i class="ti ti-x"></i></button>
-        </div>`).join('')}
-      </div>
+      <div class="queued-files">${queuedFiles.map((f,i)=>`<div class="qf"><i class="ti ${ficon(f.name)} qf-icon"></i><span class="qf-name">${f.name}</span><span class="qf-size">${fmtSize(f.size)}</span><button class="qf-rm" onclick="removeFromQueue(${i})"><i class="ti ti-x"></i></button></div>`).join('')}</div>
       ${queuedFiles.length>0?`<div class="upload-actions"><button class="btn-add" onclick="confirmUpload()"><i class="ti ti-upload"></i> Upload ${queuedFiles.length} file${queuedFiles.length>1?'s':''}${driveConnected?' + Save to Drive':''}</button></div>`:''}
     `:`
-      <div>
-        <label class="by-lbl">Paste Google Drive / Dropbox / Figma link</label>
-        <input class="link-inp" id="up-link" type="url" placeholder="https://drive.google.com/..." value="${lnVal}" oninput="renderUploadPanel()">
-        ${lnVal?`<div class="link-preview"><i class="ti ${linkIcon(lnVal)}"></i><span style="word-break:break-all;font-size:11px;color:var(--text3)">${lnVal}</span></div>`:''}
-        <label class="by-lbl">File / Document name</label>
-        <input class="link-inp" id="up-lname" type="text" placeholder="e.g. Moodboard v2, Brand Guidelines" value="${lnName}" oninput="renderUploadPanel()">
-      </div>
+      <label class="by-lbl">Paste Google Drive / Dropbox / Figma link</label>
+      <input class="link-inp" id="up-link" type="url" placeholder="https://drive.google.com/..." value="${lnVal}" oninput="renderUploadPanel()">
+      ${lnVal?`<div class="link-preview"><i class="ti ${linkIcon(lnVal)}"></i><span style="word-break:break-all;font-size:11px">${lnVal}</span></div>`:''}
+      <label class="by-lbl">File / Document name</label>
+      <input class="link-inp" id="up-lname" type="text" placeholder="e.g. Moodboard v2, Brand Guidelines" value="${lnName}" oninput="renderUploadPanel()">
       ${lnVal&&lnName?`<div class="upload-actions"><button class="btn-add" onclick="confirmLink()"><i class="ti ti-link"></i> Attach Link</button></div>`:'<p style="font-size:11px;color:var(--text3)">Paste a link and add a name to attach it</p>'}
     `}
   </div>
 </div>`;
 }
 
-function getCurrentClientName(){
-  if(!currentProjectId)return'';
-  const p=projects.find(x=>x.id===currentProjectId);
-  const cl=clients.find(c=>c.id===p?.clientId);
-  return cl?.name||'';
-}
-function getCurrentProjectName(){
-  if(!currentProjectId)return'';
-  return projects.find(x=>x.id===currentProjectId)?.name||'';
-}
-
 // ── AUTH ──
 function sel(r){selRole=r;document.querySelectorAll('.role-opt').forEach(e=>e.classList.remove('selected'));document.getElementById('opt-'+r).classList.add('selected')}
-function doLogin(){
+async function doLogin(){
   const pw=document.getElementById('pw-inp').value;
   if(pw!==PASS[selRole]){document.getElementById('pw-err').style.display='block';return}
   document.getElementById('pw-err').style.display='none';
@@ -590,6 +544,7 @@ function doLogin(){
   if(driveConnected)document.getElementById('drive-badge').style.display='flex';
   document.getElementById('scr-login').classList.remove('active');
   document.getElementById('scr-app').classList.add('active');
+  await loadFromSheets();
   goView('dashboard');
 }
 function doLogout(){document.getElementById('scr-app').classList.remove('active');document.getElementById('scr-login').classList.add('active')}
@@ -634,7 +589,7 @@ function renderNav(){
   else if(last.type==='client')content=renderClientDetail(last.id);
   else if(last.type==='project'||last.type==='folder')content=renderDrive();
   c.innerHTML=(navStack.length>1?backBar:'')+'<div class="inner">'+content+'</div>';
-  if(last.type==='project'||last.type==='folder') renderUploadPanel();
+  if(last.type==='project'||last.type==='folder')renderUploadPanel();
 }
 function openClient(cid){
   currentClientId=cid;currentProjectId=null;driveStack=[];expandedRow=null;clientEditOpen=null;
@@ -663,17 +618,17 @@ function enterFolder(fid,fname){
 function cfid(){return driveStack.length>0?driveStack[driveStack.length-1].id:null}
 function editIcon(onclick){return`<span class="edit-icon" onclick="${onclick}" title="Edit"><i class="ti ti-pencil"></i></span>`}
 
-// ── EDIT HELPERS ──
+// ── EDIT ──
 function toggleProjEdit(pid,e){if(e)e.stopPropagation();expandedRow=expandedRow===`p_${pid}`?null:`p_${pid}`;renderNav()}
-function saveProject(pid){const p=projects.find(x=>x.id===pid);p.name=document.getElementById(`e-pn-${pid}`).value.trim()||p.name;p.clientId=document.getElementById(`e-pc-${pid}`).value;p.stage=document.getElementById(`e-ps-${pid}`).value;expandedRow=null;renderNav();}
-function delProject(pid){projects=projects.filter(p=>p.id!==pid);folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);expandedRow=null;renderNav()}
+function saveProject(pid){const p=projects.find(x=>x.id===pid);p.name=document.getElementById(`e-pn-${pid}`).value.trim()||p.name;p.clientId=document.getElementById(`e-pc-${pid}`).value;p.stage=document.getElementById(`e-ps-${pid}`).value;expandedRow=null;scheduleSave();renderNav();}
+function delProject(pid){projects=projects.filter(p=>p.id!==pid);folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);expandedRow=null;scheduleSave();renderNav()}
 function projEditRow(p,cols){return`<tr class="edit-row"><td colspan="${cols}"><div class="edit-row-inner"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="e-pn-${p.id}" value="${p.name}" style="width:160px"></div><div class="edit-field"><span class="edit-lbl">Client</span><select class="edit-sel" id="e-pc-${p.id}">${clients.map(c=>`<option value="${c.id}"${c.id===p.clientId?' selected':''}>${c.name}</option>`).join('')}</select></div><div class="edit-field"><span class="edit-lbl">Stage</span><select class="edit-sel" id="e-ps-${p.id}">${STAGES.map(s=>`<option${s===p.stage?' selected':''}>${s}</option>`).join('')}</select></div><div class="edit-actions"><button class="cancel-btn" onclick="expandedRow=null;renderNav()">Cancel</button><button class="del-btn" onclick="delProject('${p.id}')">Delete</button><button class="save-btn" onclick="saveProject('${p.id}')">Save</button></div></div></td></tr>`;}
 function toggleClientEdit(cid,e){if(e)e.stopPropagation();clientEditOpen=clientEditOpen===cid?null:cid;renderNav()}
-function saveClientDetail(cid){const cl=clients.find(c=>c.id===cid);cl.name=document.getElementById(`e-cn-${cid}`).value.trim()||cl.name;cl.industry=document.getElementById(`e-ci-${cid}`).value.trim();cl.contact=document.getElementById(`e-cc-${cid}`).value.trim();cl.email=document.getElementById(`e-ce-${cid}`).value.trim();clientEditOpen=null;const seg=navStack.find(s=>s.type==='client'&&s.id===cid);if(seg)seg.label=cl.name;renderNav();}
-function delClientDetail(cid){const pids=projects.filter(p=>p.clientId===cid).map(p=>p.id);clients=clients.filter(c=>c.id!==cid);projects=projects.filter(p=>p.clientId!==cid);pids.forEach(pid=>{folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);});clientEditOpen=null;goView('clients');}
+function saveClientDetail(cid){const cl=clients.find(c=>c.id===cid);cl.name=document.getElementById(`e-cn-${cid}`).value.trim()||cl.name;cl.industry=document.getElementById(`e-ci-${cid}`).value.trim();cl.contact=document.getElementById(`e-cc-${cid}`).value.trim();cl.email=document.getElementById(`e-ce-${cid}`).value.trim();clientEditOpen=null;const seg=navStack.find(s=>s.type==='client'&&s.id===cid);if(seg)seg.label=cl.name;scheduleSave();renderNav();}
+function delClientDetail(cid){const pids=projects.filter(p=>p.clientId===cid).map(p=>p.id);clients=clients.filter(c=>c.id!==cid);projects=projects.filter(p=>p.clientId!==cid);pids.forEach(pid=>{folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);});clientEditOpen=null;scheduleSave();goView('clients');}
 function toggleClientGridEdit(cid,e){if(e)e.stopPropagation();expandedRow=expandedRow===`c_${cid}`?null:`c_${cid}`;renderNav()}
-function saveClientGrid(cid){const cl=clients.find(c=>c.id===cid);cl.name=document.getElementById(`eg-cn-${cid}`).value.trim()||cl.name;cl.industry=document.getElementById(`eg-ci-${cid}`).value.trim();expandedRow=null;renderNav();}
-function delClientGrid(cid){const pids=projects.filter(p=>p.clientId===cid).map(p=>p.id);clients=clients.filter(c=>c.id!==cid);projects=projects.filter(p=>p.clientId!==cid);pids.forEach(pid=>{folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);});expandedRow=null;renderNav();}
+function saveClientGrid(cid){const cl=clients.find(c=>c.id===cid);cl.name=document.getElementById(`eg-cn-${cid}`).value.trim()||cl.name;cl.industry=document.getElementById(`eg-ci-${cid}`).value.trim();expandedRow=null;scheduleSave();renderNav();}
+function delClientGrid(cid){const pids=projects.filter(p=>p.clientId===cid).map(p=>p.id);clients=clients.filter(c=>c.id!==cid);projects=projects.filter(p=>p.clientId!==cid);pids.forEach(pid=>{folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);});expandedRow=null;scheduleSave();renderNav();}
 
 // ── VIEWS ──
 function renderDashboard(){
@@ -685,7 +640,7 @@ function renderDashboard(){
 function renderClients(){
   const isM=canManage();
   if(clients.length===0)return`<div class="sec-hd"><span class="sec-title">Clients</span>${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div><div class="empty-state"><i class="ti ti-building"></i><p>No clients yet${isM?' — add your first client':''}</p></div>`;
-  return`<div class="sec-hd"><span class="sec-title">Clients</span>${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div><div class="clients-grid">${clients.map(cl=>{const cp=projects.filter(p=>p.clientId===cl.id);const isExp=expandedRow===`c_${cl.id}`;return`<div style="background:${isExp?'var(--bg3)':'var(--bg2)'};position:relative;border-bottom:1px solid var(--border)"><div class="client-card" style="background:transparent"><div class="cc-init">${ini(cl.name)}</div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="cc-name" onclick="openClient('${cl.id}')">${cl.name}</div><div class="cc-type">${cl.industry||'—'}</div><div class="cc-meta"><span>${cp.length} project${cp.length!==1?'s':''}</span><span>${cp.filter(p=>p.stage==='Active').length} active</span></div></div>${isM?`<span class="edit-icon" onclick="toggleClientGridEdit('${cl.id}',event)" title="Edit"><i class="ti ti-pencil"></i></span>`:''}</div></div>${isExp?`<div style="padding:0 1.25rem 1rem"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:.75rem;border-top:1px solid var(--border)"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="eg-cn-${cl.id}" value="${cl.name}" style="width:130px"></div><div class="edit-field"><span class="edit-lbl">Industry</span><input class="edit-inp" id="eg-ci-${cl.id}" value="${cl.industry||''}" style="width:120px"></div><div class="edit-actions"><button class="cancel-btn" onclick="expandedRow=null;renderNav()">Cancel</button><button class="del-btn" onclick="delClientGrid('${cl.id}')">Delete</button><button class="save-btn" onclick="saveClientGrid('${cl.id}')">Save</button></div></div></div>`:''}</div>`;}).join('')}</div>`;
+  return`<div class="sec-hd"><span class="sec-title">Clients</span>${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div><div class="clients-grid">${clients.map(cl=>{const cp=projects.filter(p=>p.clientId===cl.id);const isExp=expandedRow===`c_${cl.id}`;return`<div style="background:${isExp?'var(--bg3)':'var(--bg2)'};position:relative;border-bottom:1px solid var(--border)"><div class="client-card" style="background:transparent"><div class="cc-init">${ini(cl.name)}</div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="cc-name" onclick="openClient('${cl.id}')">${cl.name}</div><div class="cc-type">${cl.industry||'—'}</div><div class="cc-meta"><span>${cp.length} project${cp.length!==1?'s':''}</span><span>${cp.filter(p=>p.stage==='Active').length} active</span></div></div>${isM?`<span class="edit-icon" onclick="toggleClientGridEdit('${cl.id}',event)"><i class="ti ti-pencil"></i></span>`:''}</div></div>${isExp?`<div style="padding:0 1.25rem 1rem"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:.75rem;border-top:1px solid var(--border)"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="eg-cn-${cl.id}" value="${cl.name}" style="width:130px"></div><div class="edit-field"><span class="edit-lbl">Industry</span><input class="edit-inp" id="eg-ci-${cl.id}" value="${cl.industry||''}" style="width:120px"></div><div class="edit-actions"><button class="cancel-btn" onclick="expandedRow=null;renderNav()">Cancel</button><button class="del-btn" onclick="delClientGrid('${cl.id}')">Delete</button><button class="save-btn" onclick="saveClientGrid('${cl.id}')">Save</button></div></div></div>`:''}</div>`;}).join('')}</div>`;
 }
 function renderClientDetail(cid){
   const cl=clients.find(c=>c.id===cid);const cp=projects.filter(p=>p.clientId===cid);const isM=canManage();const isEO=clientEditOpen===cid;let rows='';
@@ -703,50 +658,40 @@ function renderAllProjects(){
 function renderDrive(){
   const p=projects.find(x=>x.id===currentProjectId);const fid=cfid();const isFolder=driveStack.length>0;const curName=isFolder?driveStack[driveStack.length-1].name:p.name;
   const tabs=!isFolder?`<div class="drive-tabs"><div class="drive-tab ${driveTab==='folders'?'active':''}" onclick="driveTab='folders';renderNav()">Folders</div><div class="drive-tab ${driveTab==='all'?'active':''}" onclick="driveTab='all';renderNav()">All Files</div></div>`:'';
-  const toolbar=`<div class="sec-hd"><div><div style="font-size:16px;font-weight:400;color:var(--text)">${curName}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${spill(p.stage)} <span style="margin-left:6px">${p.service}</span>${driveConnected?`<span style="margin-left:8px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><i class="ti ti-brand-google-drive" style="font-size:12px"></i> Drive sync on</span>`:''}</div></div>${!isFolder&&driveTab==='folders'?`<button class="btn-ghost" onclick="addFolderClick()"><i class="ti ti-folder-plus"></i> New Folder</button>`:''}</div>`;
+  const toolbar=`<div class="sec-hd"><div><div style="font-size:16px;font-weight:400;color:var(--text)">${curName}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${spill(p.stage)} <span style="margin-left:6px">${p.service}</span>${driveConnected?`<span style="margin-left:8px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><i class="ti ti-brand-google-drive" style="font-size:12px"></i> Drive sync on</span>`:''}</div></div>${!isFolder&&driveTab==='folders'?`<button class="btn-ghost" onclick="om('mod-folder')"><i class="ti ti-folder-plus"></i> New Folder</button>`:''}</div>`;
   let body='';
   if(driveTab==='all'&&!isFolder){
     const allFiles=files.filter(f=>f.projectId===p.id);
     if(allFiles.length===0){body=`<div class="empty-state"><i class="ti ti-file-off"></i><p>No files yet — upload or attach a Drive link below</p></div>`;}
-    else{body=`<div style="border:1px solid var(--border);margin-bottom:12px">`;allFiles.forEach(fi=>{const icon=fi.isLink?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));const openEl=fi.link?`<a href="${fi.link}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open in Drive</a>`:'';body+=`<div class="file-list-row"><i class="ti ${icon} fl-icon" style="${fi.link?'color:#4285f4':''}"></i><div class="fl-info"><div class="fl-name">${fi.name}</div><div class="fl-meta">${folderPath(fi.folderId)} · ${fi.by} · ${fi.date}${fi.size?' · '+fi.size:''}${fi.link&&!fi.isLink?' · <span style="color:var(--green)">Saved to Drive</span>':fi.isLink?' · Drive link':''}</div></div><div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="delFile('${fi.id}')" aria-label="Delete"><i class="ti ti-trash"></i></button>`:''}</div></div>`;});body+=`</div>`;}
+    else{body=`<div style="border:1px solid var(--border);margin-bottom:12px">`;allFiles.forEach(fi=>{const isLnk=fi.isLink==='true'||fi.isLink===true;const icon=isLnk?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));const openEl=fi.link?`<a href="${fi.link}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open</a>`:'';body+=`<div class="file-list-row"><i class="ti ${icon} fl-icon" style="${fi.link?'color:#4285f4':''}"></i><div class="fl-info"><div class="fl-name">${fi.name}</div><div class="fl-meta">${folderPath(fi.folderId)} · ${fi.by} · ${fi.date}${fi.size?' · '+fi.size:''}${fi.link&&!isLnk?' · <span style="color:var(--green)">In Drive</span>':isLnk?' · Drive link':''}</div></div><div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="delFile('${fi.id}')"><i class="ti ti-trash"></i></button>`:''}</div></div>`;});body+=`</div>`;}
   } else {
-    const lf=folders.filter(f=>f.projectId===p.id&&f.parentId===fid);const lfi=files.filter(f=>f.projectId===p.id&&f.folderId===fid);
+    const lf=folders.filter(f=>f.projectId===p.id&&(f.parentId||'')===(fid||''));const lfi=files.filter(f=>f.projectId===p.id&&(f.folderId||'')===(fid||''));
     if(lf.length===0&&lfi.length===0){body=`<div class="empty-state"><i class="ti ti-folder-open"></i><p>Empty — create a folder or add files below</p></div>`;}
-    else{body=`<div class="drive-grid">${lf.map(fo=>{const cnt=cif(fo.id,p.id);return`<div class="di" onclick="enterFolder('${fo.id}','${fo.name}')"><div class="di-acts">${canManage()?`<button class="di-act" onclick="event.stopPropagation();delFolder('${fo.id}')"><i class="ti ti-trash"></i></button>`:''}</div><i class="ti ti-folder-filled di-icon folder"></i><div class="di-name">${fo.name}</div><div class="di-meta">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('')}${lfi.map(fi=>{const icon=fi.isLink?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));return`<div class="di" ${fi.link?`onclick="window.open('${fi.link}','_blank')"`:''}><div class="di-acts">${canManage()?`<button class="di-act" onclick="event.stopPropagation();delFile('${fi.id}')"><i class="ti ti-trash"></i></button>`:''}</div><i class="ti ${icon} di-icon ${fi.link?'gdrive':''}"></i><div class="di-name">${fi.name}</div><div class="di-meta">${fi.isLink?'Link':fi.link?'In Drive':fi.by+' · '+fi.date}</div></div>`;}).join('')}</div>`;}
+    else{body=`<div class="drive-grid">${lf.map(fo=>{const cnt=cif(fo.id,p.id);return`<div class="di" onclick="enterFolder('${fo.id}','${fo.name}')"><div class="di-acts">${canManage()?`<button class="di-act" onclick="event.stopPropagation();delFolder('${fo.id}')"><i class="ti ti-trash"></i></button>`:''}</div><i class="ti ti-folder-filled di-icon folder"></i><div class="di-name">${fo.name}</div><div class="di-meta">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('')}${lfi.map(fi=>{const isLnk=fi.isLink==='true'||fi.isLink===true;const icon=isLnk?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));return`<div class="di" ${fi.link?`onclick="window.open('${fi.link}','_blank')"`:''} style="${fi.link?'cursor:pointer':''}"><div class="di-acts">${canManage()?`<button class="di-act" onclick="event.stopPropagation();delFile('${fi.id}')"><i class="ti ti-trash"></i></button>`:''}</div><i class="ti ${icon} di-icon ${fi.link?'gdrive':''}"></i><div class="di-name">${fi.name}</div><div class="di-meta">${isLnk?'Link':fi.link?'In Drive':fi.by+' · '+fi.date}</div></div>`;}).join('')}</div>`;}
   }
   return toolbar+tabs+body+`<div id="upload-panel-wrap"></div>`;
 }
-
-function addFolderClick(){
-  om('mod-folder');
-}
-
-function cif(fid,pid){let c=files.filter(f=>f.projectId===pid&&f.folderId===fid).length;folders.filter(f=>f.projectId===pid&&f.parentId===fid).forEach(s=>{c+=cif(s.id,pid)});return c;}
-function delFolder(fid){folders=folders.filter(f=>f.id!==fid);files=files.filter(f=>f.folderId!==fid);renderNav()}
-function delFile(fid){files=files.filter(f=>f.id!==fid);renderNav()}
-
+function cif(fid,pid){let c=files.filter(f=>f.projectId===pid&&(f.folderId||'')===fid).length;folders.filter(f=>f.projectId===pid&&(f.parentId||'')===fid).forEach(s=>{c+=cif(s.id,pid)});return c;}
+function delFolder(fid){folders=folders.filter(f=>f.id!==fid);files=files.filter(f=>(f.folderId||'')!==fid);scheduleSave();renderNav()}
+function delFile(fid){files=files.filter(f=>f.id!==fid);scheduleSave();renderNav()}
 async function addFolder(){
   const name=document.getElementById('if-name').value.trim();if(!name)return;
-  const newFolder={id:'fo'+Date.now(),projectId:currentProjectId,parentId:cfid(),name};
-  folders.push(newFolder);
-  cm('mod-folder');
-  document.getElementById('if-name').value='';
-  // create in Drive too
-  if(driveConnected) await createDriveFolder(name, currentProjectId, cfid());
-  renderNav();
+  const fo={id:'fo'+Date.now(),projectId:currentProjectId,parentId:cfid()||'',name};
+  folders.push(fo);
+  cm('mod-folder');document.getElementById('if-name').value='';
+  if(driveConnected)await createDriveFolder(name,currentProjectId,cfid());
+  scheduleSave();renderNav();
 }
-
 function renderMIS(){
   const svc={Strategy:0,Research:0,Creative:0,Production:0};projects.forEach(p=>{if(svc[p.service]!==undefined)svc[p.service]++});const mx=Math.max(...Object.values(svc),1);
   return`<div class="sec-hd"><span class="sec-title">MIS — Overview</span></div><div class="stats-grid" style="margin-bottom:1.25rem"><div class="stat-cell"><div class="stat-lbl">Total Projects</div><div class="stat-val">${projects.length}</div></div><div class="stat-cell"><div class="stat-lbl">Total Files</div><div class="stat-val">${files.length}</div></div><div class="stat-cell"><div class="stat-lbl">Clients</div><div class="stat-val">${clients.length}</div></div><div class="stat-cell"><div class="stat-lbl">Delivered</div><div class="stat-val">${projects.filter(p=>p.stage==='Delivered').length}</div></div></div><div class="mis-grid"><div class="mis-cell"><div class="mis-lbl">Projects by service</div>${Object.entries(svc).map(([k,v])=>`<div class="brow"><span class="blbl">${k}</span><div class="btrack"><div class="bfill" style="width:${Math.round(v/mx*100)}%"></div></div><span class="bval">${v}</span></div>`).join('')}</div><div class="mis-cell"><div class="mis-lbl">Pipeline</div>${STAGES.map(s=>{const c=projects.filter(p=>p.stage===s).length;return`<div class="brow"><span class="blbl">${s}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(projects.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div><div class="mis-cell"><div class="mis-lbl">Files by client</div>${clients.length===0?'<p style="font-size:11px;color:var(--text3)">No data yet</p>':clients.map(cl=>{const c=files.filter(f=>{const p=projects.find(x=>x.id===f.projectId);return p&&p.clientId===cl.id}).length;return`<div class="brow"><span class="blbl" style="font-size:10px;width:88px">${cl.name.split(' ')[0]}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(files.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div><div class="mis-cell"><div class="mis-lbl">Stage summary</div>${STAGES.map(s=>{const c=projects.filter(p=>p.stage===s).length;return`<div class="brow"><span class="blbl">${s}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(projects.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div></div>`;
 }
-
-function addClient(){const name=document.getElementById('ic-name').value.trim();if(!name)return;clients.push({id:'c'+Date.now(),name,industry:document.getElementById('ic-ind').value.trim(),contact:document.getElementById('ic-con').value.trim(),email:document.getElementById('ic-mail').value.trim()});cm('mod-client');goView('clients');}
-function addProject(){const name=document.getElementById('ip-name').value.trim();if(!name)return;projects.push({id:'p'+Date.now(),clientId:currentClientId,name,service:document.getElementById('ip-svc').value,stage:document.getElementById('ip-stage').value,notes:document.getElementById('ip-notes').value.trim()});cm('mod-proj');navStack.pop();renderNav();}
+function addClient(){const name=document.getElementById('ic-name').value.trim();if(!name)return;clients.push({id:'c'+Date.now(),name,industry:document.getElementById('ic-ind').value.trim(),contact:document.getElementById('ic-con').value.trim(),email:document.getElementById('ic-mail').value.trim()});cm('mod-client');scheduleSave();goView('clients');}
+function addProject(){const name=document.getElementById('ip-name').value.trim();if(!name)return;projects.push({id:'p'+Date.now(),clientId:currentClientId,name,service:document.getElementById('ip-svc').value,stage:document.getElementById('ip-stage').value,notes:document.getElementById('ip-notes').value.trim()});cm('mod-proj');scheduleSave();navStack.pop();renderNav();}
 
 // init
 checkSavedToken();
-if(driveConnected) showDriveStatus('Google Drive connected ✓', true);
+if(driveConnected)showDriveStatus('Google Drive connected ✓',true);
 </script>
 </body>
 </html>
