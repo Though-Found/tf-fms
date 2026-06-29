@@ -245,10 +245,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   </div>
   <button class="login-btn" onclick="doLogin()">Enter →</button>
   <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
-    <span class="login-label">Connect Google Drive (for file uploads)</span>
-    <button class="gdrive-connect" id="drive-connect-btn" onclick="connectDrive()">
-      <i class="ti ti-brand-google-drive"></i> Connect Google Drive
-    </button>
     <div class="gdrive-status" id="gdrive-status"></div>
   </div>
 </div></div>
@@ -593,15 +589,39 @@ async function doLogin(){
   role=selRole;
   document.getElementById('role-tag').textContent=role.charAt(0).toUpperCase()+role.slice(1);
   document.getElementById('pw-inp').value='';
-  // Auto-reconnect Drive silently if previously connected
-  if(localStorage.getItem('tf_drive_connected')==='true'&&!driveConnected){
-    autoReconnectDrive();
-  }
-  if(driveConnected)document.getElementById('drive-badge').style.display='flex';
   document.getElementById('scr-login').classList.remove('active');
   document.getElementById('scr-app').classList.add('active');
+  // Always auto-connect Drive silently on login
+  await silentConnectDrive();
+  if(driveConnected)document.getElementById('drive-badge').style.display='flex';
   await loadFromSheets();
   goView('dashboard');
+}
+
+function silentConnectDrive(){
+  return new Promise((resolve)=>{
+    try{
+      const client=google.accounts.oauth2.initTokenClient({
+        client_id:CLIENT_ID,
+        scope:SCOPES,
+        prompt:'', // no popup if already authorized
+        callback:(response)=>{
+          if(!response.error){
+            accessToken=response.access_token;
+            driveConnected=true;
+            localStorage.setItem('tf_drive_token',response.access_token);
+            localStorage.setItem('tf_drive_connected','true');
+            localStorage.setItem('tf_drive_expiry',(Date.now()+(3600*1000)).toString());
+          }
+          resolve();
+        },
+      });
+      client.requestAccessToken();
+    }catch(e){
+      console.log('Silent Drive connect failed',e);
+      resolve();
+    }
+  });
 }
 function doLogout(){document.getElementById('scr-app').classList.remove('active');document.getElementById('scr-login').classList.add('active')}
 
