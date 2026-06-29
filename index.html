@@ -246,7 +246,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   <button class="login-btn" onclick="doLogin()">Enter →</button>
   <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
     <span class="login-label">Connect Google Drive (for file uploads)</span>
-    <button class="gdrive-connect" onclick="connectDrive()">
+    <button class="gdrive-connect" id="drive-connect-btn" onclick="connectDrive()">
       <i class="ti ti-brand-google-drive"></i> Connect Google Drive
     </button>
     <div class="gdrive-status" id="gdrive-status"></div>
@@ -385,20 +385,72 @@ function connectDrive(){
       if(response.error){showDriveStatus('Connection failed: '+response.error,false);return;}
       accessToken=response.access_token;
       driveConnected=true;
-      showDriveStatus('Google Drive connected ✓',true);
+      // Save token + expiry (1 hour)
+      const expiry=Date.now()+(3600*1000);
       localStorage.setItem('tf_drive_token',accessToken);
+      localStorage.setItem('tf_drive_expiry',expiry.toString());
+      localStorage.setItem('tf_drive_connected','true');
+      showDriveStatus('Google Drive connected ✓',true);
+      updateDriveButton();
     },
   });
   client.requestAccessToken();
 }
+
+function autoReconnectDrive(){
+  // Silently get a fresh token if user previously connected
+  if(localStorage.getItem('tf_drive_connected')!=='true') return;
+  try{
+    const client=google.accounts.oauth2.initTokenClient({
+      client_id:CLIENT_ID,
+      scope:SCOPES,
+      prompt:'', // no popup if already authorized
+      callback:(response)=>{
+        if(response.error) return;
+        accessToken=response.access_token;
+        driveConnected=true;
+        const expiry=Date.now()+(3600*1000);
+        localStorage.setItem('tf_drive_token',accessToken);
+        localStorage.setItem('tf_drive_expiry',expiry.toString());
+        updateDriveButton();
+        if(document.getElementById('drive-badge'))
+          document.getElementById('drive-badge').style.display='flex';
+      },
+    });
+    client.requestAccessToken();
+  }catch(e){console.log('Auto reconnect failed',e);}
+}
+
+function updateDriveButton(){
+  const btn=document.getElementById('drive-connect-btn');
+  const status=document.getElementById('gdrive-status');
+  if(!btn) return;
+  if(driveConnected){
+    btn.innerHTML='<i class="ti ti-brand-google-drive"></i> Drive Connected ✓';
+    btn.style.background='var(--green-bg)';
+    btn.style.color='var(--green)';
+    btn.style.borderColor='var(--green)';
+  }
+}
+
 function showDriveStatus(msg,success){
   const el=document.getElementById('gdrive-status');
+  if(!el) return;
   el.textContent=msg;
   el.className='gdrive-status '+(success?'connected':'error');
 }
+
 function checkSavedToken(){
-  const t=localStorage.getItem('tf_drive_token');
-  if(t){accessToken=t;driveConnected=true;}
+  const connected=localStorage.getItem('tf_drive_connected');
+  const expiry=parseInt(localStorage.getItem('tf_drive_expiry')||'0');
+  const token=localStorage.getItem('tf_drive_token');
+  if(connected==='true' && token && Date.now()<expiry){
+    accessToken=token;
+    driveConnected=true;
+  } else if(connected==='true'){
+    // Token expired but user previously connected — will auto-reconnect
+    driveConnected=false;
+  }
 }
 async function getDriveFolder(name,parentId){
   const key=(parentId||'root')+'/'+name;
@@ -541,6 +593,10 @@ async function doLogin(){
   role=selRole;
   document.getElementById('role-tag').textContent=role.charAt(0).toUpperCase()+role.slice(1);
   document.getElementById('pw-inp').value='';
+  // Auto-reconnect Drive silently if previously connected
+  if(localStorage.getItem('tf_drive_connected')==='true'&&!driveConnected){
+    autoReconnectDrive();
+  }
   if(driveConnected)document.getElementById('drive-badge').style.display='flex';
   document.getElementById('scr-login').classList.remove('active');
   document.getElementById('scr-app').classList.add('active');
@@ -691,7 +747,10 @@ function addProject(){const name=document.getElementById('ip-name').value.trim()
 
 // init
 checkSavedToken();
-if(driveConnected)showDriveStatus('Google Drive connected ✓',true);
+if(driveConnected){
+  showDriveStatus('Google Drive connected ✓',true);
+  setTimeout(updateDriveButton,100);
+}
 </script>
 </body>
 </html>
