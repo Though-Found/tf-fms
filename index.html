@@ -267,6 +267,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
       <div class="nav-item" id="nav-clients" onclick="goView('clients')"><i class="ti ti-building"></i> Clients</div>
       <div class="nav-item" id="nav-pipeline" onclick="goView('pipeline')"><i class="ti ti-columns"></i> Pipeline</div>
       <div class="nav-item" id="nav-projects" onclick="goView('projects')"><i class="ti ti-folder"></i> All Projects</div>
+      <div class="nav-item" id="nav-tasks" onclick="goView('tasks')"><i class="ti ti-checkbox"></i> Tasks</div>
       <div class="nav-lbl">Insights</div>
       <div class="nav-item" id="nav-mis" onclick="goView('mis')"><i class="ti ti-chart-bar"></i> MIS</div>
     </div>
@@ -298,6 +299,42 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   <div class="form-row"><label class="form-lbl">Folder name</label><input class="form-inp" id="if-name" type="text" placeholder="e.g. Moodboards, Final Files"></div>
   <div class="modal-actions"><button class="btn-cancel" onclick="cm('mod-folder')">Cancel</button><button class="btn-add" onclick="addFolder()">Create</button></div>
 </div></div>
+
+
+<!-- ADD TASK MODAL -->
+<div class="modal-backdrop" id="mod-task" style="display:none"><div class="modal-box">
+  <div class="modal-title">Add Task</div>
+  <div class="form-row"><label class="form-lbl">Assign to (Name)</label><input class="form-inp" id="it-name" type="text" placeholder="e.g. Sanjay"></div>
+  <div class="form-row"><label class="form-lbl">Phone / WhatsApp</label><input class="form-inp" id="it-phone" type="text" placeholder="e.g. 9845169183"></div>
+  <div class="form-row"><label class="form-lbl">Email</label><input class="form-inp" id="it-email" type="email" placeholder="email@example.com"></div>
+  <div class="form-row"><label class="form-lbl">Task description</label><textarea class="form-ta" id="it-task" style="min-height:60px;resize:vertical" placeholder="Describe the task…"></textarea></div>
+  <div class="form-row"><label class="form-lbl">Project (optional)</label>
+    <select class="form-sel" id="it-proj">
+      <option value="">— No specific project —</option>
+    </select>
+  </div>
+  <div class="form-row"><label class="form-lbl">Due date</label><input class="form-inp" id="it-date" type="date"></div>
+  <div class="modal-actions"><button class="btn-cancel" onclick="cm('mod-task')">Cancel</button><button class="btn-add" onclick="addTask()">Add Task</button></div>
+</div></div>
+
+<!-- SUBMIT TASK MODAL -->
+<div class="submit-modal-backdrop" id="mod-submit" style="display:none">
+<div class="submit-modal">
+  <div class="submit-modal-title">Submit Task</div>
+  <div id="submit-task-info" style="font-size:12px;color:var(--text2);margin-bottom:1rem;padding:8px;background:var(--bg3);border:1px solid var(--border)"></div>
+  <label class="form-lbl">Upload your work</label>
+  <div class="submit-drop" id="submit-drop" onclick="document.getElementById('submit-file-inp').click()" ondragover="event.preventDefault()" ondrop="handleSubmitDrop(event)">
+    <i class="ti ti-cloud-upload"></i>
+    <p>Drag & drop or click to browse</p>
+  </div>
+  <input type="file" id="submit-file-inp" style="display:none" onchange="handleSubmitFile(event)">
+  <div class="submit-file-name" id="submit-file-name"></div>
+  <div class="modal-actions">
+    <button class="btn-cancel" onclick="cm('mod-submit')">Cancel</button>
+    <button class="btn-add" id="submit-confirm-btn" onclick="confirmSubmit()" style="display:none"><i class="ti ti-send"></i> Submit</button>
+  </div>
+</div>
+</div>
 
 <div class="toast" id="toast"><i class="ti ti-check"></i><span id="toast-msg"></span></div>
 </div>
@@ -346,6 +383,7 @@ async function loadFromSheets(){
     if(data.projects) projects=data.projects;
     if(data.folders) folders=data.folders;
     if(data.files) files=data.files;
+    if(data.tasks) tasks=data.tasks;
     showToast('Data loaded ✓');
   }catch(e){
     console.error('Load error',e);
@@ -363,7 +401,7 @@ async function saveToSheets(){
   try{
     await fetch(SCRIPT_URL,{
       method:'POST',
-      body:JSON.stringify({action:'save',clients,projects,folders,files}),
+      body:JSON.stringify({action:'save',clients,projects,folders,files,tasks}),
       headers:{'Content-Type':'application/json'}
     });
     showToast('Saved ✓');
@@ -628,7 +666,7 @@ function doLogout(){document.getElementById('scr-app').classList.remove('active'
 // ── NAV ──
 function vLabel(v){return{dashboard:'Dashboard',clients:'Clients',pipeline:'Pipeline',projects:'All Projects',mis:'MIS'}[v]||v}
 function goView(v){
-  currentClientId=null;currentProjectId=null;driveStack=[];expandedRow=null;driveTab='folders';clientEditOpen=null;queuedFiles=[];
+  currentClientId=null;currentProjectId=null;driveStack=[];expandedRow=null;driveTab='folders';clientEditOpen=null;queuedFiles=[];taskSearch='';taskSearchTask='';
   navStack=[{type:'view',id:v,label:vLabel(v)}];
   document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
   const ni=document.getElementById('nav-'+v);if(ni)ni.classList.add('active');
@@ -736,7 +774,7 @@ function renderDrive(){
   const tabs=!isFolder?`<div class="drive-tabs"><div class="drive-tab ${driveTab==='folders'?'active':''}" onclick="driveTab='folders';renderNav()">Folders</div><div class="drive-tab ${driveTab==='all'?'active':''}" onclick="driveTab='all';renderNav()">All Files</div></div>`:'';
   const toolbar=`<div class="sec-hd"><div><div style="font-size:16px;font-weight:400;color:var(--text)">${curName}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${spill(p.stage)} <span style="margin-left:6px">${p.service}</span>${driveConnected?`<span style="margin-left:8px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><i class="ti ti-brand-google-drive" style="font-size:12px"></i> Drive sync on</span>`:''}</div></div>${!isFolder&&driveTab==='folders'?`<button class="btn-ghost" onclick="om('mod-folder')"><i class="ti ti-folder-plus"></i> New Folder</button>`:''}</div>`;
   let body='';
-  if(driveTab==='all'&&!isFolder){
+  if(driveTab==='tasks'&&!isFolder){body=renderTasks(p.id);} else if(driveTab==='all'&&!isFolder){
     const allFiles=files.filter(f=>f.projectId===p.id);
     if(allFiles.length===0){body=`<div class="empty-state"><i class="ti ti-file-off"></i><p>No files yet — upload or attach a Drive link below</p></div>`;}
     else{body=`<div style="border:1px solid var(--border);margin-bottom:12px">`;allFiles.forEach(fi=>{const isLnk=fi.isLink==='true'||fi.isLink===true;const icon=isLnk?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));const openEl=fi.link?`<a href="${fi.link}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open</a>`:'';body+=`<div class="file-list-row"><i class="ti ${icon} fl-icon" style="${fi.link?'color:#4285f4':''}"></i><div class="fl-info"><div class="fl-name">${fi.name}</div><div class="fl-meta">${folderPath(fi.folderId)} · ${fi.by} · ${fi.date}${fi.size?' · '+fi.size:''}${fi.link&&!isLnk?' · <span style="color:var(--green)">In Drive</span>':isLnk?' · Drive link':''}</div></div><div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="delFile('${fi.id}')"><i class="ti ti-trash"></i></button>`:''}</div></div>`;});body+=`</div>`;}
@@ -765,6 +803,248 @@ function renderMIS(){
 function addClient(){const name=document.getElementById('ic-name').value.trim();if(!name)return;clients.push({id:'c'+Date.now(),name,industry:document.getElementById('ic-ind').value.trim(),contact:document.getElementById('ic-con').value.trim(),email:document.getElementById('ic-mail').value.trim()});cm('mod-client');scheduleSave();goView('clients');}
 function addProject(){const name=document.getElementById('ip-name').value.trim();if(!name)return;projects.push({id:'p'+Date.now(),clientId:currentClientId,name,service:document.getElementById('ip-svc').value,stage:document.getElementById('ip-stage').value,notes:document.getElementById('ip-notes').value.trim()});cm('mod-proj');scheduleSave();navStack.pop();renderNav();}
 
+
+// ── TASKS ──
+let tasks = [];
+let currentSubmitTaskId = null;
+let submitFile = null;
+let taskView = 'all'; // 'all' | 'followup' | 'add'
+let taskSearch = '';
+let taskSearchTask = '';
+
+function taskDueStatus(dateStr){
+  if(!dateStr) return 'upcoming';
+  const due = new Date(dateStr);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  due.setHours(0,0,0,0);
+  const diff = (due - today) / (1000*60*60*24);
+  if(diff < 0) return 'overdue';
+  if(diff === 0) return 'today';
+  if(diff <= 2) return 'upcoming';
+  return 'normal';
+}
+
+function duePill(dateStr, done){
+  if(done==='true'||done===true) return `<span class="task-due due-done">Done</span>`;
+  const s = taskDueStatus(dateStr);
+  const labels = {overdue:'Overdue',today:'Today',upcoming:'Soon',normal:dateStr};
+  const cls = {overdue:'due-overdue',today:'due-today',upcoming:'due-upcoming',normal:'due-upcoming'};
+  return `<span class="task-due ${cls[s]}">${labels[s]}</span>`;
+}
+
+function openAddTaskModal(projectId){
+  // populate project dropdown
+  const sel = document.getElementById('it-proj');
+  sel.innerHTML = '<option value="">— No specific project —</option>';
+  projects.forEach(p => {
+    const cl = clients.find(c=>c.id===p.clientId);
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = (cl?cl.name+' — ':'')+p.name;
+    if(projectId && p.id===projectId) opt.selected=true;
+    sel.appendChild(opt);
+  });
+  document.getElementById('it-name').value='';
+  document.getElementById('it-phone').value='';
+  document.getElementById('it-email').value='';
+  document.getElementById('it-task').value='';
+  document.getElementById('it-date').value='';
+  om('mod-task');
+}
+
+function addTask(){
+  const name=document.getElementById('it-name').value.trim();
+  const task=document.getElementById('it-task').value.trim();
+  const date=document.getElementById('it-date').value;
+  if(!name||!task||!date){showToast('Please fill name, task and due date');return;}
+  const t={
+    id:'t'+Date.now(),
+    name,
+    phone:document.getElementById('it-phone').value.trim(),
+    email:document.getElementById('it-email').value.trim(),
+    task,
+    projectId:document.getElementById('it-proj').value||'',
+    dueDate:date,
+    done:'false',
+    submittedFile:'',
+    submittedLink:'',
+    createdDate:today()
+  };
+  tasks.push(t);
+  cm('mod-task');
+  scheduleSave();
+  showToast('Task added ✓');
+  renderNav();
+}
+
+function markTaskDone(tid){
+  const t=tasks.find(x=>x.id===tid);
+  if(t){t.done='true';scheduleSave();renderNav();}
+}
+
+function reviseTask(tid){
+  const t=tasks.find(x=>x.id===tid);
+  if(t){t.done='false';t.submittedFile='';t.submittedLink='';scheduleSave();renderNav();}
+}
+
+function openSubmitModal(tid){
+  currentSubmitTaskId=tid;
+  submitFile=null;
+  const t=tasks.find(x=>x.id===tid);
+  document.getElementById('submit-task-info').innerHTML=`<strong>${t.task}</strong><br><span style="color:var(--text3)">Due: ${t.dueDate}</span>`;
+  document.getElementById('submit-file-name').textContent='';
+  document.getElementById('submit-confirm-btn').style.display='none';
+  document.getElementById('mod-submit').style.display='flex';
+}
+
+function handleSubmitDrop(e){
+  e.preventDefault();
+  const f=e.dataTransfer.files[0];
+  if(f) setSubmitFile(f);
+}
+function handleSubmitFile(e){
+  const f=e.target.files[0];
+  if(f) setSubmitFile(f);
+}
+function setSubmitFile(f){
+  submitFile=f;
+  document.getElementById('submit-file-name').textContent='Selected: '+f.name;
+  document.getElementById('submit-confirm-btn').style.display='flex';
+}
+
+async function confirmSubmit(){
+  if(!submitFile||!currentSubmitTaskId) return;
+  const t=tasks.find(x=>x.id===currentSubmitTaskId);
+  if(!t) return;
+  showToast('Submitting…');
+
+  // Upload to Drive if connected
+  let driveLink='';
+  if(driveConnected && t.projectId){
+    const info = await uploadToDrive(submitFile, t.projectId, null);
+    if(info) driveLink=info.driveLink;
+  }
+
+  // Mark done
+  t.done='true';
+  t.submittedFile=submitFile.name;
+  t.submittedLink=driveLink;
+
+  // Send email via Apps Script
+  try{
+    await fetch(SCRIPT_URL, {
+      method:'POST',
+      body: JSON.stringify({
+        action:'sendSubmission',
+        taskName: t.task,
+        assignedName: t.name,
+        assignedEmail: t.email,
+        dueDate: t.dueDate,
+        submittedFile: submitFile.name,
+        driveLink: driveLink,
+        projectId: t.projectId
+      }),
+      headers:{'Content-Type':'application/json'}
+    });
+  }catch(e){console.error('Email send error',e);}
+
+  scheduleSave();
+  document.getElementById('mod-submit').style.display='none';
+  showToast('Task submitted ✓ Owner notified!');
+  renderNav();
+}
+
+function renderTasks(projectId){
+  const isM=canManage();
+  const filtered = projectId
+    ? tasks.filter(t=>t.projectId===projectId)
+    : tasks;
+
+  const search1=(taskSearch||'').toLowerCase();
+  const search2=(taskSearchTask||'').toLowerCase();
+  const shown = filtered.filter(t=>{
+    const matchName=!search1||t.name.toLowerCase().includes(search1);
+    const matchTask=!search2||t.task.toLowerCase().includes(search2);
+    return matchName&&matchTask;
+  });
+
+  // For global view split by tab
+  let list = shown;
+  if(!projectId){
+    if(taskView==='followup') list=shown.filter(t=>t.done!=='true'&&taskDueStatus(t.dueDate)!=='normal');
+    else if(taskView==='all') list=shown.filter(t=>t.done!=='true');
+  }
+
+  const addBtn = isM ? `<button class="btn-add" onclick="openAddTaskModal('${projectId||''}')"><i class="ti ti-plus"></i> Add Task</button>` : '';
+
+  let tabs='';
+  if(!projectId){
+    tabs=`<div class="task-tabs">
+      <div class="task-tab ${taskView==='add'?'active':''}" onclick="taskView='add';renderNav()"><i class="ti ti-plus" style="font-size:12px;margin-right:4px"></i>Add Task</div>
+      <div class="task-tab ${taskView==='followup'?'active':''}" onclick="taskView='followup';renderNav()"><i class="ti ti-bell" style="font-size:12px;margin-right:4px"></i>Follow Up</div>
+      <div class="task-tab ${taskView==='all'?'active':''}" onclick="taskView='all';renderNav()"><i class="ti ti-list" style="font-size:12px;margin-right:4px"></i>All Pending</div>
+    </div>`;
+  }
+
+  if(!projectId && taskView==='add'){
+    // inline add form
+    return `${tabs}<div style="border:1px solid var(--border);background:var(--bg2);padding:1.25rem">
+      <div class="form-row"><label class="form-lbl">Assign to (Name)</label><input class="form-inp" id="it-name" type="text" placeholder="e.g. Sanjay"></div>
+      <div class="form-row"><label class="form-lbl">Phone / WhatsApp</label><input class="form-inp" id="it-phone" type="text"></div>
+      <div class="form-row"><label class="form-lbl">Email</label><input class="form-inp" id="it-email" type="email"></div>
+      <div class="form-row"><label class="form-lbl">Task description</label><textarea class="form-ta" id="it-task" style="min-height:60px;resize:vertical"></textarea></div>
+      <div class="form-row"><label class="form-lbl">Project</label><select class="form-sel" id="it-proj"><option value="">— No specific project —</option>${projects.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<option value="${p.id}">${cl?cl.name+' — ':''}</option>`;}).join('')}</select></div>
+      <div class="form-row"><label class="form-lbl">Due date</label><input class="form-inp" id="it-date" type="date"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn-add" onclick="addTask()">Add Task</button></div>
+    </div>`;
+  }
+
+  const searchRow=`<div class="task-search-row">
+    <input class="task-search" placeholder="Search by name…" value="${taskSearch}" oninput="taskSearch=this.value;renderNav()">
+    <input class="task-search" placeholder="Search by task…" value="${taskSearchTask}" oninput="taskSearchTask=this.value;renderNav()">
+  </div>`;
+
+  let rows='';
+  if(list.length===0){
+    rows=`<div class="empty-state" style="border:none"><i class="ti ti-checkbox"></i><p>No tasks here</p></div>`;
+  } else {
+    list.forEach(t=>{
+      const isDone=t.done==='true'||t.done===true;
+      const p=t.projectId?projects.find(x=>x.id===t.projectId):null;
+      const cl=p?clients.find(c=>c.id===p.clientId):null;
+      const projLabel=p?`${cl?cl.name+' — ':''}${p.name}`:'General';
+      let actions='';
+      if(isDone){
+        actions=`<span style="font-size:10px;color:var(--green);font-weight:500;letter-spacing:1px;text-transform:uppercase">✓ Done</span>`;
+        if(isM) actions+=` <button class="revise-btn" onclick="reviseTask('${t.id}')">Revise</button>`;
+      } else {
+        if(isM) actions+=`<button class="done-btn" onclick="markTaskDone('${t.id}')">✓ Done</button>`;
+        if(!isM) actions+=`<button class="submit-btn" onclick="openSubmitModal('${t.id}')"><i class="ti ti-upload" style="font-size:12px"></i> Submit</button>`;
+        if(isM) actions+=` <button class="revise-btn" onclick="reviseTask('${t.id}')">Revise</button>`;
+      }
+      rows+=`<div class="task-row">
+        <div class="task-info">
+          <div class="task-name-text">${t.task}</div>
+          <div class="task-meta-text">${t.name}${t.phone?' · '+t.phone:''} · ${projLabel} · Due ${t.dueDate}${t.submittedFile?' · Submitted: '+t.submittedFile:''}</div>
+        </div>
+        ${duePill(t.dueDate,t.done)}
+        <div class="task-actions">${actions}</div>
+      </div>`;
+    });
+  }
+
+  const hd = projectId
+    ? `<div class="sec-hd"><span class="sec-title">Tasks</span>${addBtn}</div>`
+    : `<div class="sec-hd"><span class="sec-title">${taskView==='followup'?'Follow Up Tasks':'All Pending Tasks'}</span></div>`;
+
+  return tabs+hd+searchRow+`<div style="border:1px solid var(--border);background:var(--bg2)">${rows}</div>`;
+}
+
+function renderGlobalTasks(){
+  return renderTasks(null);
+}
+
 // init
 checkSavedToken();
 if(driveConnected){
@@ -774,3 +1054,38 @@ if(driveConnected){
 </script>
 </body>
 </html>
+<!-- TASK STYLES - injected -->
+<style id="task-styles">
+.task-tabs{display:flex;gap:1px;border:1px solid var(--border);background:var(--border);margin-bottom:1rem}
+.task-tab{flex:1;padding:8px;text-align:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);cursor:pointer;background:var(--bg2);transition:all .12s}
+.task-tab:hover{color:var(--text);background:var(--bg3)}
+.task-tab.active{background:var(--accent);color:var(--accent-text)}
+.task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);transition:background .1s}
+.task-row:hover{background:var(--bg2)}.task-row:last-child{border-bottom:none}
+.task-info{flex:1;min-width:0}
+.task-name-text{font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px}
+.task-meta-text{font-size:10px;color:var(--text3)}
+.task-due{font-size:10px;padding:2px 7px;border-radius:100px;font-weight:500;flex-shrink:0}
+.due-today{background:var(--amber-bg);color:var(--amber)}
+.due-overdue{background:var(--red-bg);color:var(--red)}
+.due-upcoming{background:var(--green-bg);color:var(--green)}
+.due-done{background:var(--bg3);color:var(--text3)}
+.task-actions{display:flex;gap:6px;flex-shrink:0}
+.done-btn{background:var(--green-bg);color:var(--green);border:1px solid var(--green);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+.done-btn:hover{background:var(--green);color:white}
+.submit-btn{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+.submit-btn:hover{background:var(--blue);color:white}
+.revise-btn{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+.revise-btn:hover{background:var(--amber);color:white}
+.task-search-row{display:flex;gap:8px;margin-bottom:1rem}
+.task-search{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:7px 10px;font-size:12px;font-family:inherit;outline:none}
+.task-search:focus{border-color:var(--border2)}
+.submit-modal-backdrop{position:fixed;inset:0;background:rgba(30,42,30,.6);display:flex;align-items:center;justify-content:center;z-index:200}
+.submit-modal{background:var(--bg2);border:1px solid var(--border);width:90%;max-width:420px;padding:1.5rem}
+.submit-modal-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:1.25rem}
+.submit-drop{border:2px dashed var(--border2);padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:10px}
+.submit-drop:hover{border-color:var(--accent);background:var(--bg3)}
+.submit-drop i{font-size:24px;color:var(--text3);display:block;margin-bottom:6px}
+.submit-drop p{font-size:12px;color:var(--text3)}
+.submit-file-name{font-size:12px;color:var(--green);margin-top:6px;font-weight:500}
+</style>
