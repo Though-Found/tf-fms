@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thought & Found — Studio FMS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.2.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f0e8;--bg2:#ede8de;--bg3:#e4ddd0;--bg4:#d8d0c0;
+  --border:#c8bfaa;--border2:#a89880;
+  --text:#1e2a1e;--text2:#3d4f3d;--text3:#7a8c6a;
+  --accent:#2c3d2c;--accent2:#3d5c3d;--accent-text:#f5f0e8;
+  --green:#2c5c2c;--green-bg:#d4e8d0;
+  --amber:#7a5c1e;--amber-bg:#f0e4c0;
+  --blue:#1e3d5c;--blue-bg:#ccdde8;
+  --red:#7a2c2c;--red-bg:#f0d4d4;
+}
+body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5}
+.screen{display:none}.screen.active{display:block}
+
+.login-outer{min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-box{width:340px;padding:2.5rem 2rem;border:1px solid var(--border);background:var(--bg2)}
+.tf-wordmark{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--text3);margin-bottom:2.5rem}
+.login-title{font-size:20px;font-weight:400;color:var(--text);margin-bottom:4px}
+.login-sub{font-size:12px;color:var(--text3);margin-bottom:2rem}
+.login-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;display:block}
+.role-opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);cursor:pointer;background:var(--bg);margin-bottom:8px}
+.role-opt:hover{border-color:var(--border2)}.role-opt.selected{border-color:var(--accent);background:var(--bg3)}
+.role-opt i{font-size:16px;color:var(--text3)}
+.ro-name{font-size:13px;color:var(--text);font-weight:500}.ro-desc{font-size:11px;color:var(--text3)}
+.pw-row{margin:1rem 0 1.5rem}
+.pw-input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 12px;font-size:13px;font-family:inherit;outline:none}
+.pw-input:focus{border-color:var(--border2)}
+.pw-error{font-size:11px;color:var(--red);margin-top:5px;display:none}
+.login-btn{width:100%;background:var(--accent);color:var(--accent-text);border:none;padding:10px;font-size:13px;font-weight:500;cursor:pointer}
+.login-btn:hover{background:var(--accent2)}
+
+.topbar{height:44px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;background:var(--accent);position:sticky;top:0;z-index:20}
+.topbar-brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent-text);opacity:.9}
+.role-tag{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent-text);opacity:.6;border:1px solid rgba(245,240,232,.25);padding:2px 8px}
+.signout-btn{font-size:11px;color:var(--accent-text);opacity:.6;background:none;border:none;cursor:pointer}
+.signout-btn:hover{opacity:1}
+
+.app-body{display:flex;min-height:calc(100vh - 44px)}
+.sidebar{width:190px;border-right:1px solid var(--border);background:var(--bg2);padding:1rem 0;flex-shrink:0}
+.nav-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:0 1.25rem;margin:1rem 0 4px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 1.25rem;font-size:12px;color:var(--text2);cursor:pointer;border-left:2px solid transparent;transition:all .1s}
+.nav-item:hover{color:var(--text);background:var(--bg3)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--bg3);font-weight:500}
+.nav-item i{font-size:15px}
+.content{flex:1;overflow:auto;background:var(--bg)}
+
+.back-bar{display:flex;align-items:center;border-bottom:1px solid var(--border);background:var(--bg2);min-height:38px;position:sticky;top:44px;z-index:10}
+.back-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;font-size:12px;color:var(--text2);cursor:pointer;background:none;border:none;border-right:1px solid var(--border);transition:all .12s;white-space:nowrap}
+.back-btn:hover{color:var(--accent);background:var(--bg3)}
+.back-btn i{font-size:15px}.back-btn.primary{color:var(--accent);font-weight:500}
+.bc-trail{display:flex;align-items:center;padding:0 14px;gap:0;flex:1;overflow:hidden}
+.bc-seg{font-size:11px;color:var(--text3);display:flex;align-items:center;white-space:nowrap}
+.bc-seg span{cursor:pointer}.bc-seg span:hover{color:var(--accent)}
+.bc-seg.last span{color:var(--text2);cursor:default}
+.bc-sep{color:var(--border2);margin:0 4px;font-size:10px}
+
+.inner{padding:1.25rem}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:1.5rem}
+.stat-cell{background:var(--bg2);padding:1rem 1.25rem}
+.stat-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.stat-val{font-size:26px;font-weight:300;color:var(--accent);letter-spacing:-1px}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.sec-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text2)}
+.btn-add{background:var(--accent);color:var(--accent-text);border:none;padding:6px 14px;font-size:11px;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;gap:5px;text-transform:uppercase}
+.btn-add:hover{background:var(--accent2)}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--text2);padding:5px 12px;font-size:11px;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;gap:5px;text-transform:uppercase}
+.btn-ghost:hover{border-color:var(--border2);color:var(--accent)}
+.btn-add i,.btn-ghost i{font-size:13px}
+.btn-danger{background:none;border:1px solid var(--red);color:var(--red);padding:5px 12px;font-size:11px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+.btn-danger:hover{background:var(--red-bg)}
+
+.tf-table{width:100%;border-collapse:collapse;border:1px solid var(--border)}
+.tf-table th{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg2);font-weight:400}
+.tf-table td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text2);vertical-align:middle}
+.tf-table tr:last-child td{border-bottom:none}
+.tf-table td.nc{color:var(--text);font-weight:500}
+
+.row-name{display:flex;align-items:center;gap:6px}
+.row-open{color:var(--text);font-weight:500;cursor:pointer;flex:1}
+.row-open:hover{color:var(--accent);text-decoration:underline}
+.edit-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:1px solid var(--border);border-radius:3px;cursor:pointer;background:var(--bg2);color:var(--text3);flex-shrink:0;transition:all .12s}
+.edit-icon:hover{border-color:var(--accent);color:var(--accent);background:var(--bg3)}
+.edit-icon i{font-size:12px}
+
+.edit-row td{background:var(--bg3)!important;padding:10px 12px;border-bottom:1px solid var(--border2)!important}
+.edit-row-inner{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.edit-inp{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:5px 8px;font-size:12px;font-family:inherit;outline:none}
+.edit-inp:focus{border-color:var(--border2)}
+.edit-sel{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:5px 8px;font-size:12px;font-family:inherit;outline:none}
+.edit-lbl{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3)}
+.edit-field{display:flex;align-items:center;gap:4px}
+.edit-actions{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.save-btn{background:var(--accent);color:var(--accent-text);border:none;padding:5px 12px;font-size:11px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+.save-btn:hover{background:var(--accent2)}
+.del-btn{background:none;border:1px solid var(--red);color:var(--red);padding:5px 10px;font-size:11px;cursor:pointer;letter-spacing:1px;text-transform:uppercase}
+.del-btn:hover{background:var(--red-bg)}
+.cancel-btn{background:none;border:1px solid var(--border);color:var(--text3);padding:5px 10px;font-size:11px;cursor:pointer;letter-spacing:1px;text-transform:uppercase}
+
+.client-hd-wrap{border:1px solid var(--border);background:var(--bg2);padding:1.25rem;margin-bottom:1rem}
+.client-hd-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.client-hd-name{font-size:17px;font-weight:400;color:var(--text);margin-bottom:3px}
+.client-hd-meta{font-size:11px;color:var(--text3)}
+.client-hd-actions{display:flex;gap:6px;flex-shrink:0}
+.client-edit-form{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+.pill{font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;font-weight:500}
+.pill-active{background:var(--green-bg);color:var(--green)}
+.pill-hold{background:var(--amber-bg);color:var(--amber)}
+.pill-done{background:var(--bg3);color:var(--text3)}
+.pill-new{background:var(--blue-bg);color:var(--blue)}
+
+.clients-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:var(--border);border:1px solid var(--border)}
+.client-card{background:var(--bg2);padding:1.25rem;transition:background .12s;position:relative}
+.client-card:hover{background:var(--bg3)}
+.cc-init{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.cc-name{font-size:15px;font-weight:400;color:var(--text);margin-bottom:2px;cursor:pointer}
+.cc-name:hover{color:var(--accent);text-decoration:underline}
+.cc-type{font-size:11px;color:var(--text3);margin-bottom:8px}
+.cc-meta{display:flex;gap:12px;font-size:10px;color:var(--text3)}
+
+.pipeline-scroll{overflow-x:auto;padding-bottom:4px}
+.pipeline-stages{display:flex;gap:1px;background:var(--border);border:1px solid var(--border);min-width:max-content}
+.stage-col{width:170px;background:var(--bg2);flex-shrink:0}
+.stage-head{padding:8px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.stage-name{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
+.stage-count{font-size:10px;color:var(--text3);background:var(--bg3);padding:1px 6px}
+.stage-body{padding:8px;display:flex;flex-direction:column;gap:6px;min-height:160px}
+.kcard{background:var(--bg);border:1px solid var(--border);padding:10px;cursor:pointer;transition:border-color .12s}
+.kcard:hover{border-color:var(--border2)}
+.kc-name{font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px}
+.kc-client{font-size:11px;color:var(--text3)}
+.kc-tag{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);padding:1px 5px;margin-top:5px;display:inline-block}
+
+.drive-tabs{display:flex;gap:1px;border:1px solid var(--border);background:var(--border);margin-bottom:1rem}
+.drive-tab{flex:1;padding:8px;text-align:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);cursor:pointer;background:var(--bg2);transition:all .12s}
+.drive-tab:hover{color:var(--text);background:var(--bg3)}
+.drive-tab.active{background:var(--accent);color:var(--accent-text)}
+.drive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:12px}
+.di{background:var(--bg2);padding:1.25rem 1rem;cursor:pointer;transition:background .12s;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;position:relative}
+.di:hover{background:var(--bg3)}.di:hover .di-acts{opacity:1}
+.di-icon{font-size:30px;color:var(--text3)}.di-icon.folder{color:var(--amber)}
+.di-name{font-size:12px;color:var(--text);word-break:break-word;line-height:1.3}
+.di-meta{font-size:10px;color:var(--text3)}
+.di-acts{position:absolute;top:5px;right:5px;opacity:0;display:flex;gap:2px;transition:opacity .12s}
+.di-act{background:var(--bg4);border:none;cursor:pointer;padding:3px 5px;color:var(--text3);display:flex}
+.di-act:hover{color:var(--accent)}.di-act i{font-size:12px}
+.file-list-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border);transition:background .1s}
+.file-list-row:hover{background:var(--bg2)}.file-list-row:last-child{border-bottom:none}
+.fl-icon{font-size:18px;color:var(--text3);flex-shrink:0}
+.fl-info{flex:1;min-width:0}
+.fl-name{font-size:12px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fl-meta{font-size:10px;color:var(--text3);margin-top:1px}
+.fl-acts{display:flex;gap:4px;flex-shrink:0}
+.fl-act{background:none;border:none;cursor:pointer;padding:4px;color:var(--text3);display:flex}
+.fl-act:hover{color:var(--accent)}.fl-act i{font-size:14px}
+.drop-zone{border:1px dashed var(--border2);padding:1.5rem;text-align:center;cursor:pointer;margin-top:8px}
+.drop-zone:hover{border-color:var(--accent)}
+.drop-zone i{font-size:20px;color:var(--text3);display:block;margin-bottom:4px}
+.drop-zone p{font-size:11px;color:var(--text3)}
+.empty-state{text-align:center;padding:2.5rem;color:var(--text3);border:1px solid var(--border);margin-bottom:8px}
+.empty-state i{font-size:24px;display:block;margin-bottom:6px;opacity:.5}
+.empty-state p{font-size:12px}
+
+.mis-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border)}
+.mis-cell{background:var(--bg2);padding:1.25rem}
+.mis-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:1rem}
+.brow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.blbl{font-size:11px;color:var(--text2);width:80px;flex-shrink:0}
+.btrack{flex:1;height:3px;background:var(--bg4)}
+.bfill{height:100%;background:var(--accent)}
+.bval{font-size:11px;color:var(--text3);width:18px;text-align:right}
+.aitem{display:flex;gap:8px;margin-bottom:8px}
+.adot{width:5px;height:5px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.adot.g{background:var(--green)}.adot.a{background:var(--amber)}
+.atext{font-size:11px;color:var(--text2);line-height:1.4}
+.atime{font-size:10px;color:var(--text3)}
+
+.modal-backdrop{position:fixed;inset:0;background:rgba(30,42,30,.5);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal-box{background:var(--bg2);border:1px solid var(--border);width:90%;max-width:380px;padding:1.5rem}
+.modal-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:1.25rem}
+.form-row{margin-bottom:.875rem}
+.form-lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:5px}
+.form-inp,.form-sel,.form-ta{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;font-size:12px;font-family:inherit;outline:none}
+.form-inp:focus,.form-sel:focus{border-color:var(--border2)}
+.form-sel option{background:var(--bg2)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem}
+.btn-cancel{background:none;border:1px solid var(--border);color:var(--text3);padding:7px 14px;font-size:11px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+.btn-cancel:hover{border-color:var(--border2);color:var(--text)}
+</style>
+</head>
+<body>
+
+<div id="app">
+<div class="screen active" id="scr-login">
+<div class="login-outer"><div class="login-box">
+  <div class="tf-wordmark">Thought & Found</div>
+  <div class="login-title">Studio FMS</div>
+  <div class="login-sub">Flow Management System</div>
+  <span class="login-label">Sign in as</span>
+  <div id="opt-owner" class="role-opt selected" onclick="sel('owner')"><i class="ti ti-crown"></i><div><div class="ro-name">Owner</div><div class="ro-desc">Full access</div></div></div>
+  <div id="opt-operations" class="role-opt" onclick="sel('operations')"><i class="ti ti-settings"></i><div><div class="ro-name">Operations</div><div class="ro-desc">Manage clients & projects</div></div></div>
+  <div id="opt-designer" class="role-opt" onclick="sel('designer')"><i class="ti ti-pencil"></i><div><div class="ro-name">Designer</div><div class="ro-desc">View & upload files</div></div></div>
+  <div class="pw-row">
+    <span class="login-label">Password</span>
+    <input class="pw-input" type="password" id="pw-inp" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="pw-error" id="pw-err">Incorrect password</div>
+  </div>
+  <button class="login-btn" onclick="doLogin()">Enter →</button>
+</div></div>
+</div>
+
+<div class="screen" id="scr-app">
+  <div class="topbar">
+    <div class="topbar-brand">T&F — FMS</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="role-tag" id="role-tag">Owner</span>
+      <button class="signout-btn" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+  <div class="app-body">
+    <div class="sidebar">
+      <div class="nav-lbl">Workspace</div>
+      <div class="nav-item active" id="nav-dashboard" onclick="goView('dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+      <div class="nav-item" id="nav-clients" onclick="goView('clients')"><i class="ti ti-building"></i> Clients</div>
+      <div class="nav-item" id="nav-pipeline" onclick="goView('pipeline')"><i class="ti ti-columns"></i> Pipeline</div>
+      <div class="nav-item" id="nav-projects" onclick="goView('projects')"><i class="ti ti-folder"></i> All Projects</div>
+      <div class="nav-lbl">Insights</div>
+      <div class="nav-item" id="nav-mis" onclick="goView('mis')"><i class="ti ti-chart-bar"></i> MIS</div>
+    </div>
+    <div class="content" id="main-content"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="mod-client" style="display:none"><div class="modal-box">
+  <div class="modal-title">Add Client</div>
+  <div class="form-row"><label class="form-lbl">Company name</label><input class="form-inp" id="ic-name" type="text"></div>
+  <div class="form-row"><label class="form-lbl">Industry</label><input class="form-inp" id="ic-ind" type="text"></div>
+  <div class="form-row"><label class="form-lbl">Contact person</label><input class="form-inp" id="ic-con" type="text"></div>
+  <div class="form-row"><label class="form-lbl">Email</label><input class="form-inp" id="ic-mail" type="email"></div>
+  <div class="modal-actions"><button class="btn-cancel" onclick="cm('mod-client')">Cancel</button><button class="btn-add" onclick="addClient()">Add Client</button></div>
+</div></div>
+
+<div class="modal-backdrop" id="mod-proj" style="display:none"><div class="modal-box">
+  <div class="modal-title">Add Project</div>
+  <div class="form-row"><label class="form-lbl">Project name</label><input class="form-inp" id="ip-name" type="text"></div>
+  <div class="form-row"><label class="form-lbl">Service type</label><select class="form-sel" id="ip-svc"><option>Strategy</option><option>Research</option><option>Creative</option><option>Production</option></select></div>
+  <div class="form-row"><label class="form-lbl">Stage</label><select class="form-sel" id="ip-stage"><option>Inquiry</option><option>Brief</option><option>Proposal</option><option>Active</option><option>Review</option><option>Delivered</option></select></div>
+  <div class="form-row"><label class="form-lbl">Notes</label><textarea class="form-ta" id="ip-notes" style="min-height:54px;resize:vertical"></textarea></div>
+  <div class="modal-actions"><button class="btn-cancel" onclick="cm('mod-proj')">Cancel</button><button class="btn-add" onclick="addProject()">Add Project</button></div>
+</div></div>
+
+<div class="modal-backdrop" id="mod-folder" style="display:none"><div class="modal-box">
+  <div class="modal-title">New Folder</div>
+  <div class="form-row"><label class="form-lbl">Folder name</label><input class="form-inp" id="if-name" type="text" placeholder="e.g. Moodboards, Final Files"></div>
+  <div class="modal-actions"><button class="btn-cancel" onclick="cm('mod-folder')">Cancel</button><button class="btn-add" onclick="addFolder()">Create</button></div>
+</div></div>
+
+<div class="modal-backdrop" id="mod-upload" style="display:none"><div class="modal-box">
+  <div class="modal-title">Upload File</div>
+  <div class="form-row"><label class="form-lbl">File name</label><input class="form-inp" id="iu-name" type="text" placeholder="e.g. Moodboard v2.pdf"></div>
+  <div class="form-row"><label class="form-lbl">Uploaded by</label><input class="form-inp" id="iu-by" type="text" placeholder="Your name"></div>
+  <div class="modal-actions"><button class="btn-cancel" onclick="cm('mod-upload')">Cancel</button><button class="btn-add" onclick="doUpload()"><i class="ti ti-upload"></i> Upload</button></div>
+</div></div>
+</div>
+
+<script>
+const PASS={owner:'owner123',operations:'ops123',designer:'design123'};
+const STAGES=['Inquiry','Brief','Proposal','Active','Review','Delivered'];
+const SPILL={Inquiry:'pill-new',Brief:'pill-new',Proposal:'pill-hold',Active:'pill-active',Review:'pill-hold',Delivered:'pill-done'};
+const FICONS={pdf:'ti-file-type-pdf',pptx:'ti-presentation',docx:'ti-file-type-doc',xlsx:'ti-file-spreadsheet',jpg:'ti-photo',jpeg:'ti-photo',png:'ti-photo',mp4:'ti-video',zip:'ti-file-zip'};
+
+let role='owner',selRole='owner',navStack=[];
+let currentClientId=null,currentProjectId=null,driveStack=[];
+let expandedRow=null,driveTab='folders',clientEditOpen=null;
+
+let clients=[];
+let projects=[];
+let folders=[];
+let files=[];
+
+function ini(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
+function ficon(n){const e=(n.split('.').pop()||'').toLowerCase();return FICONS[e]||'ti-file'}
+function today(){const d=new Date();return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear()}
+function spill(s){return`<span class="pill ${SPILL[s]||'pill-done'}">${s}</span>`}
+function canManage(){return role==='owner'||role==='operations'}
+function om(id){document.getElementById(id).style.display='flex'}
+function cm(id){document.getElementById(id).style.display='none'}
+function folderPath(fid){if(!fid)return'Root';const fo=folders.find(f=>f.id===fid);if(!fo)return'Root';const p=folderPath(fo.parentId);return p==='Root'?fo.name:p+' / '+fo.name;}
+
+function sel(r){selRole=r;document.querySelectorAll('.role-opt').forEach(e=>e.classList.remove('selected'));document.getElementById('opt-'+r).classList.add('selected')}
+function doLogin(){
+  const pw=document.getElementById('pw-inp').value;
+  if(pw!==PASS[selRole]){document.getElementById('pw-err').style.display='block';return}
+  document.getElementById('pw-err').style.display='none';
+  role=selRole;document.getElementById('role-tag').textContent=role.charAt(0).toUpperCase()+role.slice(1);
+  document.getElementById('pw-inp').value='';
+  document.getElementById('scr-login').classList.remove('active');
+  document.getElementById('scr-app').classList.add('active');
+  goView('dashboard');
+}
+function doLogout(){document.getElementById('scr-app').classList.remove('active');document.getElementById('scr-login').classList.add('active')}
+
+function vLabel(v){return{dashboard:'Dashboard',clients:'Clients',pipeline:'Pipeline',projects:'All Projects',mis:'MIS'}[v]||v}
+function goView(v){
+  currentClientId=null;currentProjectId=null;driveStack=[];expandedRow=null;driveTab='folders';clientEditOpen=null;
+  navStack=[{type:'view',id:v,label:vLabel(v)}];
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+  const ni=document.getElementById('nav-'+v);if(ni)ni.classList.add('active');
+  renderNav();
+}
+function navBack(){
+  if(navStack.length<=1)return;
+  navStack.pop();expandedRow=null;clientEditOpen=null;
+  const last=navStack[navStack.length-1];
+  if(last.type==='view'){document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));const ni=document.getElementById('nav-'+last.id);if(ni)ni.classList.add('active')}
+  if(last.type!=='folder')driveStack=[];
+  else driveStack=navStack.filter(s=>s.type==='folder').map(s=>({id:s.id,name:s.label}));
+  renderNav();
+}
+function navTo(idx){
+  if(idx>=navStack.length-1)return;
+  navStack=navStack.slice(0,idx+1);expandedRow=null;clientEditOpen=null;
+  const last=navStack[navStack.length-1];
+  if(last.type==='view'){document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));const ni=document.getElementById('nav-'+last.id);if(ni)ni.classList.add('active')}
+  if(last.type!=='folder')driveStack=[];
+  else driveStack=navStack.filter(s=>s.type==='folder').map(s=>({id:s.id,name:s.label}));
+  renderNav();
+}
+function renderNav(){
+  const c=document.getElementById('main-content');
+  const last=navStack[navStack.length-1];
+  let backBar='';
+  if(navStack.length>1){
+    const prev=navStack[navStack.length-2];
+    backBar=`<div class="back-bar"><button class="back-btn primary" onclick="navBack()"><i class="ti ti-arrow-left"></i> ${prev.label}</button><div class="bc-trail">${navStack.map((s,i)=>`${i>0?'<span class="bc-sep">/</span>':''}<div class="bc-seg ${i===navStack.length-1?'last':''}"><span onclick="navTo(${i})">${s.label}</span></div>`).join('')}</div></div>`;
+  }
+  let content='';
+  if(last.type==='view'){const v=last.id;if(v==='dashboard')content=renderDashboard();else if(v==='clients')content=renderClients();else if(v==='pipeline')content=renderPipeline();else if(v==='projects')content=renderAllProjects();else if(v==='mis')content=renderMIS();}
+  else if(last.type==='client')content=renderClientDetail(last.id);
+  else if(last.type==='project'||last.type==='folder')content=renderDrive();
+  c.innerHTML=(navStack.length>1?backBar:'')+'<div class="inner">'+content+'</div>';
+}
+function openClient(cid){
+  currentClientId=cid;currentProjectId=null;driveStack=[];expandedRow=null;clientEditOpen=null;
+  const cl=clients.find(c=>c.id===cid);
+  navStack=[navStack[0],{type:'client',id:cid,label:cl.name}];
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+  document.getElementById('nav-clients').classList.add('active');
+  renderNav();
+}
+function openProject(pid){
+  currentProjectId=pid;driveStack=[];expandedRow=null;driveTab='folders';
+  const p=projects.find(x=>x.id===pid);currentClientId=p.clientId;
+  const cl=clients.find(c=>c.id===p.clientId);
+  const base=navStack.find(s=>s.type==='view')||{type:'view',id:'clients',label:'Clients'};
+  navStack=[base,{type:'client',id:p.clientId,label:cl.name},{type:'project',id:pid,label:p.name}];
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+  document.getElementById('nav-clients').classList.add('active');
+  renderNav();
+}
+function enterFolder(fid,fname){
+  driveStack.push({id:fid,name:fname});
+  const base=navStack.slice(0,navStack.findIndex(s=>s.type==='project')+1);
+  navStack=[...base,{type:'folder',id:fid,label:fname}];
+  renderNav();
+}
+function cfid(){return driveStack.length>0?driveStack[driveStack.length-1].id:null}
+function editIcon(onclick){return`<span class="edit-icon" onclick="${onclick}" title="Edit"><i class="ti ti-pencil"></i></span>`}
+
+function toggleProjEdit(pid,e){if(e)e.stopPropagation();expandedRow=expandedRow===`p_${pid}`?null:`p_${pid}`;renderNav()}
+function saveProject(pid){
+  const p=projects.find(x=>x.id===pid);
+  p.name=document.getElementById(`e-pn-${pid}`).value.trim()||p.name;
+  p.clientId=document.getElementById(`e-pc-${pid}`).value;
+  p.stage=document.getElementById(`e-ps-${pid}`).value;
+  expandedRow=null;renderNav();
+}
+function delProject(pid){projects=projects.filter(p=>p.id!==pid);folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);expandedRow=null;renderNav()}
+function projEditRow(p,cols){
+  return`<tr class="edit-row"><td colspan="${cols}"><div class="edit-row-inner">
+    <div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="e-pn-${p.id}" value="${p.name}" style="width:160px"></div>
+    <div class="edit-field"><span class="edit-lbl">Client</span><select class="edit-sel" id="e-pc-${p.id}">${clients.map(c=>`<option value="${c.id}"${c.id===p.clientId?' selected':''}>${c.name}</option>`).join('')}</select></div>
+    <div class="edit-field"><span class="edit-lbl">Stage</span><select class="edit-sel" id="e-ps-${p.id}">${STAGES.map(s=>`<option${s===p.stage?' selected':''}>${s}</option>`).join('')}</select></div>
+    <div class="edit-actions">
+      <button class="cancel-btn" onclick="expandedRow=null;renderNav()">Cancel</button>
+      <button class="del-btn" onclick="delProject('${p.id}')">Delete</button>
+      <button class="save-btn" onclick="saveProject('${p.id}')">Save</button>
+    </div>
+  </div></td></tr>`;
+}
+function toggleClientEdit(cid,e){if(e)e.stopPropagation();clientEditOpen=clientEditOpen===cid?null:cid;renderNav()}
+function saveClientDetail(cid){
+  const cl=clients.find(c=>c.id===cid);
+  cl.name=document.getElementById(`e-cn-${cid}`).value.trim()||cl.name;
+  cl.industry=document.getElementById(`e-ci-${cid}`).value.trim();
+  cl.contact=document.getElementById(`e-cc-${cid}`).value.trim();
+  cl.email=document.getElementById(`e-ce-${cid}`).value.trim();
+  clientEditOpen=null;
+  const seg=navStack.find(s=>s.type==='client'&&s.id===cid);if(seg)seg.label=cl.name;
+  renderNav();
+}
+function delClientDetail(cid){
+  const pids=projects.filter(p=>p.clientId===cid).map(p=>p.id);
+  clients=clients.filter(c=>c.id!==cid);projects=projects.filter(p=>p.clientId!==cid);
+  pids.forEach(pid=>{folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);});
+  clientEditOpen=null;goView('clients');
+}
+function toggleClientGridEdit(cid,e){if(e)e.stopPropagation();expandedRow=expandedRow===`c_${cid}`?null:`c_${cid}`;renderNav()}
+function saveClientGrid(cid){
+  const cl=clients.find(c=>c.id===cid);
+  cl.name=document.getElementById(`eg-cn-${cid}`).value.trim()||cl.name;
+  cl.industry=document.getElementById(`eg-ci-${cid}`).value.trim();
+  expandedRow=null;renderNav();
+}
+function delClientGrid(cid){
+  const pids=projects.filter(p=>p.clientId===cid).map(p=>p.id);
+  clients=clients.filter(c=>c.id!==cid);projects=projects.filter(p=>p.clientId!==cid);
+  pids.forEach(pid=>{folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);});
+  expandedRow=null;renderNav();
+}
+
+function renderDashboard(){
+  const recent=projects.slice().reverse().slice(0,6);const isM=canManage();
+  let rows='';
+  if(projects.length===0){rows=`<tr><td colspan="3" style="text-align:center;color:var(--text3);padding:2rem">No projects yet — add a client and create your first project</td></tr>`;}
+  else{recent.forEach(p=>{const cl=clients.find(c=>c.id===p.clientId);const isExp=expandedRow===`p_${p.id}`;rows+=`<tr><td><span class="row-open" onclick="openProject('${p.id}')">${cl?cl.name:'—'}</span></td><td><div class="row-name"><span class="row-open" onclick="openProject('${p.id}')">${p.name}</span>${isM?editIcon(`toggleProjEdit('${p.id}',event)`):''}</div></td><td style="color:var(--text3)">${files.filter(f=>f.projectId===p.id).length}</td></tr>`;if(isExp)rows+=projEditRow(p,3);});}
+  return`<div class="stats-grid"><div class="stat-cell"><div class="stat-lbl">Clients</div><div class="stat-val">${clients.length}</div></div><div class="stat-cell"><div class="stat-lbl">Active</div><div class="stat-val">${projects.filter(p=>p.stage==='Active').length}</div></div><div class="stat-cell"><div class="stat-lbl">In Review</div><div class="stat-val">${projects.filter(p=>p.stage==='Review').length}</div></div><div class="stat-cell"><div class="stat-lbl">Delivered</div><div class="stat-val">${projects.filter(p=>p.stage==='Delivered').length}</div></div></div>
+<div class="sec-hd"><span class="sec-title">Recent Projects</span></div>
+<table class="tf-table"><thead><tr><th>Client</th><th>Project</th><th>Files</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function renderClients(){
+  const isM=canManage();
+  if(clients.length===0)return`<div class="sec-hd"><span class="sec-title">Clients</span>${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div><div class="empty-state"><i class="ti ti-building"></i><p>No clients yet${isM?' — add your first client':''}</p></div>`;
+  return`<div class="sec-hd"><span class="sec-title">Clients</span>${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div>
+<div class="clients-grid">${clients.map(cl=>{const cp=projects.filter(p=>p.clientId===cl.id);const isExp=expandedRow===`c_${cl.id}`;return`<div style="background:${isExp?'var(--bg3)':'var(--bg2)'};position:relative;border-bottom:1px solid var(--border)"><div class="client-card" style="background:transparent"><div class="cc-init">${ini(cl.name)}</div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="cc-name" onclick="openClient('${cl.id}')">${cl.name}</div><div class="cc-type">${cl.industry||'—'}</div><div class="cc-meta"><span>${cp.length} project${cp.length!==1?'s':''}</span><span>${cp.filter(p=>p.stage==='Active').length} active</span></div></div>${isM?`<span class="edit-icon" onclick="toggleClientGridEdit('${cl.id}',event)" title="Edit"><i class="ti ti-pencil"></i></span>`:''}</div></div>${isExp?`<div style="padding:0 1.25rem 1rem"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:.75rem;border-top:1px solid var(--border)"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="eg-cn-${cl.id}" value="${cl.name}" style="width:130px"></div><div class="edit-field"><span class="edit-lbl">Industry</span><input class="edit-inp" id="eg-ci-${cl.id}" value="${cl.industry||''}" style="width:120px"></div><div class="edit-actions"><button class="cancel-btn" onclick="expandedRow=null;renderNav()">Cancel</button><button class="del-btn" onclick="delClientGrid('${cl.id}')">Delete</button><button class="save-btn" onclick="saveClientGrid('${cl.id}')">Save</button></div></div></div>`:''}</div>`;}).join('')}</div>`;
+}
+function renderClientDetail(cid){
+  const cl=clients.find(c=>c.id===cid);const cp=projects.filter(p=>p.clientId===cid);const isM=canManage();const isEditOpen=clientEditOpen===cid;
+  let rows='';cp.forEach(p=>{const isExp=expandedRow===`p_${p.id}`;rows+=`<tr><td><div class="row-name"><i class="ti ti-folder-filled" style="color:var(--amber);font-size:14px;flex-shrink:0"></i><span class="row-open" onclick="openProject('${p.id}')">${p.name}</span>${isM?editIcon(`toggleProjEdit('${p.id}',event)`):''}</div></td><td>${files.filter(f=>f.projectId===p.id).length}</td><td>${spill(p.stage)}</td></tr>`;if(isExp)rows+=projEditRow(p,3);});
+  return`<div class="client-hd-wrap"><div class="client-hd-top"><div><div class="client-hd-name">${cl.name}</div><div class="client-hd-meta">${cl.industry||''}${cl.contact?' · '+cl.contact:''}${cl.email?' · '+cl.email:''}</div></div>${isM?`<div class="client-hd-actions"><button class="btn-ghost" onclick="toggleClientEdit('${cid}',event)"><i class="ti ti-pencil"></i> ${isEditOpen?'Cancel':'Edit'}</button><button class="btn-danger" onclick="delClientDetail('${cid}')"><i class="ti ti-trash"></i> Delete</button></div>`:''}</div>${isEditOpen?`<div class="client-edit-form"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="e-cn-${cid}" value="${cl.name}" style="width:140px"></div><div class="edit-field"><span class="edit-lbl">Industry</span><input class="edit-inp" id="e-ci-${cid}" value="${cl.industry||''}" style="width:120px"></div><div class="edit-field"><span class="edit-lbl">Contact</span><input class="edit-inp" id="e-cc-${cid}" value="${cl.contact||''}" style="width:110px"></div><div class="edit-field"><span class="edit-lbl">Email</span><input class="edit-inp" id="e-ce-${cid}" value="${cl.email||''}" style="width:150px"></div><button class="save-btn" onclick="saveClientDetail('${cid}')">Save</button></div>`:''}</div>
+<div class="sec-hd"><span class="sec-title">Projects</span>${isM?`<button class="btn-add" onclick="om('mod-proj')"><i class="ti ti-plus"></i> Add Project</button>`:''}</div>
+<table class="tf-table"><thead><tr><th>Project</th><th>Files</th><th>Stage</th></tr></thead><tbody>${cp.length===0?`<tr><td colspan="3" style="text-align:center;color:var(--text3);padding:2rem">No projects yet</td></tr>`:rows}</tbody></table>`;
+}
+function renderPipeline(){
+  return`<div class="sec-hd"><span class="sec-title">Pipeline</span></div><div class="pipeline-scroll"><div class="pipeline-stages">${STAGES.map(s=>{const sp=projects.filter(p=>p.stage===s);return`<div class="stage-col"><div class="stage-head"><span class="stage-name">${s}</span><span class="stage-count">${sp.length}</span></div><div class="stage-body">${sp.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<div class="kcard" onclick="openProject('${p.id}')"><div class="kc-name">${p.name}</div><div class="kc-client">${cl?cl.name:'—'}</div><span class="kc-tag">${p.service}</span></div>`;}).join('')}</div></div>`;}).join('')}</div></div>`;
+}
+function renderAllProjects(){
+  const isM=canManage();let rows='';
+  projects.forEach(p=>{const cl=clients.find(c=>c.id===p.clientId);const isExp=expandedRow===`p_${p.id}`;rows+=`<tr><td><span class="row-open" onclick="openProject('${p.id}')">${cl?cl.name:'—'}</span></td><td><div class="row-name"><span class="row-open" onclick="openProject('${p.id}')">${p.name}</span>${isM?editIcon(`toggleProjEdit('${p.id}',event)`):''}</div></td><td>${files.filter(f=>f.projectId===p.id).length}</td><td>${spill(p.stage)}</td></tr>`;if(isExp)rows+=projEditRow(p,4);});
+  return`<div class="sec-hd"><span class="sec-title">All Projects</span></div><table class="tf-table"><thead><tr><th>Client</th><th>Project</th><th>Files</th><th>Stage</th></tr></thead><tbody>${rows||`<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:2rem">No projects yet</td></tr>`}</tbody></table>`;
+}
+function renderDrive(){
+  const p=projects.find(x=>x.id===currentProjectId);const fid=cfid();const isFolder=driveStack.length>0;const curName=isFolder?driveStack[driveStack.length-1].name:p.name;
+  const tabs=!isFolder?`<div class="drive-tabs"><div class="drive-tab ${driveTab==='folders'?'active':''}" onclick="driveTab='folders';renderNav()">Folders</div><div class="drive-tab ${driveTab==='all'?'active':''}" onclick="driveTab='all';renderNav()">All Files</div></div>`:'';
+  const toolbar=`<div class="sec-hd"><div><div style="font-size:16px;font-weight:400;color:var(--text)">${curName}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${spill(p.stage)} <span style="margin-left:6px">${p.service}</span></div></div><div style="display:flex;gap:6px">${!isFolder&&driveTab==='folders'?`<button class="btn-ghost" onclick="om('mod-folder')"><i class="ti ti-folder-plus"></i> New Folder</button>`:''}<button class="btn-add" onclick="om('mod-upload')"><i class="ti ti-upload"></i> Upload File</button></div></div>`;
+  let body='';
+  if(driveTab==='all'&&!isFolder){const allFiles=files.filter(f=>f.projectId===p.id);if(allFiles.length===0){body=`<div class="empty-state"><i class="ti ti-file-off"></i><p>No files yet</p></div>`;}else{body=`<div style="border:1px solid var(--border)">`;allFiles.forEach(fi=>{body+=`<div class="file-list-row"><i class="ti ${ficon(fi.name)} fl-icon"></i><div class="fl-info"><div class="fl-name">${fi.name}</div><div class="fl-meta">${folderPath(fi.folderId)} · ${fi.by} · ${fi.date}</div></div><div class="fl-acts"><button class="fl-act"><i class="ti ti-download"></i></button>${canManage()?`<button class="fl-act" onclick="delFile('${fi.id}')"><i class="ti ti-trash"></i></button>`:''}</div></div>`;});body+=`</div>`;}body+=`<div class="drop-zone" onclick="om('mod-upload')"><i class="ti ti-cloud-upload"></i><p>Click to upload a file</p></div>`;}
+  else{const lf=folders.filter(f=>f.projectId===p.id&&f.parentId===fid);const lfi=files.filter(f=>f.projectId===p.id&&f.folderId===fid);if(lf.length===0&&lfi.length===0){body=`<div class="empty-state"><i class="ti ti-folder-open"></i><p>Empty — create a folder or upload a file</p></div>`;}else{body=`<div class="drive-grid">${lf.map(fo=>{const cnt=cif(fo.id,p.id);return`<div class="di" onclick="enterFolder('${fo.id}','${fo.name}')"><div class="di-acts">${canManage()?`<button class="di-act" onclick="event.stopPropagation();delFolder('${fo.id}')"><i class="ti ti-trash"></i></button>`:''}</div><i class="ti ti-folder-filled di-icon folder"></i><div class="di-name">${fo.name}</div><div class="di-meta">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('')}${lfi.map(fi=>`<div class="di"><div class="di-acts"><button class="di-act"><i class="ti ti-download"></i></button>${canManage()?`<button class="di-act" onclick="delFile('${fi.id}')"><i class="ti ti-trash"></i></button>`:''}</div><i class="ti ${ficon(fi.name)} di-icon"></i><div class="di-name">${fi.name}</div><div class="di-meta">${fi.by} · ${fi.date}</div></div>`).join('')}</div>`;}body+=`<div class="drop-zone" onclick="om('mod-upload')"><i class="ti ti-cloud-upload"></i><p>Drop files here or click to upload</p></div>`;}
+  return toolbar+tabs+body;
+}
+function cif(fid,pid){let c=files.filter(f=>f.projectId===pid&&f.folderId===fid).length;folders.filter(f=>f.projectId===pid&&f.parentId===fid).forEach(s=>{c+=cif(s.id,pid)});return c;}
+function delFolder(fid){folders=folders.filter(f=>f.id!==fid);files=files.filter(f=>f.folderId!==fid);renderNav()}
+function delFile(fid){files=files.filter(f=>f.id!==fid);renderNav()}
+function addFolder(){const name=document.getElementById('if-name').value.trim();if(!name)return;folders.push({id:'fo'+Date.now(),projectId:currentProjectId,parentId:cfid(),name});cm('mod-folder');document.getElementById('if-name').value='';renderNav();}
+function doUpload(){const nm=document.getElementById('iu-name').value.trim();if(!nm)return;const by=document.getElementById('iu-by').value.trim();files.push({id:'fi'+Date.now(),projectId:currentProjectId,folderId:cfid(),name:nm,by:by||'Team',date:today()});cm('mod-upload');document.getElementById('iu-name').value='';document.getElementById('iu-by').value='';renderNav();}
+function renderMIS(){
+  const svc={Strategy:0,Research:0,Creative:0,Production:0};projects.forEach(p=>{if(svc[p.service]!==undefined)svc[p.service]++});const mx=Math.max(...Object.values(svc),1);
+  return`<div class="sec-hd"><span class="sec-title">MIS — Overview</span></div><div class="stats-grid" style="margin-bottom:1.25rem"><div class="stat-cell"><div class="stat-lbl">Total Projects</div><div class="stat-val">${projects.length}</div></div><div class="stat-cell"><div class="stat-lbl">Total Files</div><div class="stat-val">${files.length}</div></div><div class="stat-cell"><div class="stat-lbl">Clients</div><div class="stat-val">${clients.length}</div></div><div class="stat-cell"><div class="stat-lbl">Delivered</div><div class="stat-val">${projects.filter(p=>p.stage==='Delivered').length}</div></div></div><div class="mis-grid"><div class="mis-cell"><div class="mis-lbl">Projects by service</div>${Object.entries(svc).map(([k,v])=>`<div class="brow"><span class="blbl">${k}</span><div class="btrack"><div class="bfill" style="width:${Math.round(v/mx*100)}%"></div></div><span class="bval">${v}</span></div>`).join('')}</div><div class="mis-cell"><div class="mis-lbl">Pipeline</div>${STAGES.map(s=>{const c=projects.filter(p=>p.stage===s).length;return`<div class="brow"><span class="blbl">${s}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(projects.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div><div class="mis-cell"><div class="mis-lbl">Files by client</div>${clients.length===0?'<p style="font-size:11px;color:var(--text3)">No data yet</p>':clients.map(cl=>{const c=files.filter(f=>{const p=projects.find(x=>x.id===f.projectId);return p&&p.clientId===cl.id}).length;return`<div class="brow"><span class="blbl" style="font-size:10px;width:88px">${cl.name.split(' ')[0]}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(files.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div><div class="mis-cell"><div class="mis-lbl">Stage summary</div>${STAGES.map(s=>{const c=projects.filter(p=>p.stage===s).length;return`<div class="brow"><span class="blbl">${s}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(projects.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div></div>`;
+}
+function addClient(){const name=document.getElementById('ic-name').value.trim();if(!name)return;clients.push({id:'c'+Date.now(),name,industry:document.getElementById('ic-ind').value.trim(),contact:document.getElementById('ic-con').value.trim(),email:document.getElementById('ic-mail').value.trim()});cm('mod-client');goView('clients');}
+function addProject(){const name=document.getElementById('ip-name').value.trim();if(!name)return;projects.push({id:'p'+Date.now(),clientId:currentClientId,name,service:document.getElementById('ip-svc').value,stage:document.getElementById('ip-stage').value,notes:document.getElementById('ip-notes').value.trim()});cm('mod-proj');navStack.pop();renderNav();}
+</script>
+</body>
+</html>
