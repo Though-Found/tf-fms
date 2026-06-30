@@ -958,6 +958,11 @@ function saveNewMember(){
   renderNav();
 }
 
+function generateTaskId(){
+  // Generate a short unique ID like the sheet (e.g. dyc78xl)
+  return Math.random().toString(36).substring(2,9);
+}
+
 function addTask(){
   const name=document.getElementById('it-name').value.trim();
   const task=document.getElementById('it-task').value.trim();
@@ -965,12 +970,18 @@ function addTask(){
   if(!name||!task||!date){showToast('Please select a team member, fill task and due date');return;}
   const t={
     id:'t'+Date.now(),
+    taskId:generateTaskId(),
     name,
     phone:document.getElementById('it-phone').value.trim(),
     email:document.getElementById('it-email').value.trim(),
     task,
     projectId:document.getElementById('it-proj').value||'',
     dueDate:date,
+    firstDate:today(),
+    revision1:'',
+    revision2:'',
+    latestRevision:today(),
+    totalRevisions:'0',
     done:'false',
     submittedFile:'',
     submittedLink:'',
@@ -985,12 +996,24 @@ function addTask(){
 
 function markTaskDone(tid){
   const t=tasks.find(x=>x.id===tid);
-  if(t){t.done='true';scheduleSave();renderNav();}
+  if(t){t.done='true';t.latestRevision=today();scheduleSave();renderNav();}
 }
 
 function reviseTask(tid){
   const t=tasks.find(x=>x.id===tid);
-  if(t){t.done='false';t.submittedFile='';t.submittedLink='';scheduleSave();renderNav();}
+  if(t){
+    t.done='false';
+    t.submittedFile='';
+    t.submittedLink='';
+    // Track revision history like the sheet (Revision 1, Revision 2 columns)
+    const revCount=parseInt(t.totalRevisions||'0')+1;
+    t.totalRevisions=String(revCount);
+    if(revCount===1) t.revision1=today();
+    else if(revCount===2) t.revision2=today();
+    t.latestRevision=today();
+    scheduleSave();
+    renderNav();
+  }
 }
 
 function openSubmitModal(tid){
@@ -1035,6 +1058,7 @@ async function confirmSubmit(){
   t.done='true';
   t.submittedFile=submitFile.name;
   t.submittedLink=driveLink;
+  t.latestRevision=today();
 
   // Send email via Apps Script
   try{
@@ -1144,7 +1168,7 @@ function renderTasks(projectId){
       rows+=`<div class="task-row">
         <div class="task-info">
           <div class="task-name-text">${t.task}</div>
-          <div class="task-meta-text">${t.name}${t.phone?' · '+t.phone:''} · ${projLabel} · Due ${t.dueDate}${t.submittedFile?' · Submitted: '+t.submittedFile:''}</div>
+          <div class="task-meta-text">${t.name}${t.phone?' · '+t.phone:''} · ${projLabel} · Due ${t.dueDate}${t.submittedFile?' · Submitted: '+t.submittedFile:''}${t.totalRevisions&&parseInt(t.totalRevisions)>0?' · Revised '+t.totalRevisions+'x':''}</div>
         </div>
         ${duePill(t.dueDate,t.done)}
         <div class="task-actions">${actions}</div>
