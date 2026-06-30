@@ -337,10 +337,22 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 <!-- ADD TASK MODAL -->
 <div class="modal-backdrop" id="mod-task" style="display:none"><div class="modal-box">
   <div class="modal-title">Add Task</div>
-  <div class="form-row"><label class="form-lbl">Assign to (Name)</label><input class="form-inp" id="it-name" type="text" placeholder="e.g. Sanjay"></div>
-  <div class="form-row"><label class="form-lbl">Phone / WhatsApp</label><input class="form-inp" id="it-phone" type="text" placeholder="e.g. 9845169183"></div>
-  <div class="form-row"><label class="form-lbl">Email</label><input class="form-inp" id="it-email" type="email" placeholder="email@example.com"></div>
-  <div class="form-row"><label class="form-lbl">Task description</label><textarea class="form-ta" id="it-task" style="min-height:60px;resize:vertical" placeholder="Describe the task…"></textarea></div>
+  <div class="form-row"><label class="form-lbl">Assign to</label>
+    <select class="form-sel" id="it-member" onchange="fillMemberDetails()">
+      <option value="">— Select team member —</option>
+      <option value="__custom__">+ Add new team member…</option>
+    </select>
+  </div>
+  <div id="custom-member-fields" style="display:none">
+    <div class="form-row"><label class="form-lbl">Name</label><input class="form-inp" id="it-name-new" type="text" placeholder="e.g. Sanjay"></div>
+    <div class="form-row"><label class="form-lbl">Phone / WhatsApp</label><input class="form-inp" id="it-phone-new" type="text"></div>
+    <div class="form-row"><label class="form-lbl">Email</label><input class="form-inp" id="it-email-new" type="email"></div>
+    <button class="btn-ghost" onclick="saveNewMember()" style="margin-bottom:10px"><i class="ti ti-plus"></i> Save Team Member</button>
+  </div>
+  <input type="hidden" id="it-name" value="">
+  <input type="hidden" id="it-phone" value="">
+  <input type="hidden" id="it-email" value="">
+  <div class="form-row"><label class="form-lbl">Task description</label><textarea class="form-ta" id="it-task" style="min-height:60px;resize:vertical" placeholder="Describe exactly what needs to be done…"></textarea></div>
   <div class="form-row"><label class="form-lbl">Project (optional)</label>
     <select class="form-sel" id="it-proj">
       <option value="">— No specific project —</option>
@@ -417,6 +429,7 @@ async function loadFromSheets(){
     if(data.folders) folders=data.folders;
     if(data.files) files=data.files;
     if(data.tasks) tasks=data.tasks;
+    if(data.teamMembers && data.teamMembers.length>0) teamMembers=data.teamMembers;
     showToast('Data loaded ✓');
   }catch(e){
     console.error('Load error',e);
@@ -434,7 +447,7 @@ async function saveToSheets(){
   try{
     await fetch(SCRIPT_URL,{
       method:'POST',
-      body:JSON.stringify({action:'save',clients,projects,folders,files,tasks}),
+      body:JSON.stringify({action:'save',clients,projects,folders,files,tasks,teamMembers}),
       headers:{'Content-Type':'text/plain;charset=utf-8'}
     });
     showToast('Saved ✓');
@@ -845,6 +858,14 @@ function addProject(){const name=document.getElementById('ip-name').value.trim()
 
 // ── TASKS ──
 let tasks = [];
+let teamMembers = [
+  {id:'m1', name:'Aditi Sinde', phone:'8169287446', email:'team@thought-found.com'},
+  {id:'m2', name:'Sanjay', phone:'9845169183', email:'team2@thought-found.com'},
+  {id:'m3', name:'Dilip', phone:'8977559817', email:'operations@thought-found.com'},
+  {id:'m4', name:'Palak', phone:'8850894058', email:'ea@thought-found.com'},
+  {id:'m5', name:'Aaradhya', phone:'585998917', email:'outreach@thought-found.com'},
+  {id:'m6', name:'Aananya', phone:'9638535322', email:'intern@thought-found.com'},
+];
 let currentSubmitTaskId = null;
 let submitFile = null;
 let taskView = 'all'; // 'all' | 'followup' | 'add'
@@ -884,6 +905,12 @@ function openAddTaskModal(projectId){
     if(projectId && p.id===projectId) opt.selected=true;
     sel.appendChild(opt);
   });
+  // populate team member dropdown
+  const memberSel = document.getElementById('it-member');
+  memberSel.innerHTML = '<option value="">— Select team member —</option>' +
+    teamMembers.map(m=>`<option value="${m.id}">${m.name} — ${m.phone}</option>`).join('') +
+    '<option value="__custom__">+ Add new team member…</option>';
+  document.getElementById('custom-member-fields').style.display='none';
   document.getElementById('it-name').value='';
   document.getElementById('it-phone').value='';
   document.getElementById('it-email').value='';
@@ -892,11 +919,50 @@ function openAddTaskModal(projectId){
   om('mod-task');
 }
 
+function fillMemberDetails(){
+  const sel=document.getElementById('it-member');
+  const customDiv=document.getElementById('custom-member-fields');
+  if(sel.value==='__custom__'){
+    customDiv.style.display='block';
+    document.getElementById('it-name').value='';
+    document.getElementById('it-phone').value='';
+    document.getElementById('it-email').value='';
+  } else if(sel.value){
+    customDiv.style.display='none';
+    const m=teamMembers.find(x=>x.id===sel.value);
+    if(m){
+      document.getElementById('it-name').value=m.name;
+      document.getElementById('it-phone').value=m.phone;
+      document.getElementById('it-email').value=m.email;
+    }
+  } else {
+    customDiv.style.display='none';
+    document.getElementById('it-name').value='';
+    document.getElementById('it-phone').value='';
+    document.getElementById('it-email').value='';
+  }
+}
+
+function saveNewMember(){
+  const name=document.getElementById('it-name-new').value.trim();
+  const phone=document.getElementById('it-phone-new').value.trim();
+  const email=document.getElementById('it-email-new').value.trim();
+  if(!name){showToast('Please enter a name');return;}
+  const newMember={id:'m'+Date.now(), name, phone, email};
+  teamMembers.push(newMember);
+  document.getElementById('it-name').value=name;
+  document.getElementById('it-phone').value=phone;
+  document.getElementById('it-email').value=email;
+  scheduleSave();
+  showToast('Team member added ✓');
+  renderNav();
+}
+
 function addTask(){
   const name=document.getElementById('it-name').value.trim();
   const task=document.getElementById('it-task').value.trim();
   const date=document.getElementById('it-date').value;
-  if(!name||!task||!date){showToast('Please fill name, task and due date');return;}
+  if(!name||!task||!date){showToast('Please select a team member, fill task and due date');return;}
   const t={
     id:'t'+Date.now(),
     name,
@@ -1029,10 +1095,23 @@ function renderTasks(projectId){
   if(!projectId && taskView==='add'){
     // inline add form
     return `${tabs}<div style="border:1px solid var(--border);background:var(--bg2);padding:1.25rem">
-      <div class="form-row"><label class="form-lbl">Assign to (Name)</label><input class="form-inp" id="it-name" type="text" placeholder="e.g. Sanjay"></div>
-      <div class="form-row"><label class="form-lbl">Phone / WhatsApp</label><input class="form-inp" id="it-phone" type="text"></div>
-      <div class="form-row"><label class="form-lbl">Email</label><input class="form-inp" id="it-email" type="email"></div>
-      <div class="form-row"><label class="form-lbl">Task description</label><textarea class="form-ta" id="it-task" style="min-height:60px;resize:vertical"></textarea></div>
+      <div class="form-row"><label class="form-lbl">Assign to</label>
+        <select class="form-sel" id="it-member" onchange="fillMemberDetails()">
+          <option value="">— Select team member —</option>
+          ${teamMembers.map(m=>`<option value="${m.id}">${m.name} — ${m.phone}</option>`).join('')}
+          <option value="__custom__">+ Add new team member…</option>
+        </select>
+      </div>
+      <div id="custom-member-fields" style="display:none">
+        <div class="form-row"><label class="form-lbl">Name</label><input class="form-inp" id="it-name-new" type="text" placeholder="e.g. Sanjay"></div>
+        <div class="form-row"><label class="form-lbl">Phone / WhatsApp</label><input class="form-inp" id="it-phone-new" type="text"></div>
+        <div class="form-row"><label class="form-lbl">Email</label><input class="form-inp" id="it-email-new" type="email"></div>
+        <button class="btn-ghost" onclick="saveNewMember()" style="margin-bottom:10px"><i class="ti ti-plus"></i> Save Team Member</button>
+      </div>
+      <input type="hidden" id="it-name" value="">
+      <input type="hidden" id="it-phone" value="">
+      <input type="hidden" id="it-email" value="">
+      <div class="form-row"><label class="form-lbl">Task description</label><textarea class="form-ta" id="it-task" style="min-height:60px;resize:vertical" placeholder="Describe exactly what needs to be done…"></textarea></div>
       <div class="form-row"><label class="form-lbl">Project</label><select class="form-sel" id="it-proj"><option value="">— No specific project —</option>${projects.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<option value="${p.id}">${cl?cl.name+' — ':''}${p.name}</option>`;}).join('')}</select></div>
       <div class="form-row"><label class="form-lbl">Due date</label><input class="form-inp" id="it-date" type="date"></div>
       <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn-add" onclick="addTask()">Add Task</button></div>
