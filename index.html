@@ -1033,7 +1033,7 @@ function renderTasks(projectId){
       <div class="form-row"><label class="form-lbl">Phone / WhatsApp</label><input class="form-inp" id="it-phone" type="text"></div>
       <div class="form-row"><label class="form-lbl">Email</label><input class="form-inp" id="it-email" type="email"></div>
       <div class="form-row"><label class="form-lbl">Task description</label><textarea class="form-ta" id="it-task" style="min-height:60px;resize:vertical"></textarea></div>
-      <div class="form-row"><label class="form-lbl">Project</label><select class="form-sel" id="it-proj"><option value="">— No specific project —</option>${projects.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<option value="${p.id}">${cl?cl.name+' — ':''}</option>`;}).join('')}</select></div>
+      <div class="form-row"><label class="form-lbl">Project</label><select class="form-sel" id="it-proj"><option value="">— No specific project —</option>${projects.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<option value="${p.id}">${cl?cl.name+' — ':''}${p.name}</option>`;}).join('')}</select></div>
       <div class="form-row"><label class="form-lbl">Due date</label><input class="form-inp" id="it-date" type="date"></div>
       <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn-add" onclick="addTask()">Add Task</button></div>
     </div>`;
