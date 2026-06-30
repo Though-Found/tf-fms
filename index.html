@@ -738,7 +738,7 @@ function renderNav(){
     backBar=`<div class="back-bar"><button class="back-btn primary" onclick="navBack()"><i class="ti ti-arrow-left"></i> ${prev.label}</button><div class="bc-trail">${navStack.map((s,i)=>`${i>0?'<span class="bc-sep">/</span>':''}<div class="bc-seg ${i===navStack.length-1?'last':''}"><span onclick="navTo(${i})">${s.label}</span></div>`).join('')}</div></div>`;
   }
   let content='';
-  if(last.type==='view'){const v=last.id;if(v==='dashboard')content=renderDashboard();else if(v==='clients')content=renderClients();else if(v==='pipeline')content=renderPipeline();else if(v==='projects')content=renderAllProjects();else if(v==='mis')content=renderMIS();}
+  if(last.type==='view'){const v=last.id;if(v==='dashboard')content=renderDashboard();else if(v==='clients')content=renderClients();else if(v==='pipeline')content=renderPipeline();else if(v==='projects')content=renderAllProjects();else if(v==='tasks')content=renderGlobalTasks();else if(v==='mis')content=renderMIS();}
   else if(last.type==='client')content=renderClientDetail(last.id);
   else if(last.type==='project'||last.type==='folder')content=renderDrive();
   c.innerHTML=(navStack.length>1?backBar:'')+'<div class="inner">'+content+'</div>';
