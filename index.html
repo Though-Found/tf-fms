@@ -217,6 +217,39 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .toast{position:fixed;bottom:20px;right:20px;background:var(--accent);color:var(--accent-text);padding:10px 16px;font-size:12px;z-index:200;display:none;align-items:center;gap:8px}
 .toast.show{display:flex}
 .toast i{font-size:16px}
+
+.task-tabs{display:flex;gap:1px;border:1px solid var(--border);background:var(--border);margin-bottom:1rem}
+.task-tab{flex:1;padding:8px;text-align:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);cursor:pointer;background:var(--bg2);transition:all .12s}
+.task-tab:hover{color:var(--text);background:var(--bg3)}
+.task-tab.active{background:var(--accent);color:var(--accent-text)}
+.task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);transition:background .1s}
+.task-row:hover{background:var(--bg2)}.task-row:last-child{border-bottom:none}
+.task-info{flex:1;min-width:0}
+.task-name-text{font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px}
+.task-meta-text{font-size:10px;color:var(--text3)}
+.task-due{font-size:10px;padding:2px 7px;border-radius:100px;font-weight:500;flex-shrink:0}
+.due-today{background:var(--amber-bg);color:var(--amber)}
+.due-overdue{background:var(--red-bg);color:var(--red)}
+.due-upcoming{background:var(--green-bg);color:var(--green)}
+.due-done{background:var(--bg3);color:var(--text3)}
+.task-actions{display:flex;gap:6px;flex-shrink:0}
+.done-btn{background:var(--green-bg);color:var(--green);border:1px solid var(--green);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+.done-btn:hover{background:var(--green);color:white}
+.submit-btn{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+.submit-btn:hover{background:var(--blue);color:white}
+.revise-btn{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+.revise-btn:hover{background:var(--amber);color:white}
+.task-search-row{display:flex;gap:8px;margin-bottom:1rem}
+.task-search{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:7px 10px;font-size:12px;font-family:inherit;outline:none}
+.task-search:focus{border-color:var(--border2)}
+.submit-modal-backdrop{position:fixed;inset:0;background:rgba(30,42,30,.6);display:flex;align-items:center;justify-content:center;z-index:200}
+.submit-modal{background:var(--bg2);border:1px solid var(--border);width:90%;max-width:420px;padding:1.5rem}
+.submit-modal-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:1.25rem}
+.submit-drop{border:2px dashed var(--border2);padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:10px}
+.submit-drop:hover{border-color:var(--accent);background:var(--bg3)}
+.submit-drop i{font-size:24px;color:var(--text3);display:block;margin-bottom:6px}
+.submit-drop p{font-size:12px;color:var(--text3)}
+.submit-file-name{font-size:12px;color:var(--green);margin-top:6px;font-weight:500}
 </style>
 </head>
 <body>
@@ -402,11 +435,12 @@ async function saveToSheets(){
     await fetch(SCRIPT_URL,{
       method:'POST',
       body:JSON.stringify({action:'save',clients,projects,folders,files,tasks}),
-      headers:{'Content-Type':'application/json'}
+      headers:{'Content-Type':'text/plain;charset=utf-8'}
     });
     showToast('Saved ✓');
   }catch(e){
     console.error('Save error',e);
+    showToast('Could not save — check connection');
   }
 }
 
@@ -638,6 +672,11 @@ async function doLogin(){
 
 function silentConnectDrive(){
   return new Promise((resolve)=>{
+    if(typeof google==='undefined'||!google.accounts){
+      console.log('Google script not loaded yet, skipping silent connect');
+      resolve();
+      return;
+    }
     try{
       const client=google.accounts.oauth2.initTokenClient({
         client_id:CLIENT_ID,
@@ -945,7 +984,7 @@ async function confirmSubmit(){
         driveLink: driveLink,
         projectId: t.projectId
       }),
-      headers:{'Content-Type':'application/json'}
+      headers:{'Content-Type':'text/plain;charset=utf-8'}
     });
   }catch(e){console.error('Email send error',e);}
 
@@ -1054,38 +1093,3 @@ if(driveConnected){
 </script>
 </body>
 </html>
-<!-- TASK STYLES - injected -->
-<style id="task-styles">
-.task-tabs{display:flex;gap:1px;border:1px solid var(--border);background:var(--border);margin-bottom:1rem}
-.task-tab{flex:1;padding:8px;text-align:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);cursor:pointer;background:var(--bg2);transition:all .12s}
-.task-tab:hover{color:var(--text);background:var(--bg3)}
-.task-tab.active{background:var(--accent);color:var(--accent-text)}
-.task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);transition:background .1s}
-.task-row:hover{background:var(--bg2)}.task-row:last-child{border-bottom:none}
-.task-info{flex:1;min-width:0}
-.task-name-text{font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px}
-.task-meta-text{font-size:10px;color:var(--text3)}
-.task-due{font-size:10px;padding:2px 7px;border-radius:100px;font-weight:500;flex-shrink:0}
-.due-today{background:var(--amber-bg);color:var(--amber)}
-.due-overdue{background:var(--red-bg);color:var(--red)}
-.due-upcoming{background:var(--green-bg);color:var(--green)}
-.due-done{background:var(--bg3);color:var(--text3)}
-.task-actions{display:flex;gap:6px;flex-shrink:0}
-.done-btn{background:var(--green-bg);color:var(--green);border:1px solid var(--green);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
-.done-btn:hover{background:var(--green);color:white}
-.submit-btn{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
-.submit-btn:hover{background:var(--blue);color:white}
-.revise-btn{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
-.revise-btn:hover{background:var(--amber);color:white}
-.task-search-row{display:flex;gap:8px;margin-bottom:1rem}
-.task-search{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:7px 10px;font-size:12px;font-family:inherit;outline:none}
-.task-search:focus{border-color:var(--border2)}
-.submit-modal-backdrop{position:fixed;inset:0;background:rgba(30,42,30,.6);display:flex;align-items:center;justify-content:center;z-index:200}
-.submit-modal{background:var(--bg2);border:1px solid var(--border);width:90%;max-width:420px;padding:1.5rem}
-.submit-modal-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:1.25rem}
-.submit-drop{border:2px dashed var(--border2);padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:10px}
-.submit-drop:hover{border-color:var(--accent);background:var(--bg3)}
-.submit-drop i{font-size:24px;color:var(--text3);display:block;margin-bottom:6px}
-.submit-drop p{font-size:12px;color:var(--text3)}
-.submit-file-name{font-size:12px;color:var(--green);margin-top:6px;font-weight:500}
-</style>
