@@ -381,6 +381,33 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 </div>
 </div>
 
+<!-- REVISE TASK MODAL -->
+<div class="submit-modal-backdrop" id="mod-revise" style="display:none">
+<div class="submit-modal">
+  <div class="submit-modal-title">Revise Planned Task</div>
+  <div class="form-row">
+    <label class="form-lbl">Task ID</label>
+    <div id="revise-taskid" style="font-size:12px;color:var(--text3);padding:8px 10px;background:var(--bg3);border:1px solid var(--border)"></div>
+  </div>
+  <div class="form-row">
+    <label class="form-lbl">Name</label>
+    <div id="revise-name" style="font-size:13px;color:var(--text);font-weight:500;padding:8px 10px;background:var(--bg3);border:1px solid var(--border)"></div>
+  </div>
+  <div class="form-row">
+    <label class="form-lbl">Task</label>
+    <div id="revise-task" style="font-size:12px;color:var(--text2);padding:8px 10px;background:var(--bg3);border:1px solid var(--border)"></div>
+  </div>
+  <div class="form-row">
+    <label class="form-lbl">New Planned Date</label>
+    <input class="form-inp" id="revise-date" type="date">
+  </div>
+  <div class="modal-actions">
+    <button class="btn-cancel" onclick="cm('mod-revise')">Cancel</button>
+    <button class="btn-add" onclick="confirmRevise()"><i class="ti ti-refresh"></i> Revise Task Plan</button>
+  </div>
+</div>
+</div>
+
 <div class="toast" id="toast"><i class="ti ti-check"></i><span id="toast-msg"></span></div>
 </div>
 
@@ -999,21 +1026,40 @@ function markTaskDone(tid){
   if(t){t.done='true';t.latestRevision=today();scheduleSave();renderNav();}
 }
 
-function reviseTask(tid){
+let currentReviseTaskId=null;
+
+function openReviseModal(tid){
+  currentReviseTaskId=tid;
   const t=tasks.find(x=>x.id===tid);
-  if(t){
-    t.done='false';
-    t.submittedFile='';
-    t.submittedLink='';
-    // Track revision history like the sheet (Revision 1, Revision 2 columns)
-    const revCount=parseInt(t.totalRevisions||'0')+1;
-    t.totalRevisions=String(revCount);
-    if(revCount===1) t.revision1=today();
-    else if(revCount===2) t.revision2=today();
-    t.latestRevision=today();
-    scheduleSave();
-    renderNav();
-  }
+  if(!t)return;
+  document.getElementById('revise-taskid').textContent=t.taskId||t.id;
+  document.getElementById('revise-name').textContent=t.name;
+  document.getElementById('revise-task').textContent=t.task;
+  document.getElementById('revise-date').value=t.dueDate;
+  om('mod-revise');
+}
+
+function confirmRevise(){
+  const t=tasks.find(x=>x.id===currentReviseTaskId);
+  if(!t)return;
+  const newDate=document.getElementById('revise-date').value;
+  if(!newDate){showToast('Please select a new planned date');return;}
+
+  t.done='false';
+  t.submittedFile='';
+  t.submittedLink='';
+  // Track revision history like the sheet (Revision 1, Revision 2 columns)
+  const revCount=parseInt(t.totalRevisions||'0')+1;
+  t.totalRevisions=String(revCount);
+  if(revCount===1) t.revision1=today();
+  else if(revCount===2) t.revision2=today();
+  t.latestRevision=today();
+  t.dueDate=newDate; // update planned date to the new one
+
+  cm('mod-revise');
+  scheduleSave();
+  showToast('Task revised — new date set ✓');
+  renderNav();
 }
 
 function openSubmitModal(tid){
@@ -1159,11 +1205,11 @@ function renderTasks(projectId){
       let actions='';
       if(isDone){
         actions=`<span style="font-size:10px;color:var(--green);font-weight:500;letter-spacing:1px;text-transform:uppercase">✓ Done</span>`;
-        if(isM) actions+=` <button class="revise-btn" onclick="reviseTask('${t.id}')">Revise</button>`;
+        if(isM) actions+=` <button class="revise-btn" onclick="openReviseModal('${t.id}')">Revise</button>`;
       } else {
         if(isM) actions+=`<button class="done-btn" onclick="markTaskDone('${t.id}')">✓ Done</button>`;
         if(!isM) actions+=`<button class="submit-btn" onclick="openSubmitModal('${t.id}')"><i class="ti ti-upload" style="font-size:12px"></i> Submit</button>`;
-        if(isM) actions+=` <button class="revise-btn" onclick="reviseTask('${t.id}')">Revise</button>`;
+        if(isM) actions+=` <button class="revise-btn" onclick="openReviseModal('${t.id}')">Revise</button>`;
       }
       rows+=`<div class="task-row">
         <div class="task-info">
