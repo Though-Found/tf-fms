@@ -1216,7 +1216,12 @@ function renderTasks(projectId){
       <div class="task-tab ${taskView==='add'?'active':''}" onclick="taskView='add';renderNav()"><i class="ti ti-plus" style="font-size:12px;margin-right:4px"></i>Add Task</div>
       <div class="task-tab ${taskView==='followup'?'active':''}" onclick="taskView='followup';renderNav()"><i class="ti ti-bell" style="font-size:12px;margin-right:4px"></i>Follow Up</div>
       <div class="task-tab ${taskView==='all'?'active':''}" onclick="taskView='all';renderNav()"><i class="ti ti-list" style="font-size:12px;margin-right:4px"></i>All Pending</div>
+      <div class="task-tab ${taskView==='share'?'active':''}" onclick="taskView='share';renderNav()"><i class="ti ti-share" style="font-size:12px;margin-right:4px"></i>Share Files</div>
     </div>`;
+  }
+
+  if(!projectId && taskView==='share'){
+    return tabs + renderShareFilesView();
   }
 
   if(!projectId && taskView==='add'){
@@ -1290,7 +1295,168 @@ function renderGlobalTasks(){
   return renderTasks(null);
 }
 
-// ── FILE SHARING ──
+// ── SHARE FILES VIEW (under Tasks) ──
+let shareSelProject='';
+let shareSelFolder='';
+let shareSelFile='';
+let shareSelMember='';
+
+function renderShareFilesView(){
+  // Get folders and files for selected project
+  const projFolders=shareSelProject?folders.filter(f=>f.projectId===shareSelProject&&(f.parentId||'')===(shareSelFolder||'')):[]; 
+  const projFiles=shareSelProject?files.filter(f=>f.projectId===shareSelProject&&(f.folderId||'')===(shareSelFolder||'')):[]; 
+
+  // Breadcrumb for folder navigation
+  let folderBreadcrumb='';
+  if(shareSelFolder){
+    const fo=folders.find(f=>f.id===shareSelFolder);
+    folderBreadcrumb=`<div style="font-size:11px;color:var(--text3);margin-bottom:8px">
+      <span style="cursor:pointer;color:var(--accent)" onclick="shareSelFolder='';shareSelFile='';renderNav()">Root</span>
+      ${fo?' / '+fo.name:''}
+    </div>`;
+  }
+
+  return `<div style="border:1px solid var(--border);background:var(--bg2);padding:1.25rem">
+    <div class="sec-hd" style="margin-bottom:1rem"><span class="sec-title">Share Files with Team</span></div>
+
+    <!-- Step 1: Select Project -->
+    <div class="form-row">
+      <label class="form-lbl">1. Select Project</label>
+      <select class="form-sel" id="sf-proj" onchange="shareSelProject=this.value;shareSelFolder='';shareSelFile='';renderNav()">
+        <option value="">— Select a project —</option>
+        ${projects.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<option value="${p.id}" ${p.id===shareSelProject?'selected':''}>${cl?cl.name+' — ':''}${p.name}</option>`;}).join('')}
+      </select>
+    </div>
+
+    ${shareSelProject?`
+    <!-- Step 2: Browse Folders/Files -->
+    <div class="form-row">
+      <label class="form-lbl">2. Select File</label>
+      ${folderBreadcrumb}
+      <div style="border:1px solid var(--border);background:var(--bg);max-height:220px;overflow-y:auto">
+        ${shareSelFolder?`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);color:var(--text3)" onclick="shareSelFolder='';shareSelFile='';renderNav()"><i class="ti ti-arrow-left" style="font-size:14px"></i> Back to Root</div>`:''}
+        ${projFolders.map(fo=>`
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s" onclick="shareSelFolder='${fo.id}';shareSelFile='';renderNav()" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+            <i class="ti ti-folder-filled" style="font-size:18px;color:var(--amber)"></i>
+            <span style="font-size:12px;color:var(--text)">${fo.name}</span>
+          </div>`).join('')}
+        ${projFiles.length===0&&projFolders.length===0?`<div style="padding:1.5rem;text-align:center;color:var(--text3);font-size:12px">No files in this location</div>`:''}
+        ${projFiles.map(fi=>`
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border);background:${fi.id===shareSelFile?'var(--bg3)':''};transition:background .1s" onclick="shareSelFile='${fi.id}';renderNav()">
+            <i class="ti ${fi.isLink==='true'?'ti-link':ficon(fi.name)}" style="font-size:18px;color:var(--text3)"></i>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;color:var(--text);font-weight:${fi.id===shareSelFile?'600':'400'}">${fi.name}</div>
+              <div style="font-size:10px;color:var(--text3)">${fi.date}${fi.size?' · '+fi.size:''}</div>
+            </div>
+            ${fi.id===shareSelFile?`<i class="ti ti-check" style="color:var(--green);font-size:16px"></i>`:''}
+          </div>`).join('')}
+      </div>
+    </div>
+    `:''}
+
+    ${shareSelFile?`
+    <!-- Step 3: Select Recipient -->
+    <div class="form-row">
+      <label class="form-lbl">3. Send to</label>
+      <select class="form-sel" id="sf-member" onchange="shareSelMember=this.value">
+        <option value="">— Select team member —</option>
+        <option value="all">Entire Team</option>
+        ${teamMembers.map(m=>`<option value="${m.id}" ${m.id===shareSelMember?'selected':''}>${m.name}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Note (optional)</label>
+      <input class="form-inp" id="sf-note" type="text" placeholder="e.g. Please review this file">
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px">
+      <button class="btn-add" onclick="sendSharedFile()"><i class="ti ti-send"></i> Send File</button>
+    </div>
+    `:''}
+
+    ${sharedFiles.length>0?`
+    <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem">
+      <div class="sec-title" style="margin-bottom:10px">Recently Shared</div>
+      ${sharedFiles.slice().reverse().slice(0,5).map(sf=>{
+        const p=projects.find(x=>x.id===sf.projectId);
+        const cl=p?clients.find(c=>c.id===p.clientId):null;
+        const recipientName=sf.sentTo==='all'?'Entire Team':teamMembers.find(m=>m.id===sf.sentTo)?.name||sf.sentTo;
+        return`<div class="file-list-row" style="padding:8px 0">
+          <i class="ti ti-share fl-icon" style="color:var(--blue)"></i>
+          <div class="fl-info">
+            <div class="fl-name">${sf.fileName}</div>
+            <div class="fl-meta">${sf.sentBy} → ${recipientName} · ${p?(cl?cl.name+' — ':'')+p.name:''} · ${sf.date}${sf.note?' · '+sf.note:''}</div>
+          </div>
+          ${sf.driveLink?`<a href="${sf.driveLink}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open</a>`:''}
+        </div>`;}).join('')}
+    </div>`:''}
+  </div>`;
+}
+
+async function sendSharedFile(){
+  const memberId=document.getElementById('sf-member')?document.getElementById('sf-member').value:shareSelMember;
+  if(!memberId){showToast('Please select a team member');return;}
+  if(!shareSelFile){showToast('Please select a file');return;}
+
+  const fi=files.find(f=>f.id===shareSelFile);
+  const p=projects.find(x=>x.id===shareSelProject);
+  const cl=clients.find(c=>c.id===p?.clientId);
+  const senderName=role==='owner'?'Owner':role==='operations'?'Operations':'Designer';
+  const note=document.getElementById('sf-note')?document.getElementById('sf-note').value.trim():'';
+  const recipientName=memberId==='all'?'the entire team':teamMembers.find(m=>m.id===memberId)?.name||'team';
+  const recipientEmail=memberId==='all'?null:teamMembers.find(m=>m.id===memberId)?.email;
+  const projectLabel=p?(cl?cl.name+' — ':'')+p.name:'';
+
+  showToast('Sending file…');
+
+  // Save shared file record
+  const sf={
+    id:'sf'+Date.now(),
+    projectId:shareSelProject,
+    fileName:fi.name,
+    driveLink:fi.link||'',
+    sentBy:senderName,
+    sentTo:memberId,
+    note,
+    date:today()
+  };
+  sharedFiles.push(sf);
+
+  // Send Google Chat notification
+  const chatMsg={
+    text:`📎 *${senderName}* shared a file with *${recipientName}*\n*File:* ${fi.name}\n*Project:* ${projectLabel}${note?'\n*Note:* '+note:''}${fi.link?'\n<'+fi.link+'|Open in Drive>':''}`
+  };
+  try{
+    await fetch(CHAT_WEBHOOK,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(chatMsg)
+    });
+  }catch(e){console.error('Chat notification failed',e);}
+
+  // Send email via Apps Script
+  try{
+    await fetch(SCRIPT_URL,{
+      method:'POST',
+      body:JSON.stringify({
+        action:'sendFileShare',
+        fileName:fi.name,
+        driveLink:fi.link||'',
+        sentBy:senderName,
+        recipientName,
+        recipientEmail,
+        projectLabel,
+        note
+      }),
+      headers:{'Content-Type':'text/plain;charset=utf-8'}
+    });
+  }catch(e){console.error('Email failed',e);}
+
+  scheduleSave();
+  shareSelFile='';
+  shareSelMember='';
+  showToast('File sent ✓ Team notified!');
+  renderNav();
+}
 function openShareModal(projectId){
   currentShareProjectId=projectId;
   shareFile=null;
