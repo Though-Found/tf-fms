@@ -408,6 +408,36 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 </div>
 </div>
 
+<!-- SHARE FILE MODAL -->
+<div class="submit-modal-backdrop" id="mod-share" style="display:none">
+<div class="submit-modal">
+  <div class="submit-modal-title">Share File</div>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:1rem">Project: <span id="share-project-name" style="color:var(--text);font-weight:500"></span></div>
+  <div class="form-row">
+    <label class="form-lbl">Share with</label>
+    <select class="form-sel" id="share-to">
+      <option value="all">Entire Team</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label class="form-lbl">Note (optional)</label>
+    <input class="form-inp" id="share-note" type="text" placeholder="e.g. Please review and give feedback">
+  </div>
+  <label class="form-lbl">Select file to share</label>
+  <div class="submit-drop" onclick="document.getElementById('share-file-inp').click()"
+    ondragover="event.preventDefault()" ondrop="handleShareFileDrop(event)">
+    <i class="ti ti-cloud-upload"></i>
+    <p>Drag & drop or click to browse</p>
+  </div>
+  <input type="file" id="share-file-inp" style="display:none" onchange="handleShareFileSelect(event)">
+  <div class="submit-file-name" id="share-file-name"></div>
+  <div class="modal-actions">
+    <button class="btn-cancel" onclick="cm('mod-share')">Cancel</button>
+    <button class="btn-add" id="share-confirm-btn" onclick="confirmShare()" style="display:none"><i class="ti ti-send"></i> Share & Notify</button>
+  </div>
+</div>
+</div>
+
 <div class="toast" id="toast"><i class="ti ti-check"></i><span id="toast-msg"></span></div>
 </div>
 
@@ -417,6 +447,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwq7iZ0hnIOqO7senf93
 const CLIENT_ID = '135763636344-dpefl07fnciqt59fphfp2475c9vnjh8a.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 const TF_ROOT = 'T&F FMS';
+const CHAT_WEBHOOK = 'https://chat.googleapis.com/v1/spaces/AAQAGw-YiFs/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=Sy-Ozz1uLQVzZPgW-D_E8R_mdhYu94J7LqyU_FGVVr4';
 
 const PASS={owner:'owner123',operations:'ops123',designer:'design123'};
 const STAGES=['Inquiry','Brief','Proposal','Active','Review','Delivered'];
@@ -457,6 +488,7 @@ async function loadFromSheets(){
     if(data.files) files=data.files;
     if(data.tasks) tasks=data.tasks;
     if(data.teamMembers && data.teamMembers.length>0) teamMembers=data.teamMembers;
+    if(data.sharedFiles) sharedFiles=data.sharedFiles;
     showToast('Data loaded ✓');
   }catch(e){
     console.error('Load error',e);
@@ -474,7 +506,7 @@ async function saveToSheets(){
   try{
     await fetch(SCRIPT_URL,{
       method:'POST',
-      body:JSON.stringify({action:'save',clients,projects,folders,files,tasks,teamMembers}),
+      body:JSON.stringify({action:'save',clients,projects,folders,files,tasks,teamMembers,sharedFiles}),
       headers:{'Content-Type':'text/plain;charset=utf-8'}
     });
     showToast('Saved ✓');
@@ -850,10 +882,31 @@ function renderAllProjects(){
 }
 function renderDrive(){
   const p=projects.find(x=>x.id===currentProjectId);const fid=cfid();const isFolder=driveStack.length>0;const curName=isFolder?driveStack[driveStack.length-1].name:p.name;
-  const tabs=!isFolder?`<div class="drive-tabs"><div class="drive-tab ${driveTab==='folders'?'active':''}" onclick="driveTab='folders';renderNav()">Folders</div><div class="drive-tab ${driveTab==='all'?'active':''}" onclick="driveTab='all';renderNav()">All Files</div></div>`:'';
-  const toolbar=`<div class="sec-hd"><div><div style="font-size:16px;font-weight:400;color:var(--text)">${curName}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${spill(p.stage)} <span style="margin-left:6px">${p.service}</span>${driveConnected?`<span style="margin-left:8px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><i class="ti ti-brand-google-drive" style="font-size:12px"></i> Drive sync on</span>`:''}</div></div>${!isFolder&&driveTab==='folders'?`<button class="btn-ghost" onclick="om('mod-folder')"><i class="ti ti-folder-plus"></i> New Folder</button>`:''}</div>`;
+  const tabs=!isFolder?`<div class="drive-tabs"><div class="drive-tab ${driveTab==='folders'?'active':''}" onclick="driveTab='folders';renderNav()">Folders</div><div class="drive-tab ${driveTab==='all'?'active':''}" onclick="driveTab='all';renderNav()">All Files</div><div class="drive-tab ${driveTab==='tasks'?'active':''}" onclick="driveTab='tasks';renderNav()">Tasks</div><div class="drive-tab ${driveTab==='shared'?'active':''}" onclick="driveTab='shared';renderNav()">Shared Files</div></div>`:'';
+  const toolbar=`<div class="sec-hd"><div><div style="font-size:16px;font-weight:400;color:var(--text)">${curName}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${spill(p.stage)} <span style="margin-left:6px">${p.service}</span>${driveConnected?`<span style="margin-left:8px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><i class="ti ti-brand-google-drive" style="font-size:12px"></i> Drive sync on</span>`:''}</div></div><div style="display:flex;gap:6px">${!isFolder&&driveTab==='folders'?`<button class="btn-ghost" onclick="om('mod-folder')"><i class="ti ti-folder-plus"></i> New Folder</button>`:''}<button class="btn-ghost" onclick="openShareModal('${p.id}')"><i class="ti ti-share"></i> Share File</button></div></div>`;
   let body='';
-  if(driveTab==='tasks'&&!isFolder){body=renderTasks(p.id);} else if(driveTab==='all'&&!isFolder){
+  if(driveTab==='tasks'&&!isFolder){body=renderTasks(p.id);} else if(driveTab==='shared'&&!isFolder){
+    const pShared=sharedFiles.filter(sf=>sf.projectId===p.id);
+    if(pShared.length===0){body=`<div class="empty-state"><i class="ti ti-share" aria-hidden="true"></i><p>No files shared in this project yet</p></div>`;}
+    else{
+      body=`<div style="border:1px solid var(--border);margin-bottom:12px">`;
+      pShared.slice().reverse().forEach(sf=>{
+        const recipientName=sf.sentTo==='all'?'Entire Team':teamMembers.find(m=>m.id===sf.sentTo)?.name||sf.sentTo;
+        body+=`<div class="file-list-row">
+          <i class="ti ti-share fl-icon" style="color:var(--blue)"></i>
+          <div class="fl-info">
+            <div class="fl-name">${sf.fileName}</div>
+            <div class="fl-meta">Shared by ${sf.sentBy} → ${recipientName} · ${sf.date}${sf.note?' · '+sf.note:''}</div>
+          </div>
+          <div class="fl-acts">
+            ${sf.driveLink?`<a href="${sf.driveLink}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open</a>`:''}
+          </div>
+        </div>`;
+      });
+      body+=`</div>`;
+    }
+    body+=`<button class="btn-ghost" style="margin-top:8px" onclick="openShareModal('${p.id}')"><i class="ti ti-share"></i> Share a File</button>`;
+  } else if(driveTab==='all'&&!isFolder){
     const allFiles=files.filter(f=>f.projectId===p.id);
     if(allFiles.length===0){body=`<div class="empty-state"><i class="ti ti-file-off"></i><p>No files yet — upload or attach a Drive link below</p></div>`;}
     else{body=`<div style="border:1px solid var(--border);margin-bottom:12px">`;allFiles.forEach(fi=>{const isLnk=fi.isLink==='true'||fi.isLink===true;const icon=isLnk?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));const openEl=fi.link?`<a href="${fi.link}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open</a>`:'';body+=`<div class="file-list-row"><i class="ti ${icon} fl-icon" style="${fi.link?'color:#4285f4':''}"></i><div class="fl-info"><div class="fl-name">${fi.name}</div><div class="fl-meta">${folderPath(fi.folderId)} · ${fi.by} · ${fi.date}${fi.size?' · '+fi.size:''}${fi.link&&!isLnk?' · <span style="color:var(--green)">In Drive</span>':isLnk?' · Drive link':''}</div></div><div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="delFile('${fi.id}')"><i class="ti ti-trash"></i></button>`:''}</div></div>`;});body+=`</div>`;}
@@ -893,6 +946,10 @@ let teamMembers = [
   {id:'m5', name:'Aaradhya', phone:'585998917', email:'outreach@thought-found.com'},
   {id:'m6', name:'Aananya', phone:'9638535322', email:'intern@thought-found.com'},
 ];
+let sharedFiles = [];
+let currentShareFileId = null;
+let currentShareProjectId = null;
+let shareFile = null;
 let currentSubmitTaskId = null;
 let submitFile = null;
 let taskView = 'all'; // 'all' | 'followup' | 'add'
@@ -1232,6 +1289,92 @@ function renderTasks(projectId){
 function renderGlobalTasks(){
   return renderTasks(null);
 }
+
+// ── FILE SHARING ──
+function openShareModal(projectId){
+  currentShareProjectId=projectId;
+  shareFile=null;
+  document.getElementById('share-file-name').textContent='';
+  document.getElementById('share-confirm-btn').style.display='none';
+  document.getElementById('share-note').value='';
+  // populate recipient options
+  const sel=document.getElementById('share-to');
+  sel.innerHTML='<option value="all">Entire Team</option>'+
+    teamMembers.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+  const p=projects.find(x=>x.id===projectId);
+  document.getElementById('share-project-name').textContent=p?p.name:'';
+  om('mod-share');
+}
+
+function handleShareFileDrop(e){
+  e.preventDefault();
+  const f=e.dataTransfer.files[0];
+  if(f)setShareFile(f);
+}
+function handleShareFileSelect(e){
+  const f=e.target.files[0];
+  if(f)setShareFile(f);
+  e.target.value='';
+}
+function setShareFile(f){
+  shareFile=f;
+  document.getElementById('share-file-name').textContent='Selected: '+f.name;
+  document.getElementById('share-confirm-btn').style.display='flex';
+}
+
+async function confirmShare(){
+  if(!shareFile||!currentShareProjectId)return;
+  const toVal=document.getElementById('share-to').value;
+  const note=document.getElementById('share-note').value.trim();
+  const senderName=role==='owner'?'Owner':role==='operations'?'Operations':'Designer';
+  const p=projects.find(x=>x.id===currentShareProjectId);
+  const cl=clients.find(c=>c.id===p?.clientId);
+
+  showToast('Sharing file…');
+
+  // Upload to Drive
+  let driveLink='';
+  if(driveConnected){
+    const info=await uploadToDrive(shareFile,currentShareProjectId,null);
+    if(info)driveLink=info.driveLink;
+  }
+
+  // Save shared file record
+  const sf={
+    id:'sf'+Date.now(),
+    projectId:currentShareProjectId,
+    fileName:shareFile.name,
+    driveLink,
+    sentBy:senderName,
+    sentTo:toVal, // 'all' or member id
+    note,
+    date:today()
+  };
+  sharedFiles.push(sf);
+
+  // Determine recipient name for notification
+  const recipientName=toVal==='all'?'the entire team':teamMembers.find(m=>m.id===toVal)?.name||'team';
+  const projectLabel=p?(cl?cl.name+' — ':'')+p.name:'';
+
+  // Send Google Chat notification
+  const chatMsg={
+    text:`📎 *${senderName}* shared a file with *${recipientName}*\n*File:* ${shareFile.name}\n*Project:* ${projectLabel}${note?'\n*Note:* '+note:''}${driveLink?'\n<'+driveLink+'|Open in Drive>':''}`
+  };
+  try{
+    await fetch(CHAT_WEBHOOK,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(chatMsg)
+    });
+  }catch(e){console.error('Chat notification failed',e);}
+
+  scheduleSave();
+  cm('mod-share');
+  showToast('File shared ✓ Team notified in Google Chat!');
+  renderNav();
+}
+
+// ── SAVE/LOAD sharedFiles ──
 
 // init
 checkSavedToken();
