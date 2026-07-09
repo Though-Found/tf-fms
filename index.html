@@ -250,6 +250,14 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .submit-drop i{font-size:24px;color:var(--text3);display:block;margin-bottom:6px}
 .submit-drop p{font-size:12px;color:var(--text3)}
 .submit-file-name{font-size:12px;color:var(--green);margin-top:6px;font-weight:500}
+
+.success-popup{position:fixed;inset:0;background:rgba(30,42,30,.5);display:flex;align-items:center;justify-content:center;z-index:300;opacity:0;transition:opacity .3s}
+.success-popup.show{opacity:1}
+.success-popup-box{background:var(--bg2);border:1px solid var(--border);padding:2rem;text-align:center;max-width:320px;width:90%;transform:scale(.9);transition:transform .3s}
+.success-popup.show .success-popup-box{transform:scale(1)}
+.success-popup-icon{font-size:40px;color:var(--green);margin-bottom:12px}
+.success-popup-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px}
+.success-popup-sub{font-size:12px;color:var(--text3);margin-bottom:1.25rem}
 </style>
 </head>
 <body>
@@ -313,8 +321,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   <div class="modal-title">Add Client</div>
   <div class="form-row"><label class="form-lbl">Company name</label><input class="form-inp" id="ic-name" type="text"></div>
   <div class="form-row"><label class="form-lbl">Industry</label><input class="form-inp" id="ic-ind" type="text"></div>
-  <div class="form-row"><label class="form-lbl">Contact person</label><input class="form-inp" id="ic-con" type="text"></div>
-  <div class="form-row"><label class="form-lbl">Email</label><input class="form-inp" id="ic-mail" type="email"></div>
   <div class="modal-actions"><button class="btn-cancel" onclick="cm('mod-client')">Cancel</button><button class="btn-add" onclick="addClient()">Add Client</button></div>
 </div></div>
 
@@ -437,6 +443,36 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   </div>
 </div>
 </div>
+
+
+<!-- SUCCESS POPUP -->
+<div class="success-popup" id="success-popup" onclick="hideSuccessPopup()">
+  <div class="success-popup-box" onclick="event.stopPropagation()">
+    <div class="success-popup-icon"><i class="ti ti-check"></i></div>
+    <div class="success-popup-title" id="success-popup-title">File uploaded successfully!</div>
+    <div class="success-popup-sub" id="success-popup-sub">Saved to Google Drive</div>
+    <button class="btn-add" onclick="hideSuccessPopup()" style="margin:0 auto">Done</button>
+  </div>
+</div>
+
+
+<!-- MANAGE TEAM MODAL -->
+<div class="modal-backdrop" id="mod-team" style="display:none"><div class="modal-box" style="max-width:500px">
+  <div class="modal-title">Manage Team Members</div>
+  <div id="team-list"></div>
+  <div style="border-top:1px solid var(--border);margin-top:1rem;padding-top:1rem">
+    <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:10px">Add New Member</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input class="form-inp" id="nm-name" type="text" placeholder="Name" style="flex:1;min-width:100px">
+      <input class="form-inp" id="nm-phone" type="text" placeholder="Phone" style="flex:1;min-width:100px">
+      <input class="form-inp" id="nm-email" type="email" placeholder="Email" style="flex:1;min-width:140px">
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:8px">
+      <button class="btn-add" onclick="addTeamMember()"><i class="ti ti-plus"></i> Add Member</button>
+    </div>
+  </div>
+  <div class="modal-actions"><button class="btn-cancel" onclick="cm('mod-team')">Close</button></div>
+</div></div>
 
 <div class="toast" id="toast"><i class="ti ti-check"></i><span id="toast-msg"></span></div>
 </div>
@@ -624,7 +660,7 @@ async function uploadToDrive(file,projectId,subFolderId){
     form.append('file',file);
     const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+accessToken},body:form});
     const data=await res.json();
-    showToast('Saved to Google Drive ✓');
+    showSuccessPopup('File saved to Google Drive ✓', 'T&F FMS → '+getCurrentClientName()+' → '+getCurrentProjectName());
     return{driveId:data.id,driveLink:data.webViewLink};
   }catch(e){console.error('Drive upload error',e);showToast('Drive upload failed');return null;}
 }
@@ -634,6 +670,21 @@ async function createDriveFolder(name,projectId,parentSubId){
 }
 
 // ── TOAST ──
+
+function showSuccessPopup(title, sub){
+  document.getElementById('success-popup-title').textContent = title || 'Done!';
+  document.getElementById('success-popup-sub').textContent = sub || '';
+  const el = document.getElementById('success-popup');
+  el.style.display = 'flex';
+  setTimeout(()=>el.classList.add('show'), 10);
+  setTimeout(()=>hideSuccessPopup(), 4000);
+}
+function hideSuccessPopup(){
+  const el = document.getElementById('success-popup');
+  el.classList.remove('show');
+  setTimeout(()=>el.style.display='none', 300);
+}
+
 function showToast(msg){
   const t=document.getElementById('toast');
   document.getElementById('toast-msg').textContent=msg;
@@ -645,6 +696,7 @@ function showToast(msg){
 function ini(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
 function ficon(n){const e=(n.split('.').pop()||'').toLowerCase();return FICONS[e]||'ti-file'}
 function today(){const d=new Date();return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear()}
+function fmtDate(str){if(!str)return'';try{const d=new Date(str);if(isNaN(d))return str;return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear();}catch(e){return str;}}
 function spill(s){return`<span class="pill ${SPILL[s]||'pill-done'}">${s}</span>`}
 function canManage(){return role==='owner'||role==='operations'}
 function om(id){document.getElementById(id).style.display='flex'}
@@ -677,11 +729,25 @@ async function confirmUpload(){
 
 function confirmLink(){
   const url=document.getElementById('up-link')?document.getElementById('up-link').value.trim():'';
-  const name=document.getElementById('up-lname')?document.getElementById('up-lname').value.trim():'';
+  if(!url)return;
+  let name=document.getElementById('up-lname')?document.getElementById('up-lname').value.trim():'';
+  // Auto-extract name from URL if not provided
+  if(!name){
+    try{
+      const u=new URL(url);
+      // Try to get file name from path
+      const parts=u.pathname.split('/').filter(Boolean);
+      name=decodeURIComponent(parts[parts.length-1]||'')
+        .replace(/\.[^.]+$/,'') // remove extension
+        .replace(/[-_]/g,' ')
+        .trim();
+      if(!name||name.length<2) name='Linked File';
+    }catch(e){name='Linked File';}
+  }
   const by=document.getElementById('up-by')?document.getElementById('up-by').value.trim()||'Team':'Team';
-  if(!url||!name)return;
   files.push({id:'fi'+Date.now(),projectId:currentProjectId,folderId:cfid()||'',name,by,date:today(),size:'',link:url,isLink:'true'});
   scheduleSave();
+  showToast('Drive link attached ✓');
   renderNav();
 }
 
@@ -715,10 +781,10 @@ function renderUploadPanel(){
     `:`
       <label class="by-lbl">Paste Google Drive / Dropbox / Figma link</label>
       <input class="link-inp" id="up-link" type="url" placeholder="https://drive.google.com/..." value="${lnVal}" oninput="renderUploadPanel()">
-      ${lnVal?`<div class="link-preview"><i class="ti ${linkIcon(lnVal)}"></i><span style="word-break:break-all;font-size:11px">${lnVal}</span></div>`:''}
-      <label class="by-lbl">File / Document name</label>
-      <input class="link-inp" id="up-lname" type="text" placeholder="e.g. Moodboard v2, Brand Guidelines" value="${lnName}" oninput="renderUploadPanel()">
-      ${lnVal&&lnName?`<div class="upload-actions"><button class="btn-add" onclick="confirmLink()"><i class="ti ti-link"></i> Attach Link</button></div>`:'<p style="font-size:11px;color:var(--text3)">Paste a link and add a name to attach it</p>'}
+      ${lnVal?`<div class="link-preview"><i class="ti ${linkIcon(lnVal)}"></i><span style="word-break:break-all;font-size:11px;color:var(--text3)">${lnVal}</span></div>`:''}
+      <label class="by-lbl">Name (optional — auto-filled if left blank)</label>
+      <input class="link-inp" id="up-lname" type="text" placeholder="e.g. Moodboard v2 — or leave blank" value="${lnName}" oninput="renderUploadPanel()">
+      ${lnVal?`<div class="upload-actions"><button class="btn-add" onclick="confirmLink()"><i class="ti ti-link"></i> Attach Link</button></div>`:'<p style="font-size:11px;color:var(--text3)">Paste any Google Drive, Dropbox or Figma link to attach it</p>'}
     `}
   </div>
 </div>`;
@@ -869,23 +935,34 @@ function renderClients(){
 }
 function renderClientDetail(cid){
   const cl=clients.find(c=>c.id===cid);const cp=projects.filter(p=>p.clientId===cid);const isM=canManage();const isEO=clientEditOpen===cid;let rows='';
-  cp.forEach(p=>{const isExp=expandedRow===`p_${p.id}`;rows+=`<tr><td><div class="row-name"><i class="ti ti-folder-filled" style="color:var(--amber);font-size:14px;flex-shrink:0"></i><span class="row-open" onclick="openProject('${p.id}')">${p.name}</span>${isM?editIcon(`toggleProjEdit('${p.id}',event)`):''}</div></td><td>${files.filter(f=>f.projectId===p.id).length}</td><td>${spill(p.stage)}</td></tr>`;if(isExp)rows+=projEditRow(p,3);});
+  cp.forEach(p=>{const isExp=expandedRow===`p_${p.id}`;rows+=`<tr><td><div class="row-name"><i class="ti ti-folder-filled" style="color:var(--amber);font-size:14px;flex-shrink:0"></i><span class="row-open" onclick="openProject('${p.id}')">${p.name}</span>${isM?editIcon(`toggleProjEdit('${p.id}',event)`):''}</div></td><td>${files.filter(f=>f.projectId===p.id).length}</td><td>${isM?stageDropdown(p.id,p.stage):spill(p.stage)}</td></tr>`;if(isExp)rows+=projEditRow(p,3);});
   return`<div class="client-hd-wrap"><div class="client-hd-top"><div><div class="client-hd-name">${cl.name}</div><div class="client-hd-meta">${cl.industry||''}${cl.contact?' · '+cl.contact:''}${cl.email?' · '+cl.email:''}</div></div>${isM?`<div class="client-hd-actions"><button class="btn-ghost" onclick="toggleClientEdit('${cid}',event)"><i class="ti ti-pencil"></i> ${isEO?'Cancel':'Edit'}</button><button class="btn-danger" onclick="delClientDetail('${cid}')"><i class="ti ti-trash"></i> Delete</button></div>`:''}</div>${isEO?`<div class="client-edit-form"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="e-cn-${cid}" value="${cl.name}" style="width:140px"></div><div class="edit-field"><span class="edit-lbl">Industry</span><input class="edit-inp" id="e-ci-${cid}" value="${cl.industry||''}" style="width:120px"></div><div class="edit-field"><span class="edit-lbl">Contact</span><input class="edit-inp" id="e-cc-${cid}" value="${cl.contact||''}" style="width:110px"></div><div class="edit-field"><span class="edit-lbl">Email</span><input class="edit-inp" id="e-ce-${cid}" value="${cl.email||''}" style="width:150px"></div><button class="save-btn" onclick="saveClientDetail('${cid}')">Save</button></div>`:''}</div><div class="sec-hd"><span class="sec-title">Projects</span>${isM?`<button class="btn-add" onclick="om('mod-proj')"><i class="ti ti-plus"></i> Add Project</button>`:''}</div><table class="tf-table"><thead><tr><th>Project</th><th>Files</th><th>Stage</th></tr></thead><tbody>${cp.length===0?`<tr><td colspan="3" style="text-align:center;color:var(--text3);padding:2rem">No projects yet</td></tr>`:rows}</tbody></table>`;
 }
 function renderPipeline(){
   return`<div class="sec-hd"><span class="sec-title">Pipeline</span></div><div class="pipeline-scroll"><div class="pipeline-stages">${STAGES.map(s=>{const sp=projects.filter(p=>p.stage===s);return`<div class="stage-col"><div class="stage-head"><span class="stage-name">${s}</span><span class="stage-count">${sp.length}</span></div><div class="stage-body">${sp.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<div class="kcard" onclick="openProject('${p.id}')"><div class="kc-name">${p.name}</div><div class="kc-client">${cl?cl.name:'—'}</div><span class="kc-tag">${p.service}</span></div>`;}).join('')}</div></div>`;}).join('')}</div></div>`;
 }
+function quickStage(pid, newStage){
+  const p=projects.find(x=>x.id===pid);
+  if(p){p.stage=newStage;scheduleSave();renderNav();}
+}
+
+function stageDropdown(pid, currentStage){
+  return `<select class="edit-sel" onchange="quickStage('${pid}',this.value)" onclick="event.stopPropagation()" style="font-size:10px;padding:2px 6px;border-radius:2px">
+    ${STAGES.map(s=>`<option value="${s}" ${s===currentStage?'selected':''}>${s}</option>`).join('')}
+  </select>`;
+}
+
 function renderAllProjects(){
   const isM=canManage();let rows='';
-  projects.forEach(p=>{const cl=clients.find(c=>c.id===p.clientId);const isExp=expandedRow===`p_${p.id}`;rows+=`<tr><td><span class="row-open" onclick="openProject('${p.id}')">${cl?cl.name:'—'}</span></td><td><div class="row-name"><span class="row-open" onclick="openProject('${p.id}')">${p.name}</span>${isM?editIcon(`toggleProjEdit('${p.id}',event)`):''}</div></td><td>${files.filter(f=>f.projectId===p.id).length}</td><td>${spill(p.stage)}</td></tr>`;if(isExp)rows+=projEditRow(p,4);});
+  projects.forEach(p=>{const cl=clients.find(c=>c.id===p.clientId);const isExp=expandedRow===`p_${p.id}`;rows+=`<tr><td><span class="row-open" onclick="openProject('${p.id}')">${cl?cl.name:'—'}</span></td><td><div class="row-name"><span class="row-open" onclick="openProject('${p.id}')">${p.name}</span>${isM?editIcon(`toggleProjEdit('${p.id}',event)`):''}</div></td><td>${files.filter(f=>f.projectId===p.id).length}</td><td>${isM?stageDropdown(p.id,p.stage):spill(p.stage)}</td></tr>`;if(isExp)rows+=projEditRow(p,4);});
   return`<div class="sec-hd"><span class="sec-title">All Projects</span></div><table class="tf-table"><thead><tr><th>Client</th><th>Project</th><th>Files</th><th>Stage</th></tr></thead><tbody>${rows||`<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:2rem">No projects yet</td></tr>`}</tbody></table>`;
 }
 function renderDrive(){
   const p=projects.find(x=>x.id===currentProjectId);const fid=cfid();const isFolder=driveStack.length>0;const curName=isFolder?driveStack[driveStack.length-1].name:p.name;
-  const tabs=!isFolder?`<div class="drive-tabs"><div class="drive-tab ${driveTab==='folders'?'active':''}" onclick="driveTab='folders';renderNav()">Folders</div><div class="drive-tab ${driveTab==='all'?'active':''}" onclick="driveTab='all';renderNav()">All Files</div><div class="drive-tab ${driveTab==='tasks'?'active':''}" onclick="driveTab='tasks';renderNav()">Tasks</div><div class="drive-tab ${driveTab==='shared'?'active':''}" onclick="driveTab='shared';renderNav()">Shared Files</div></div>`:'';
+  const tabs=!isFolder?`<div class="drive-tabs"><div class="drive-tab ${driveTab==='folders'?'active':''}" onclick="driveTab='folders';renderNav()">Folders</div><div class="drive-tab ${driveTab==='all'?'active':''}" onclick="driveTab='all';renderNav()">All Files</div><div class="drive-tab ${driveTab==='shared'?'active':''}" onclick="driveTab='shared';renderNav()">Shared Files</div></div>`:'';
   const toolbar=`<div class="sec-hd"><div><div style="font-size:16px;font-weight:400;color:var(--text)">${curName}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${spill(p.stage)} <span style="margin-left:6px">${p.service}</span>${driveConnected?`<span style="margin-left:8px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><i class="ti ti-brand-google-drive" style="font-size:12px"></i> Drive sync on</span>`:''}</div></div><div style="display:flex;gap:6px">${!isFolder&&driveTab==='folders'?`<button class="btn-ghost" onclick="om('mod-folder')"><i class="ti ti-folder-plus"></i> New Folder</button>`:''}<button class="btn-ghost" onclick="openShareModal('${p.id}')"><i class="ti ti-share"></i> Share File</button></div></div>`;
   let body='';
-  if(driveTab==='tasks'&&!isFolder){body=renderTasks(p.id);} else if(driveTab==='shared'&&!isFolder){
+  if(driveTab==='shared'&&!isFolder){
     const pShared=sharedFiles.filter(sf=>sf.projectId===p.id);
     if(pShared.length===0){body=`<div class="empty-state"><i class="ti ti-share" aria-hidden="true"></i><p>No files shared in this project yet</p></div>`;}
     else{
@@ -909,11 +986,32 @@ function renderDrive(){
   } else if(driveTab==='all'&&!isFolder){
     const allFiles=files.filter(f=>f.projectId===p.id);
     if(allFiles.length===0){body=`<div class="empty-state"><i class="ti ti-file-off"></i><p>No files yet — upload or attach a Drive link below</p></div>`;}
-    else{body=`<div style="border:1px solid var(--border);margin-bottom:12px">`;allFiles.forEach(fi=>{const isLnk=fi.isLink==='true'||fi.isLink===true;const icon=isLnk?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));const openEl=fi.link?`<a href="${fi.link}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open</a>`:'';body+=`<div class="file-list-row"><i class="ti ${icon} fl-icon" style="${fi.link?'color:#4285f4':''}"></i><div class="fl-info"><div class="fl-name">${fi.name}</div><div class="fl-meta">${folderPath(fi.folderId)} · ${fi.by} · ${fi.date}${fi.size?' · '+fi.size:''}${fi.link&&!isLnk?' · <span style="color:var(--green)">In Drive</span>':isLnk?' · Drive link':''}</div></div><div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="delFile('${fi.id}')"><i class="ti ti-trash"></i></button>`:''}</div></div>`;});body+=`</div>`;}
+    else{
+      body=`<div style="border:1px solid var(--border);margin-bottom:12px">`;
+      allFiles.forEach(fi=>{
+        const isLnk=fi.isLink==='true'||fi.isLink===true;
+        const icon=isLnk?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));
+        const openEl=fi.link?`<a href="${fi.link}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open in Drive</a>`:'';
+        const dateStr=fmtDate(fi.date);
+        const loc=fi.folderId?folderPath(fi.folderId):'Root';
+        body+=`<div class="file-list-row">
+          <i class="ti ${icon} fl-icon" style="${fi.link?'color:#4285f4':'color:var(--text3)'}"></i>
+          <div class="fl-info">
+            <div class="fl-name">${fi.name}</div>
+            <div class="fl-meta">${loc} · ${fi.by||'Team'} · ${dateStr}${fi.size?' · '+fi.size:''}${fi.link&&!isLnk?' · <span style="color:var(--green);font-weight:500">✓ In Drive</span>':isLnk?' · <span style="color:#4285f4">Drive link</span>':''}</div>
+          </div>
+          <div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="delFile('${fi.id}')" title="Delete"><i class="ti ti-trash"></i></button>`:''}</div>
+        </div>`;
+      });
+      body+=`</div>`;
+    }
   } else {
     const lf=folders.filter(f=>f.projectId===p.id&&(f.parentId||'')===(fid||''));const lfi=files.filter(f=>f.projectId===p.id&&(f.folderId||'')===(fid||''));
     if(lf.length===0&&lfi.length===0){body=`<div class="empty-state"><i class="ti ti-folder-open"></i><p>Empty — create a folder or add files below</p></div>`;}
-    else{body=`<div class="drive-grid">${lf.map(fo=>{const cnt=cif(fo.id,p.id);return`<div class="di" onclick="enterFolder('${fo.id}','${fo.name}')"><div class="di-acts">${canManage()?`<button class="di-act" onclick="event.stopPropagation();delFolder('${fo.id}')"><i class="ti ti-trash"></i></button>`:''}</div><i class="ti ti-folder-filled di-icon folder"></i><div class="di-name">${fo.name}</div><div class="di-meta">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('')}${lfi.map(fi=>{const isLnk=fi.isLink==='true'||fi.isLink===true;const icon=isLnk?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));return`<div class="di" ${fi.link?`onclick="window.open('${fi.link}','_blank')"`:''} style="${fi.link?'cursor:pointer':''}"><div class="di-acts">${canManage()?`<button class="di-act" onclick="event.stopPropagation();delFile('${fi.id}')"><i class="ti ti-trash"></i></button>`:''}</div><i class="ti ${icon} di-icon ${fi.link?'gdrive':''}"></i><div class="di-name">${fi.name}</div><div class="di-meta">${isLnk?'Link':fi.link?'In Drive':fi.by+' · '+fi.date}</div></div>`;}).join('')}</div>`;}
+    else{
+      if(lf.length===0){body=`<div class="empty-state"><i class="ti ti-folder-open"></i><p>No folders yet — create one above</p></div>`;}
+      else{body=`<div class="drive-grid">${lf.map(fo=>{const cnt=cif(fo.id,p.id);return`<div class="di" onclick="enterFolder('${fo.id}','${fo.name}')"><div class="di-acts">${canManage()?`<button class="di-act" onclick="event.stopPropagation();delFolder('${fo.id}')"><i class="ti ti-trash"></i></button>`:''}</div><i class="ti ti-folder-filled di-icon folder"></i><div class="di-name">${fo.name}</div><div class="di-meta">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('')}</div>`;}
+    }
   }
   return toolbar+tabs+body+`<div id="upload-panel-wrap"></div>`;
 }
@@ -932,7 +1030,7 @@ function renderMIS(){
   const svc={Strategy:0,Research:0,Creative:0,Production:0};projects.forEach(p=>{if(svc[p.service]!==undefined)svc[p.service]++});const mx=Math.max(...Object.values(svc),1);
   return`<div class="sec-hd"><span class="sec-title">MIS — Overview</span></div><div class="stats-grid" style="margin-bottom:1.25rem"><div class="stat-cell"><div class="stat-lbl">Total Projects</div><div class="stat-val">${projects.length}</div></div><div class="stat-cell"><div class="stat-lbl">Total Files</div><div class="stat-val">${files.length}</div></div><div class="stat-cell"><div class="stat-lbl">Clients</div><div class="stat-val">${clients.length}</div></div><div class="stat-cell"><div class="stat-lbl">Delivered</div><div class="stat-val">${projects.filter(p=>p.stage==='Delivered').length}</div></div></div><div class="mis-grid"><div class="mis-cell"><div class="mis-lbl">Projects by service</div>${Object.entries(svc).map(([k,v])=>`<div class="brow"><span class="blbl">${k}</span><div class="btrack"><div class="bfill" style="width:${Math.round(v/mx*100)}%"></div></div><span class="bval">${v}</span></div>`).join('')}</div><div class="mis-cell"><div class="mis-lbl">Pipeline</div>${STAGES.map(s=>{const c=projects.filter(p=>p.stage===s).length;return`<div class="brow"><span class="blbl">${s}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(projects.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div><div class="mis-cell"><div class="mis-lbl">Files by client</div>${clients.length===0?'<p style="font-size:11px;color:var(--text3)">No data yet</p>':clients.map(cl=>{const c=files.filter(f=>{const p=projects.find(x=>x.id===f.projectId);return p&&p.clientId===cl.id}).length;return`<div class="brow"><span class="blbl" style="font-size:10px;width:88px">${cl.name.split(' ')[0]}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(files.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div><div class="mis-cell"><div class="mis-lbl">Stage summary</div>${STAGES.map(s=>{const c=projects.filter(p=>p.stage===s).length;return`<div class="brow"><span class="blbl">${s}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(projects.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div></div>`;
 }
-function addClient(){const name=document.getElementById('ic-name').value.trim();if(!name)return;clients.push({id:'c'+Date.now(),name,industry:document.getElementById('ic-ind').value.trim(),contact:document.getElementById('ic-con').value.trim(),email:document.getElementById('ic-mail').value.trim()});cm('mod-client');scheduleSave();goView('clients');}
+function addClient(){const name=document.getElementById('ic-name').value.trim();if(!name)return;clients.push({id:'c'+Date.now(),name,industry:document.getElementById('ic-ind').value.trim(),contact:'',email:''});cm('mod-client');scheduleSave();goView('clients');}
 function addProject(){const name=document.getElementById('ip-name').value.trim();if(!name)return;projects.push({id:'p'+Date.now(),clientId:currentClientId,name,service:document.getElementById('ip-svc').value,stage:document.getElementById('ip-stage').value,notes:document.getElementById('ip-notes').value.trim()});cm('mod-proj');scheduleSave();navStack.pop();renderNav();}
 
 
@@ -1040,6 +1138,45 @@ function saveNewMember(){
   scheduleSave();
   showToast('Team member added ✓');
   renderNav();
+}
+
+function openManageTeam(){
+  renderTeamList();
+  om('mod-team');
+}
+function renderTeamList(){
+  const el=document.getElementById('team-list');
+  if(!el)return;
+  el.innerHTML=teamMembers.map((m,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:500;color:var(--text)">${m.name}</div>
+        <div style="font-size:10px;color:var(--text3)">${m.phone} · ${m.email}</div>
+      </div>
+      <button class="edit-icon" onclick="editTeamMember(${i})" title="Edit"><i class="ti ti-pencil"></i></button>
+      <button class="edit-icon" onclick="deleteTeamMember(${i})" title="Delete" style="color:var(--red)"><i class="ti ti-trash"></i></button>
+    </div>
+  `).join('');
+}
+function addTeamMember(){
+  const name=document.getElementById('nm-name').value.trim();
+  if(!name){showToast('Please enter a name');return;}
+  teamMembers.push({id:'m'+Date.now(),name,phone:document.getElementById('nm-phone').value.trim(),email:document.getElementById('nm-email').value.trim()});
+  document.getElementById('nm-name').value='';
+  document.getElementById('nm-phone').value='';
+  document.getElementById('nm-email').value='';
+  scheduleSave();renderTeamList();showToast('Team member added ✓');
+}
+function deleteTeamMember(i){
+  if(confirm('Delete '+teamMembers[i].name+'?')){teamMembers.splice(i,1);scheduleSave();renderTeamList();}
+}
+function editTeamMember(i){
+  const m=teamMembers[i];
+  const name=prompt('Name:',m.name);if(name===null)return;
+  const phone=prompt('Phone:',m.phone);if(phone===null)return;
+  const email=prompt('Email:',m.email);if(email===null)return;
+  teamMembers[i]={...m,name,phone,email};
+  scheduleSave();renderTeamList();showToast('Updated ✓');
 }
 
 function generateTaskId(){
