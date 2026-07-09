@@ -1,4 +1,11 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thought & Found — Studio FMS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.2.0/tabler-icons.min.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -13,9 +20,8 @@
 }
 body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5}
 .screen{display:none}.screen.active{display:block}
-
-.login-outer{min-height:620px;display:flex;align-items:center;justify-content:center}
-.login-box{width:340px;padding:2.5rem 2rem;border:1px solid var(--border);background:var(--bg2)}
+.login-outer{min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-box{width:360px;padding:2.5rem 2rem;border:1px solid var(--border);background:var(--bg2)}
 .tf-wordmark{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--text3);margin-bottom:2.5rem}
 .login-title{font-size:20px;font-weight:400;color:var(--text);margin-bottom:4px}
 .login-sub{font-size:12px;color:var(--text3);margin-bottom:2rem}
@@ -24,20 +30,32 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .role-opt:hover{border-color:var(--border2)}.role-opt.selected{border-color:var(--accent);background:var(--bg3)}
 .role-opt i{font-size:16px;color:var(--text3)}
 .ro-name{font-size:13px;color:var(--text);font-weight:500}.ro-desc{font-size:11px;color:var(--text3)}
-.pw-row{margin:1rem 0 1.5rem}
+.pw-row{margin:1rem 0 1rem}
 .pw-input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 12px;font-size:13px;font-family:inherit;outline:none}
 .pw-input:focus{border-color:var(--border2)}
 .pw-error{font-size:11px;color:var(--red);margin-top:5px;display:none}
-.login-btn{width:100%;background:var(--accent);color:var(--accent-text);border:none;padding:10px;font-size:13px;font-weight:500;cursor:pointer}
+.login-btn{width:100%;background:var(--accent);color:var(--accent-text);border:none;padding:10px;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:10px}
 .login-btn:hover{background:var(--accent2)}
-
+.gdrive-connect{width:100%;background:var(--bg3);color:var(--text2);border:1px solid var(--border);padding:9px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px}
+.gdrive-connect:hover{background:var(--bg4)}
+.gdrive-connect i{font-size:16px;color:#4285f4}
+.gdrive-status{font-size:11px;padding:6px 10px;border-radius:3px;margin-top:6px;text-align:center;display:none}
+.gdrive-status.connected{background:var(--green-bg);color:var(--green);display:block}
+.gdrive-status.error{background:var(--red-bg);color:var(--red);display:block}
+.loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:999}
+.loading-screen.hide{display:none}
+.loading-text{font-size:12px;color:var(--text3);letter-spacing:2px;text-transform:uppercase}
+.spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .topbar{height:44px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;background:var(--accent);position:sticky;top:0;z-index:20}
 .topbar-brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent-text);opacity:.9}
+.topbar-right{display:flex;align-items:center;gap:10px}
 .role-tag{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent-text);opacity:.6;border:1px solid rgba(245,240,232,.25);padding:2px 8px}
+.drive-badge{font-size:10px;color:var(--accent-text);opacity:.7;display:flex;align-items:center;gap:4px}
+.drive-badge i{font-size:13px}
 .signout-btn{font-size:11px;color:var(--accent-text);opacity:.6;background:none;border:none;cursor:pointer}
 .signout-btn:hover{opacity:1}
-
-.app-body{display:flex;min-height:576px}
+.app-body{display:flex;min-height:calc(100vh - 44px)}
 .sidebar{width:190px;border-right:1px solid var(--border);background:var(--bg2);padding:1rem 0;flex-shrink:0}
 .nav-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:0 1.25rem;margin:1rem 0 4px}
 .nav-item{display:flex;align-items:center;gap:8px;padding:7px 1.25rem;font-size:12px;color:var(--text2);cursor:pointer;border-left:2px solid transparent;transition:all .1s}
@@ -45,7 +63,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--bg3);font-weight:500}
 .nav-item i{font-size:15px}
 .content{flex:1;overflow:auto;background:var(--bg)}
-
 .back-bar{display:flex;align-items:center;border-bottom:1px solid var(--border);background:var(--bg2);min-height:38px;position:sticky;top:44px;z-index:10}
 .back-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;font-size:12px;color:var(--text2);cursor:pointer;background:none;border:none;border-right:1px solid var(--border);white-space:nowrap}
 .back-btn:hover{color:var(--accent);background:var(--bg3)}
@@ -55,7 +72,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .bc-seg span{cursor:pointer}.bc-seg span:hover{color:var(--accent)}
 .bc-seg.last span{color:var(--text2);cursor:default}
 .bc-sep{color:var(--border2);margin:0 4px;font-size:10px}
-
 .inner{padding:1.25rem}
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:1.5rem}
 .stat-cell{background:var(--bg2);padding:1rem 1.25rem}
@@ -70,19 +86,16 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .btn-add i,.btn-ghost i{font-size:13px}
 .btn-danger{background:none;border:1px solid var(--red);color:var(--red);padding:5px 12px;font-size:11px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
 .btn-danger:hover{background:var(--red-bg)}
-
 .tf-table{width:100%;border-collapse:collapse;border:1px solid var(--border)}
 .tf-table th{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg2);font-weight:400}
 .tf-table td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text2);vertical-align:middle}
 .tf-table tr:last-child td{border-bottom:none}
-
 .row-name{display:flex;align-items:center;gap:6px}
 .row-open{color:var(--text);font-weight:500;cursor:pointer;flex:1}
 .row-open:hover{color:var(--accent);text-decoration:underline}
-.edit-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:1px solid var(--border);border-radius:3px;cursor:pointer;background:var(--bg2);color:var(--text3);flex-shrink:0;transition:all .12s}
+.edit-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:1px solid var(--border);border-radius:3px;cursor:pointer;background:var(--bg2);color:var(--text3);flex-shrink:0}
 .edit-icon:hover{border-color:var(--accent);color:var(--accent);background:var(--bg3)}
 .edit-icon i{font-size:12px}
-
 .edit-row td{background:var(--bg3)!important;padding:10px 12px;border-bottom:1px solid var(--border2)!important}
 .edit-row-inner{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .edit-inp{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:5px 8px;font-size:12px;font-family:inherit;outline:none}
@@ -95,20 +108,17 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .del-btn{background:none;border:1px solid var(--red);color:var(--red);padding:5px 10px;font-size:11px;cursor:pointer;letter-spacing:1px;text-transform:uppercase}
 .del-btn:hover{background:var(--red-bg)}
 .cancel-btn{background:none;border:1px solid var(--border);color:var(--text3);padding:5px 10px;font-size:11px;cursor:pointer;letter-spacing:1px;text-transform:uppercase}
-
 .client-hd-wrap{border:1px solid var(--border);background:var(--bg2);padding:1.25rem;margin-bottom:1rem}
 .client-hd-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
 .client-hd-name{font-size:17px;font-weight:400;color:var(--text);margin-bottom:3px}
 .client-hd-meta{font-size:11px;color:var(--text3)}
 .client-hd-actions{display:flex;gap:6px;flex-shrink:0}
 .client-edit-form{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-
 .pill{font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;font-weight:500}
 .pill-active{background:var(--green-bg);color:var(--green)}
 .pill-hold{background:var(--amber-bg);color:var(--amber)}
 .pill-done{background:var(--bg3);color:var(--text3)}
 .pill-new{background:var(--blue-bg);color:var(--blue)}
-
 .clients-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:var(--border);border:1px solid var(--border)}
 .client-card{background:var(--bg2);padding:1.25rem;transition:background .12s}
 .client-card:hover{background:var(--bg3)}
@@ -117,7 +127,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .cc-name:hover{color:var(--accent);text-decoration:underline}
 .cc-type{font-size:11px;color:var(--text3);margin-bottom:8px}
 .cc-meta{display:flex;gap:12px;font-size:10px;color:var(--text3)}
-
 .pipeline-scroll{overflow-x:auto;padding-bottom:4px}
 .pipeline-stages{display:flex;gap:1px;background:var(--border);border:1px solid var(--border);min-width:max-content}
 .stage-col{width:170px;background:var(--bg2);flex-shrink:0}
@@ -130,16 +139,14 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .kc-name{font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px}
 .kc-client{font-size:11px;color:var(--text3)}
 .kc-tag{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);padding:1px 5px;margin-top:5px;display:inline-block}
-
-/* DRIVE */
 .drive-tabs{display:flex;gap:1px;border:1px solid var(--border);background:var(--border);margin-bottom:1rem}
 .drive-tab{flex:1;padding:8px;text-align:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);cursor:pointer;background:var(--bg2);transition:all .12s}
 .drive-tab:hover{color:var(--text);background:var(--bg3)}
 .drive-tab.active{background:var(--accent);color:var(--accent-text)}
-.drive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:12px}
+.drive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:12px}
 .di{background:var(--bg2);padding:1.25rem 1rem;cursor:pointer;transition:background .12s;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;position:relative}
 .di:hover{background:var(--bg3)}.di:hover .di-acts{opacity:1}
-.di-icon{font-size:30px;color:var(--text3)}.di-icon.folder{color:var(--amber)}
+.di-icon{font-size:30px;color:var(--text3)}.di-icon.folder{color:var(--amber)}.di-icon.gdrive{color:#4285f4}
 .di-name{font-size:12px;color:var(--text);word-break:break-word;line-height:1.3}
 .di-meta{font-size:10px;color:var(--text3)}
 .di-acts{position:absolute;top:5px;right:5px;opacity:0;display:flex;gap:2px;transition:opacity .12s}
@@ -151,35 +158,43 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .fl-info{flex:1;min-width:0}
 .fl-name{font-size:12px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fl-meta{font-size:10px;color:var(--text3);margin-top:1px}
-.fl-acts{display:flex;gap:4px;flex-shrink:0}
+.fl-acts{display:flex;gap:4px;flex-shrink:0;align-items:center}
 .fl-act{background:none;border:none;cursor:pointer;padding:4px;color:var(--text3);display:flex}
 .fl-act:hover{color:var(--accent)}.fl-act i{font-size:14px}
+.open-link{font-size:11px;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:3px;padding:3px 6px;border:1px solid var(--border)}
+.open-link:hover{background:var(--bg3)}
 .empty-state{text-align:center;padding:2.5rem;color:var(--text3);border:1px solid var(--border);margin-bottom:8px}
 .empty-state i{font-size:24px;display:block;margin-bottom:6px;opacity:.5}
 .empty-state p{font-size:12px}
-
-/* ── DRAG & DROP ZONE ── */
-.upload-zone{border:2px dashed var(--border2);padding:2rem 1rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:0;background:var(--bg2)}
-.upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:var(--bg3)}
-.upload-zone.drag-over{border-style:solid}
-.upload-zone i{font-size:32px;color:var(--text3);display:block;margin-bottom:10px;transition:color .2s}
-.upload-zone:hover i,.upload-zone.drag-over i{color:var(--accent)}
-.upload-zone-title{font-size:13px;color:var(--text);font-weight:500;margin-bottom:4px}
-.upload-zone-sub{font-size:11px;color:var(--text3);margin-bottom:12px}
+.upload-panel{border:1px solid var(--border);background:var(--bg2);margin-bottom:12px}
+.upload-tabs{display:flex;gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
+.upload-tab{flex:1;padding:9px;text-align:center;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);cursor:pointer;background:var(--bg2);transition:all .12s}
+.upload-tab:hover{color:var(--text);background:var(--bg3)}
+.upload-tab.active{background:var(--accent);color:var(--accent-text)}
+.upload-body{padding:1.25rem}
+.drop-zone{border:2px dashed var(--border2);padding:2rem 1rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg)}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:var(--bg3)}
+.drop-zone.drag-over{border-style:solid}
+.drop-zone i{font-size:32px;color:var(--text3);display:block;margin-bottom:10px}
+.drop-zone:hover i,.drop-zone.drag-over i{color:var(--accent)}
+.dz-title{font-size:13px;color:var(--text);font-weight:500;margin-bottom:4px}
+.dz-sub{font-size:11px;color:var(--text3);margin-bottom:12px}
 .browse-btn{background:var(--accent);color:var(--accent-text);border:none;padding:7px 16px;font-size:11px;letter-spacing:1px;cursor:pointer;text-transform:uppercase;display:inline-block}
 .browse-btn:hover{background:var(--accent2)}
-
-/* queued files list */
 .queued-files{margin-top:10px;display:flex;flex-direction:column;gap:6px}
-.queued-file{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg3);border:1px solid var(--border)}
+.qf{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg3);border:1px solid var(--border)}
 .qf-icon{font-size:16px;color:var(--text3);flex-shrink:0}
 .qf-name{flex:1;font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .qf-size{font-size:10px;color:var(--text3);flex-shrink:0}
-.qf-remove{background:none;border:none;cursor:pointer;color:var(--text3);padding:2px;display:flex}
-.qf-remove:hover{color:var(--red)}
-.qf-remove i{font-size:14px}
-.upload-actions{display:flex;gap:8px;margin-top:12px;justify-content:flex-end}
-
+.qf-rm{background:none;border:none;cursor:pointer;color:var(--text3);padding:2px;display:flex}
+.qf-rm:hover{color:var(--red)}.qf-rm i{font-size:14px}
+.by-row{margin-bottom:10px}
+.by-lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:4px}
+.link-inp{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;font-size:12px;font-family:inherit;outline:none;margin-bottom:8px}
+.link-inp:focus{border-color:var(--border2)}
+.link-preview{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);margin-bottom:8px;font-size:11px;color:var(--text2)}
+.link-preview i{font-size:16px;color:#4285f4}
+.upload-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
 .mis-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border)}
 .mis-cell{background:var(--bg2);padding:1.25rem}
 .mis-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:1rem}
@@ -188,14 +203,8 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .btrack{flex:1;height:3px;background:var(--bg4)}
 .bfill{height:100%;background:var(--accent)}
 .bval{font-size:11px;color:var(--text3);width:18px;text-align:right}
-.aitem{display:flex;gap:8px;margin-bottom:8px}
-.adot{width:5px;height:5px;border-radius:50%;margin-top:5px;flex-shrink:0}
-.adot.g{background:var(--green)}.adot.a{background:var(--amber)}
-.atext{font-size:11px;color:var(--text2);line-height:1.4}
-.atime{font-size:10px;color:var(--text3)}
-
 .modal-backdrop{position:fixed;inset:0;background:rgba(30,42,30,.5);display:flex;align-items:center;justify-content:center;z-index:100}
-.modal-box{background:var(--bg2);border:1px solid var(--border);width:90%;max-width:420px;padding:1.5rem;max-height:90vh;overflow-y:auto}
+.modal-box{background:var(--bg2);border:1px solid var(--border);width:90%;max-width:400px;padding:1.5rem;max-height:90vh;overflow-y:auto}
 .modal-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:1.25rem}
 .form-row{margin-bottom:.875rem}
 .form-lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:5px}
@@ -205,31 +214,89 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem}
 .btn-cancel{background:none;border:1px solid var(--border);color:var(--text3);padding:7px 14px;font-size:11px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
 .btn-cancel:hover{border-color:var(--border2);color:var(--text)}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--accent);color:var(--accent-text);padding:10px 16px;font-size:12px;z-index:200;display:none;align-items:center;gap:8px}
+.toast.show{display:flex}
+.toast i{font-size:16px}
+
+.task-tabs{display:flex;gap:1px;border:1px solid var(--border);background:var(--border);margin-bottom:1rem}
+.task-tab{flex:1;padding:8px;text-align:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);cursor:pointer;background:var(--bg2);transition:all .12s}
+.task-tab:hover{color:var(--text);background:var(--bg3)}
+.task-tab.active{background:var(--accent);color:var(--accent-text)}
+.task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);transition:background .1s}
+.task-row:hover{background:var(--bg2)}.task-row:last-child{border-bottom:none}
+.task-info{flex:1;min-width:0}
+.task-name-text{font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px}
+.task-meta-text{font-size:10px;color:var(--text3)}
+.task-due{font-size:10px;padding:2px 7px;border-radius:100px;font-weight:500;flex-shrink:0}
+.due-today{background:var(--amber-bg);color:var(--amber)}
+.due-overdue{background:var(--red-bg);color:var(--red)}
+.due-upcoming{background:var(--green-bg);color:var(--green)}
+.due-done{background:var(--bg3);color:var(--text3)}
+.task-actions{display:flex;gap:6px;flex-shrink:0}
+.done-btn{background:var(--green-bg);color:var(--green);border:1px solid var(--green);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+.done-btn:hover{background:var(--green);color:white}
+.submit-btn{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+.submit-btn:hover{background:var(--blue);color:white}
+.revise-btn{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+.revise-btn:hover{background:var(--amber);color:white}
+.task-search-row{display:flex;gap:8px;margin-bottom:1rem}
+.task-search{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:7px 10px;font-size:12px;font-family:inherit;outline:none}
+.task-search:focus{border-color:var(--border2)}
+.submit-modal-backdrop{position:fixed;inset:0;background:rgba(30,42,30,.6);display:flex;align-items:center;justify-content:center;z-index:200}
+.submit-modal{background:var(--bg2);border:1px solid var(--border);width:90%;max-width:420px;padding:1.5rem}
+.submit-modal-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:1.25rem}
+.submit-drop{border:2px dashed var(--border2);padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:10px}
+.submit-drop:hover{border-color:var(--accent);background:var(--bg3)}
+.submit-drop i{font-size:24px;color:var(--text3);display:block;margin-bottom:6px}
+.submit-drop p{font-size:12px;color:var(--text3)}
+.submit-file-name{font-size:12px;color:var(--green);margin-top:6px;font-weight:500}
+
+.success-popup{position:fixed;inset:0;background:rgba(30,42,30,.5);display:flex;align-items:center;justify-content:center;z-index:300;opacity:0;transition:opacity .3s}
+.success-popup.show{opacity:1}
+.success-popup-box{background:var(--bg2);border:1px solid var(--border);padding:2rem;text-align:center;max-width:320px;width:90%;transform:scale(.9);transition:transform .3s}
+.success-popup.show .success-popup-box{transform:scale(1)}
+.success-popup-icon{font-size:40px;color:var(--green);margin-bottom:12px}
+.success-popup-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px}
+.success-popup-sub{font-size:12px;color:var(--text3);margin-bottom:1.25rem}
 </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-screen hide" id="loading-screen">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Loading data…</div>
+</div>
 
 <div id="app">
+<!-- LOGIN -->
 <div class="screen active" id="scr-login">
 <div class="login-outer"><div class="login-box">
   <div class="tf-wordmark">Thought & Found</div>
   <div class="login-title">Studio FMS</div>
   <div class="login-sub">Flow Management System</div>
   <span class="login-label">Sign in as</span>
-  <div id="opt-owner" class="role-opt selected" onclick="sel('owner')"><i class="ti ti-crown" aria-hidden="true"></i><div><div class="ro-name">Owner</div><div class="ro-desc">Full access</div></div></div>
-  <div id="opt-operations" class="role-opt" onclick="sel('operations')"><i class="ti ti-settings" aria-hidden="true"></i><div><div class="ro-name">Operations</div><div class="ro-desc">Manage clients & projects</div></div></div>
-  <div id="opt-designer" class="role-opt" onclick="sel('designer')"><i class="ti ti-pencil" aria-hidden="true"></i><div><div class="ro-name">Designer</div><div class="ro-desc">View & upload files</div></div></div>
+  <div id="opt-owner" class="role-opt selected" onclick="sel('owner')"><i class="ti ti-crown"></i><div><div class="ro-name">Owner</div><div class="ro-desc">Full access</div></div></div>
+  <div id="opt-operations" class="role-opt" onclick="sel('operations')"><i class="ti ti-settings"></i><div><div class="ro-name">Operations</div><div class="ro-desc">Manage clients & projects</div></div></div>
+  <div id="opt-designer" class="role-opt" onclick="sel('designer')"><i class="ti ti-pencil"></i><div><div class="ro-name">Designer</div><div class="ro-desc">View & upload files</div></div></div>
   <div class="pw-row">
     <span class="login-label">Password</span>
     <input class="pw-input" type="password" id="pw-inp" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
     <div class="pw-error" id="pw-err">Incorrect password</div>
   </div>
   <button class="login-btn" onclick="doLogin()">Enter →</button>
+  <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
+    <div class="gdrive-status" id="gdrive-status"></div>
+  </div>
 </div></div>
 </div>
 
+<!-- APP -->
 <div class="screen" id="scr-app">
   <div class="topbar">
     <div class="topbar-brand">T&F — FMS</div>
-    <div style="display:flex;align-items:center;gap:10px">
+    <div class="topbar-right">
+      <div class="drive-badge" id="drive-badge" style="display:none"><i class="ti ti-brand-google-drive"></i> Drive on</div>
       <span class="role-tag" id="role-tag">Owner</span>
       <button class="signout-btn" onclick="doLogout()">Sign out</button>
     </div>
@@ -237,12 +304,13 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   <div class="app-body">
     <div class="sidebar">
       <div class="nav-lbl">Workspace</div>
-      <div class="nav-item active" id="nav-dashboard" onclick="goView('dashboard')"><i class="ti ti-layout-dashboard" aria-hidden="true"></i> Dashboard</div>
-      <div class="nav-item" id="nav-clients" onclick="goView('clients')"><i class="ti ti-building" aria-hidden="true"></i> Clients</div>
-      <div class="nav-item" id="nav-pipeline" onclick="goView('pipeline')"><i class="ti ti-columns" aria-hidden="true"></i> Pipeline</div>
-      <div class="nav-item" id="nav-projects" onclick="goView('projects')"><i class="ti ti-folder" aria-hidden="true"></i> All Projects</div>
+      <div class="nav-item active" id="nav-dashboard" onclick="goView('dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+      <div class="nav-item" id="nav-clients" onclick="goView('clients')"><i class="ti ti-building"></i> Clients</div>
+      <div class="nav-item" id="nav-pipeline" onclick="goView('pipeline')"><i class="ti ti-columns"></i> Pipeline</div>
+      <div class="nav-item" id="nav-projects" onclick="goView('projects')"><i class="ti ti-folder"></i> All Projects</div>
+      <div class="nav-item" id="nav-tasks" onclick="goView('tasks')"><i class="ti ti-checkbox"></i> Tasks</div>
       <div class="nav-lbl">Insights</div>
-      <div class="nav-item" id="nav-mis" onclick="goView('mis')"><i class="ti ti-chart-bar" aria-hidden="true"></i> MIS</div>
+      <div class="nav-item" id="nav-mis" onclick="goView('mis')"><i class="ti ti-chart-bar"></i> MIS</div>
     </div>
     <div class="content" id="main-content"></div>
   </div>
@@ -253,8 +321,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   <div class="modal-title">Add Client</div>
   <div class="form-row"><label class="form-lbl">Company name</label><input class="form-inp" id="ic-name" type="text"></div>
   <div class="form-row"><label class="form-lbl">Industry</label><input class="form-inp" id="ic-ind" type="text"></div>
-  <div class="form-row"><label class="form-lbl">Contact person</label><input class="form-inp" id="ic-con" type="text"></div>
-  <div class="form-row"><label class="form-lbl">Email</label><input class="form-inp" id="ic-mail" type="email"></div>
   <div class="modal-actions"><button class="btn-cancel" onclick="cm('mod-client')">Cancel</button><button class="btn-add" onclick="addClient()">Add Client</button></div>
 </div></div>
 
@@ -273,129 +339,511 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   <div class="modal-actions"><button class="btn-cancel" onclick="cm('mod-folder')">Cancel</button><button class="btn-add" onclick="addFolder()">Create</button></div>
 </div></div>
 
-<!-- UPLOAD MODAL — drag & drop + browse -->
-<div class="modal-backdrop" id="mod-upload" style="display:none"><div class="modal-box">
-  <div class="modal-title">Upload Files</div>
-  <div class="form-row"><label class="form-lbl">Uploaded by</label><input class="form-inp" id="iu-by" type="text" placeholder="Your name"></div>
 
-  <!-- Drop zone -->
-  <div class="upload-zone" id="upload-zone"
-    ondragover="handleDragOver(event)"
-    ondragleave="handleDragLeave(event)"
-    ondrop="handleDrop(event)"
-    onclick="document.getElementById('file-input').click()">
-    <i class="ti ti-cloud-upload" aria-hidden="true"></i>
-    <div class="upload-zone-title">Drag & drop files here</div>
-    <div class="upload-zone-sub">or click to browse from your device</div>
-    <span class="browse-btn">Browse Files</span>
+<!-- ADD TASK MODAL -->
+<div class="modal-backdrop" id="mod-task" style="display:none"><div class="modal-box">
+  <div class="modal-title">Add Task</div>
+  <div class="form-row"><label class="form-lbl">Assign to</label>
+    <select class="form-sel" id="it-member" onchange="fillMemberDetails()">
+      <option value="">— Select team member —</option>
+      <option value="__custom__">+ Add new team member…</option>
+    </select>
   </div>
-  <input type="file" id="file-input" multiple style="display:none" onchange="handleFileSelect(event)">
-
-  <!-- Queued files list -->
-  <div class="queued-files" id="queued-files"></div>
-
-  <div class="modal-actions">
-    <button class="btn-cancel" onclick="cancelUpload()">Cancel</button>
-    <button class="btn-add" id="upload-confirm-btn" onclick="confirmUpload()" style="display:none"><i class="ti ti-upload" aria-hidden="true"></i> Upload</button>
+  <div id="custom-member-fields" style="display:none">
+    <div class="form-row"><label class="form-lbl">Name</label><input class="form-inp" id="it-name-new" type="text" placeholder="e.g. Sanjay"></div>
+    <div class="form-row"><label class="form-lbl">Phone / WhatsApp</label><input class="form-inp" id="it-phone-new" type="text"></div>
+    <div class="form-row"><label class="form-lbl">Email</label><input class="form-inp" id="it-email-new" type="email"></div>
+    <button class="btn-ghost" onclick="saveNewMember()" style="margin-bottom:10px"><i class="ti ti-plus"></i> Save Team Member</button>
   </div>
+  <input type="hidden" id="it-name" value="">
+  <input type="hidden" id="it-phone" value="">
+  <input type="hidden" id="it-email" value="">
+  <div class="form-row"><label class="form-lbl">Task description</label><textarea class="form-ta" id="it-task" style="min-height:60px;resize:vertical" placeholder="Describe exactly what needs to be done…"></textarea></div>
+  <div class="form-row"><label class="form-lbl">Project (optional)</label>
+    <select class="form-sel" id="it-proj">
+      <option value="">— No specific project —</option>
+    </select>
+  </div>
+  <div class="form-row"><label class="form-lbl">Due date</label><input class="form-inp" id="it-date" type="date"></div>
+  <div class="modal-actions"><button class="btn-cancel" onclick="cm('mod-task')">Cancel</button><button class="btn-add" onclick="addTask()">Add Task</button></div>
 </div></div>
 
+<!-- SUBMIT TASK MODAL -->
+<div class="submit-modal-backdrop" id="mod-submit" style="display:none">
+<div class="submit-modal">
+  <div class="submit-modal-title">Submit Task</div>
+  <div id="submit-task-info" style="font-size:12px;color:var(--text2);margin-bottom:1rem;padding:8px;background:var(--bg3);border:1px solid var(--border)"></div>
+  <label class="form-lbl">Upload your work</label>
+  <div class="submit-drop" id="submit-drop" onclick="document.getElementById('submit-file-inp').click()" ondragover="event.preventDefault()" ondrop="handleSubmitDrop(event)">
+    <i class="ti ti-cloud-upload"></i>
+    <p>Drag & drop or click to browse</p>
+  </div>
+  <input type="file" id="submit-file-inp" style="display:none" onchange="handleSubmitFile(event)">
+  <div class="submit-file-name" id="submit-file-name"></div>
+  <div class="modal-actions">
+    <button class="btn-cancel" onclick="cm('mod-submit')">Cancel</button>
+    <button class="btn-add" id="submit-confirm-btn" onclick="confirmSubmit()" style="display:none"><i class="ti ti-send"></i> Submit</button>
+  </div>
+</div>
+</div>
+
+<!-- REVISE TASK MODAL -->
+<div class="submit-modal-backdrop" id="mod-revise" style="display:none">
+<div class="submit-modal">
+  <div class="submit-modal-title">Revise Planned Task</div>
+  <div class="form-row">
+    <label class="form-lbl">Task ID</label>
+    <div id="revise-taskid" style="font-size:12px;color:var(--text3);padding:8px 10px;background:var(--bg3);border:1px solid var(--border)"></div>
+  </div>
+  <div class="form-row">
+    <label class="form-lbl">Name</label>
+    <div id="revise-name" style="font-size:13px;color:var(--text);font-weight:500;padding:8px 10px;background:var(--bg3);border:1px solid var(--border)"></div>
+  </div>
+  <div class="form-row">
+    <label class="form-lbl">Task</label>
+    <div id="revise-task" style="font-size:12px;color:var(--text2);padding:8px 10px;background:var(--bg3);border:1px solid var(--border)"></div>
+  </div>
+  <div class="form-row">
+    <label class="form-lbl">New Planned Date</label>
+    <input class="form-inp" id="revise-date" type="date">
+  </div>
+  <div class="modal-actions">
+    <button class="btn-cancel" onclick="cm('mod-revise')">Cancel</button>
+    <button class="btn-add" onclick="confirmRevise()"><i class="ti ti-refresh"></i> Revise Task Plan</button>
+  </div>
+</div>
+</div>
+
+<!-- SHARE FILE MODAL -->
+<div class="submit-modal-backdrop" id="mod-share" style="display:none">
+<div class="submit-modal">
+  <div class="submit-modal-title">Share File</div>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:1rem">Project: <span id="share-project-name" style="color:var(--text);font-weight:500"></span></div>
+  <div class="form-row">
+    <label class="form-lbl">Share with</label>
+    <select class="form-sel" id="share-to">
+      <option value="all">Entire Team</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label class="form-lbl">Note (optional)</label>
+    <input class="form-inp" id="share-note" type="text" placeholder="e.g. Please review and give feedback">
+  </div>
+  <label class="form-lbl">Select file to share</label>
+  <div class="submit-drop" onclick="document.getElementById('share-file-inp').click()"
+    ondragover="event.preventDefault()" ondrop="handleShareFileDrop(event)">
+    <i class="ti ti-cloud-upload"></i>
+    <p>Drag & drop or click to browse</p>
+  </div>
+  <input type="file" id="share-file-inp" style="display:none" onchange="handleShareFileSelect(event)">
+  <div class="submit-file-name" id="share-file-name"></div>
+  <div class="modal-actions">
+    <button class="btn-cancel" onclick="cm('mod-share')">Cancel</button>
+    <button class="btn-add" id="share-confirm-btn" onclick="confirmShare()" style="display:none"><i class="ti ti-send"></i> Share & Notify</button>
+  </div>
+</div>
+</div>
+
+
+<!-- SUCCESS POPUP -->
+<div class="success-popup" id="success-popup" onclick="hideSuccessPopup()">
+  <div class="success-popup-box" onclick="event.stopPropagation()">
+    <div class="success-popup-icon"><i class="ti ti-check"></i></div>
+    <div class="success-popup-title" id="success-popup-title">File uploaded successfully!</div>
+    <div class="success-popup-sub" id="success-popup-sub">Saved to Google Drive</div>
+    <button class="btn-add" onclick="hideSuccessPopup()" style="margin:0 auto">Done</button>
+  </div>
+</div>
+
+
+<!-- MANAGE TEAM MODAL -->
+<div class="modal-backdrop" id="mod-team" style="display:none"><div class="modal-box" style="max-width:500px">
+  <div class="modal-title">Manage Team Members</div>
+  <div id="team-list"></div>
+  <div style="border-top:1px solid var(--border);margin-top:1rem;padding-top:1rem">
+    <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:10px">Add New Member</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input class="form-inp" id="nm-name" type="text" placeholder="Name" style="flex:1;min-width:100px">
+      <input class="form-inp" id="nm-phone" type="text" placeholder="Phone" style="flex:1;min-width:100px">
+      <input class="form-inp" id="nm-email" type="email" placeholder="Email" style="flex:1;min-width:140px">
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:8px">
+      <button class="btn-add" onclick="addTeamMember()"><i class="ti ti-plus"></i> Add Member</button>
+    </div>
+  </div>
+  <div class="modal-actions"><button class="btn-cancel" onclick="cm('mod-team')">Close</button></div>
+</div></div>
+
+<div class="toast" id="toast"><i class="ti ti-check"></i><span id="toast-msg"></span></div>
+</div>
+
 <script>
+// ── CONFIG ──
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwq7iZ0hnIOqO7senf931SlcowrZbVlvkecUNZs9gkCOOfeCo6Tr21Oq6mJXgLOv3_rlg/exec';
+const CLIENT_ID = '135763636344-dpefl07fnciqt59fphfp2475c9vnjh8a.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+const TF_ROOT = 'T&F FMS';
+const CHAT_WEBHOOK = 'https://chat.googleapis.com/v1/spaces/AAQAGw-YiFs/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=Sy-Ozz1uLQVzZPgW-D_E8R_mdhYu94J7LqyU_FGVVr4';
+
 const PASS={owner:'owner123',operations:'ops123',designer:'design123'};
 const STAGES=['Inquiry','Brief','Proposal','Active','Review','Delivered'];
 const SPILL={Inquiry:'pill-new',Brief:'pill-new',Proposal:'pill-hold',Active:'pill-active',Review:'pill-hold',Delivered:'pill-done'};
-const FICONS={pdf:'ti-file-type-pdf',pptx:'ti-presentation',docx:'ti-file-type-doc',xlsx:'ti-file-spreadsheet',jpg:'ti-photo',jpeg:'ti-photo',png:'ti-photo',gif:'ti-photo',mp4:'ti-video',mp3:'ti-music',zip:'ti-file-zip',ai:'ti-vector',fig:'ti-vector',sketch:'ti-vector'};
+const FICONS={pdf:'ti-file-type-pdf',pptx:'ti-presentation',docx:'ti-file-type-doc',xlsx:'ti-file-spreadsheet',jpg:'ti-photo',jpeg:'ti-photo',png:'ti-photo',gif:'ti-photo',mp4:'ti-video',mp3:'ti-music',zip:'ti-file-zip',ai:'ti-vector',fig:'ti-vector'};
 
 let role='owner',selRole='owner',navStack=[];
 let currentClientId=null,currentProjectId=null,driveStack=[];
 let expandedRow=null,driveTab='folders',clientEditOpen=null;
-let queuedFiles=[]; // {name, size, sizeStr, type}
+let uploadTab='dragdrop';
+let queuedFiles=[];
+let accessToken=null;
+let driveConnected=false;
+let driveFolderCache={};
+let saveTimeout=null;
 
 let clients=[];
 let projects=[];
 let folders=[];
 let files=[];
 
+// ── GOOGLE SHEETS ──
+function showLoading(msg){
+  const el=document.getElementById('loading-screen');
+  document.getElementById('loading-text').textContent=msg||'Loading…';
+  el.classList.remove('hide');
+}
+function hideLoading(){document.getElementById('loading-screen').classList.add('hide')}
+
+async function loadFromSheets(){
+  showLoading('Loading your data…');
+  try{
+    const res=await fetch(SCRIPT_URL+'?action=load');
+    const data=await res.json();
+    if(data.clients) clients=data.clients;
+    if(data.projects) projects=data.projects;
+    if(data.folders) folders=data.folders;
+    if(data.files) files=data.files;
+    if(data.tasks) tasks=data.tasks;
+    if(data.teamMembers && data.teamMembers.length>0) teamMembers=data.teamMembers;
+    if(data.sharedFiles) sharedFiles=data.sharedFiles;
+    showToast('Data loaded ✓');
+  }catch(e){
+    console.error('Load error',e);
+    showToast('Could not load data — working offline');
+  }
+  hideLoading();
+}
+
+function scheduleSave(){
+  clearTimeout(saveTimeout);
+  saveTimeout=setTimeout(saveToSheets, 1500);
+}
+
+async function saveToSheets(){
+  try{
+    await fetch(SCRIPT_URL,{
+      method:'POST',
+      body:JSON.stringify({action:'save',clients,projects,folders,files,tasks,teamMembers,sharedFiles}),
+      headers:{'Content-Type':'text/plain;charset=utf-8'}
+    });
+    showToast('Saved ✓');
+  }catch(e){
+    console.error('Save error',e);
+    showToast('Could not save — check connection');
+  }
+}
+
+// ── GOOGLE DRIVE ──
+function connectDrive(){
+  const client=google.accounts.oauth2.initTokenClient({
+    client_id:CLIENT_ID,
+    scope:SCOPES,
+    callback:(response)=>{
+      if(response.error){showDriveStatus('Connection failed: '+response.error,false);return;}
+      accessToken=response.access_token;
+      driveConnected=true;
+      // Save token + expiry (1 hour)
+      const expiry=Date.now()+(3600*1000);
+      localStorage.setItem('tf_drive_token',accessToken);
+      localStorage.setItem('tf_drive_expiry',expiry.toString());
+      localStorage.setItem('tf_drive_connected','true');
+      showDriveStatus('Google Drive connected ✓',true);
+      updateDriveButton();
+    },
+  });
+  client.requestAccessToken();
+}
+
+function autoReconnectDrive(){
+  // Silently get a fresh token if user previously connected
+  if(localStorage.getItem('tf_drive_connected')!=='true') return;
+  try{
+    const client=google.accounts.oauth2.initTokenClient({
+      client_id:CLIENT_ID,
+      scope:SCOPES,
+      prompt:'', // no popup if already authorized
+      callback:(response)=>{
+        if(response.error) return;
+        accessToken=response.access_token;
+        driveConnected=true;
+        const expiry=Date.now()+(3600*1000);
+        localStorage.setItem('tf_drive_token',accessToken);
+        localStorage.setItem('tf_drive_expiry',expiry.toString());
+        updateDriveButton();
+        if(document.getElementById('drive-badge'))
+          document.getElementById('drive-badge').style.display='flex';
+      },
+    });
+    client.requestAccessToken();
+  }catch(e){console.log('Auto reconnect failed',e);}
+}
+
+function updateDriveButton(){
+  const btn=document.getElementById('drive-connect-btn');
+  const status=document.getElementById('gdrive-status');
+  if(!btn) return;
+  if(driveConnected){
+    btn.innerHTML='<i class="ti ti-brand-google-drive"></i> Drive Connected ✓';
+    btn.style.background='var(--green-bg)';
+    btn.style.color='var(--green)';
+    btn.style.borderColor='var(--green)';
+  }
+}
+
+function showDriveStatus(msg,success){
+  const el=document.getElementById('gdrive-status');
+  if(!el) return;
+  el.textContent=msg;
+  el.className='gdrive-status '+(success?'connected':'error');
+}
+
+function checkSavedToken(){
+  const connected=localStorage.getItem('tf_drive_connected');
+  const expiry=parseInt(localStorage.getItem('tf_drive_expiry')||'0');
+  const token=localStorage.getItem('tf_drive_token');
+  if(connected==='true' && token && Date.now()<expiry){
+    accessToken=token;
+    driveConnected=true;
+  } else if(connected==='true'){
+    // Token expired but user previously connected — will auto-reconnect
+    driveConnected=false;
+  }
+}
+async function getDriveFolder(name,parentId){
+  const key=(parentId||'root')+'/'+name;
+  if(driveFolderCache[key])return driveFolderCache[key];
+  const q=`name='${name}' and mimeType='application/vnd.google-apps.folder' and '${parentId||'root'}' in parents and trashed=false`;
+  const sr=await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`,{headers:{Authorization:'Bearer '+accessToken}});
+  const sd=await sr.json();
+  if(sd.files&&sd.files.length>0){driveFolderCache[key]=sd.files[0].id;return sd.files[0].id;}
+  const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({name,mimeType:'application/vnd.google-apps.folder',parents:[parentId||'root']})});
+  const cd=await cr.json();
+  driveFolderCache[key]=cd.id;return cd.id;
+}
+async function getProjectDrivePath(projectId,subFolderId){
+  const p=projects.find(x=>x.id===projectId);
+  const cl=clients.find(c=>c.id===p.clientId);
+  const rootId=await getDriveFolder(TF_ROOT,null);
+  const clientId2=await getDriveFolder(cl.name,rootId);
+  const projId=await getDriveFolder(p.name,clientId2);
+  if(!subFolderId)return projId;
+  const build=async(fid)=>{const fo=folders.find(f=>f.id===fid);if(!fo)return projId;const par=fo.parentId?await build(fo.parentId):projId;return await getDriveFolder(fo.name,par);};
+  return await build(subFolderId);
+}
+async function uploadToDrive(file,projectId,subFolderId){
+  if(!driveConnected||!accessToken)return null;
+  try{
+    showToast('Uploading to Drive…');
+    const targetId=await getProjectDrivePath(projectId,subFolderId);
+    const meta={name:file.name,parents:[targetId]};
+    const form=new FormData();
+    form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
+    form.append('file',file);
+    const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+accessToken},body:form});
+    const data=await res.json();
+    showSuccessPopup('File saved to Google Drive ✓', 'T&F FMS → '+getCurrentClientName()+' → '+getCurrentProjectName());
+    return{driveId:data.id,driveLink:data.webViewLink};
+  }catch(e){console.error('Drive upload error',e);showToast('Drive upload failed');return null;}
+}
+async function createDriveFolder(name,projectId,parentSubId){
+  if(!driveConnected||!accessToken)return;
+  try{const par=await getProjectDrivePath(projectId,parentSubId);await getDriveFolder(name,par);showToast('Folder created in Drive ✓');}catch(e){console.error(e);}
+}
+
+// ── TOAST ──
+
+function showSuccessPopup(title, sub){
+  document.getElementById('success-popup-title').textContent = title || 'Done!';
+  document.getElementById('success-popup-sub').textContent = sub || '';
+  const el = document.getElementById('success-popup');
+  el.style.display = 'flex';
+  setTimeout(()=>el.classList.add('show'), 10);
+  setTimeout(()=>hideSuccessPopup(), 4000);
+}
+function hideSuccessPopup(){
+  const el = document.getElementById('success-popup');
+  el.classList.remove('show');
+  setTimeout(()=>el.style.display='none', 300);
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── UTILS ──
 function ini(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
 function ficon(n){const e=(n.split('.').pop()||'').toLowerCase();return FICONS[e]||'ti-file'}
 function today(){const d=new Date();return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear()}
+function fmtDate(str){if(!str)return'';try{const d=new Date(str);if(isNaN(d))return str;return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear();}catch(e){return str;}}
 function spill(s){return`<span class="pill ${SPILL[s]||'pill-done'}">${s}</span>`}
 function canManage(){return role==='owner'||role==='operations'}
 function om(id){document.getElementById(id).style.display='flex'}
 function cm(id){document.getElementById(id).style.display='none'}
 function folderPath(fid){if(!fid)return'Root';const fo=folders.find(f=>f.id===fid);if(!fo)return'Root';const p=folderPath(fo.parentId);return p==='Root'?fo.name:p+' / '+fo.name;}
-function fmtSize(bytes){if(bytes<1024)return bytes+'B';if(bytes<1048576)return(bytes/1024).toFixed(1)+'KB';return(bytes/1048576).toFixed(1)+'MB';}
+function fmtSize(b){if(!b)return'';if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
+function linkIcon(url){if(!url)return'ti-link';if(url.includes('drive.google'))return'ti-brand-google-drive';if(url.includes('dropbox'))return'ti-brand-dropbox';if(url.includes('figma'))return'ti-brand-figma';return'ti-link';}
 
-/* ── DRAG & DROP ── */
-function handleDragOver(e){e.preventDefault();e.stopPropagation();document.getElementById('upload-zone').classList.add('drag-over')}
-function handleDragLeave(e){e.preventDefault();document.getElementById('upload-zone').classList.remove('drag-over')}
-function handleDrop(e){
-  e.preventDefault();e.stopPropagation();
-  document.getElementById('upload-zone').classList.remove('drag-over');
-  const dropped=Array.from(e.dataTransfer.files);
-  addToQueue(dropped);
-}
-function handleFileSelect(e){
-  const selected=Array.from(e.target.files);
-  addToQueue(selected);
-  e.target.value=''; // reset so same file can be re-selected
-}
-function addToQueue(fileList){
-  fileList.forEach(f=>{
-    if(!queuedFiles.find(q=>q.name===f.name)){
-      queuedFiles.push({name:f.name,size:f.size,sizeStr:fmtSize(f.size),type:f.type});
-    }
-  });
-  renderQueue();
-}
-function removeFromQueue(idx){queuedFiles.splice(idx,1);renderQueue()}
-function renderQueue(){
-  const el=document.getElementById('queued-files');
-  const btn=document.getElementById('upload-confirm-btn');
-  if(queuedFiles.length===0){el.innerHTML='';btn.style.display='none';return;}
-  btn.style.display='flex';
-  el.innerHTML=queuedFiles.map((f,i)=>`
-    <div class="queued-file">
-      <i class="ti ${ficon(f.name)} qf-icon" aria-hidden="true"></i>
-      <span class="qf-name">${f.name}</span>
-      <span class="qf-size">${f.sizeStr}</span>
-      <button class="qf-remove" onclick="removeFromQueue(${i})" aria-label="Remove"><i class="ti ti-x" aria-hidden="true"></i></button>
-    </div>`).join('');
-}
-function openUploadModal(){
-  queuedFiles=[];
-  document.getElementById('iu-by').value='';
-  document.getElementById('queued-files').innerHTML='';
-  document.getElementById('upload-confirm-btn').style.display='none';
-  om('mod-upload');
-}
-function cancelUpload(){queuedFiles=[];cm('mod-upload')}
-function confirmUpload(){
+// ── DRAG DROP ──
+function handleDragOver(e){e.preventDefault();e.stopPropagation();const z=document.getElementById('dz');if(z)z.classList.add('drag-over')}
+function handleDragLeave(e){e.preventDefault();const z=document.getElementById('dz');if(z)z.classList.remove('drag-over')}
+function handleDrop(e){e.preventDefault();e.stopPropagation();const z=document.getElementById('dz');if(z)z.classList.remove('drag-over');addToQueue(Array.from(e.dataTransfer.files));}
+function handleFileSelect(e){addToQueue(Array.from(e.target.files));e.target.value='';}
+function addToQueue(list){list.forEach(f=>{if(!queuedFiles.find(q=>q.name===f.name))queuedFiles.push(f);});renderUploadPanel();}
+function removeFromQueue(i){queuedFiles.splice(i,1);renderUploadPanel();}
+
+async function confirmUpload(){
   if(queuedFiles.length===0)return;
-  const by=document.getElementById('iu-by').value.trim()||'Team';
+  const by=document.getElementById('up-by')?document.getElementById('up-by').value.trim()||'Team':'Team';
   const fid=cfid();
-  queuedFiles.forEach(f=>{
-    files.push({id:'fi'+Date.now()+Math.random(),projectId:currentProjectId,folderId:fid,name:f.name,by,date:today(),size:f.sizeStr});
-  });
-  queuedFiles=[];cm('mod-upload');renderNav();
+  for(const f of queuedFiles){
+    let driveInfo=null;
+    if(driveConnected)driveInfo=await uploadToDrive(f,currentProjectId,fid);
+    files.push({id:'fi'+Date.now()+Math.random(),projectId:currentProjectId,folderId:fid||'',name:f.name,by,date:today(),size:fmtSize(f.size),link:driveInfo?driveInfo.driveLink:'',isLink:'false'});
+  }
+  queuedFiles=[];
+  scheduleSave();
+  renderNav();
 }
 
+function confirmLink(){
+  const url=document.getElementById('up-link')?document.getElementById('up-link').value.trim():'';
+  if(!url)return;
+  let name=document.getElementById('up-lname')?document.getElementById('up-lname').value.trim():'';
+  // Auto-extract name from URL if not provided
+  if(!name){
+    try{
+      const u=new URL(url);
+      // Try to get file name from path
+      const parts=u.pathname.split('/').filter(Boolean);
+      name=decodeURIComponent(parts[parts.length-1]||'')
+        .replace(/\.[^.]+$/,'') // remove extension
+        .replace(/[-_]/g,' ')
+        .trim();
+      if(!name||name.length<2) name='Linked File';
+    }catch(e){name='Linked File';}
+  }
+  const by=document.getElementById('up-by')?document.getElementById('up-by').value.trim()||'Team':'Team';
+  files.push({id:'fi'+Date.now(),projectId:currentProjectId,folderId:cfid()||'',name,by,date:today(),size:'',link:url,isLink:'true'});
+  scheduleSave();
+  showToast('Drive link attached ✓');
+  renderNav();
+}
+
+function renderUploadPanel(){
+  const el=document.getElementById('upload-panel-wrap');
+  if(!el)return;
+  const byVal=document.getElementById('up-by')?document.getElementById('up-by').value:'';
+  const lnVal=document.getElementById('up-link')?document.getElementById('up-link').value:'';
+  const lnName=document.getElementById('up-lname')?document.getElementById('up-lname').value:'';
+  const p=projects.find(x=>x.id===currentProjectId);
+  const cl=clients.find(c=>c.id===p?.clientId);
+  el.innerHTML=`
+<div class="upload-panel">
+  <div class="upload-tabs">
+    <div class="upload-tab ${uploadTab==='dragdrop'?'active':''}" onclick="uploadTab='dragdrop';renderUploadPanel()"><i class="ti ti-upload" style="font-size:12px;margin-right:4px"></i>Upload File</div>
+    <div class="upload-tab ${uploadTab==='link'?'active':''}" onclick="uploadTab='link';renderUploadPanel()"><i class="ti ti-brand-google-drive" style="font-size:12px;margin-right:4px"></i>Attach Drive Link</div>
+  </div>
+  <div class="upload-body">
+    <div class="by-row"><label class="by-lbl">Your name</label><input class="form-inp" id="up-by" type="text" placeholder="e.g. Aditi" value="${byVal}"></div>
+    ${uploadTab==='dragdrop'?`
+      ${driveConnected?`<div style="font-size:11px;color:var(--green);background:var(--green-bg);padding:6px 10px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><i class="ti ti-brand-google-drive" style="font-size:14px"></i>Files will save to: T&F FMS → ${cl?.name||''} → ${p?.name||''}</div>`:''}
+      <div class="drop-zone" id="dz" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="document.getElementById('file-inp').click()">
+        <i class="ti ti-cloud-upload"></i>
+        <div class="dz-title">Drag & drop files here</div>
+        <div class="dz-sub">PDF, PPTX, DOCX, JPG, PNG and more</div>
+        <span class="browse-btn">Browse Files</span>
+      </div>
+      <input type="file" id="file-inp" multiple style="display:none" onchange="handleFileSelect(event)">
+      <div class="queued-files">${queuedFiles.map((f,i)=>`<div class="qf"><i class="ti ${ficon(f.name)} qf-icon"></i><span class="qf-name">${f.name}</span><span class="qf-size">${fmtSize(f.size)}</span><button class="qf-rm" onclick="removeFromQueue(${i})"><i class="ti ti-x"></i></button></div>`).join('')}</div>
+      ${queuedFiles.length>0?`<div class="upload-actions"><button class="btn-add" onclick="confirmUpload()"><i class="ti ti-upload"></i> Upload ${queuedFiles.length} file${queuedFiles.length>1?'s':''}${driveConnected?' + Save to Drive':''}</button></div>`:''}
+    `:`
+      <label class="by-lbl">Paste Google Drive / Dropbox / Figma link</label>
+      <input class="link-inp" id="up-link" type="url" placeholder="https://drive.google.com/..." value="${lnVal}" oninput="renderUploadPanel()">
+      ${lnVal?`<div class="link-preview"><i class="ti ${linkIcon(lnVal)}"></i><span style="word-break:break-all;font-size:11px;color:var(--text3)">${lnVal}</span></div>`:''}
+      <label class="by-lbl">Name (optional — auto-filled if left blank)</label>
+      <input class="link-inp" id="up-lname" type="text" placeholder="e.g. Moodboard v2 — or leave blank" value="${lnName}" oninput="renderUploadPanel()">
+      ${lnVal?`<div class="upload-actions"><button class="btn-add" onclick="confirmLink()"><i class="ti ti-link"></i> Attach Link</button></div>`:'<p style="font-size:11px;color:var(--text3)">Paste any Google Drive, Dropbox or Figma link to attach it</p>'}
+    `}
+  </div>
+</div>`;
+}
+
+// ── AUTH ──
 function sel(r){selRole=r;document.querySelectorAll('.role-opt').forEach(e=>e.classList.remove('selected'));document.getElementById('opt-'+r).classList.add('selected')}
-function doLogin(){
+async function doLogin(){
   const pw=document.getElementById('pw-inp').value;
   if(pw!==PASS[selRole]){document.getElementById('pw-err').style.display='block';return}
   document.getElementById('pw-err').style.display='none';
-  role=selRole;document.getElementById('role-tag').textContent=role.charAt(0).toUpperCase()+role.slice(1);
+  role=selRole;
+  document.getElementById('role-tag').textContent=role.charAt(0).toUpperCase()+role.slice(1);
   document.getElementById('pw-inp').value='';
   document.getElementById('scr-login').classList.remove('active');
   document.getElementById('scr-app').classList.add('active');
+  // Always auto-connect Drive silently on login
+  await silentConnectDrive();
+  if(driveConnected)document.getElementById('drive-badge').style.display='flex';
+  await loadFromSheets();
   goView('dashboard');
+}
+
+function silentConnectDrive(){
+  return new Promise((resolve)=>{
+    if(typeof google==='undefined'||!google.accounts){
+      console.log('Google script not loaded yet, skipping silent connect');
+      resolve();
+      return;
+    }
+    try{
+      const client=google.accounts.oauth2.initTokenClient({
+        client_id:CLIENT_ID,
+        scope:SCOPES,
+        prompt:'', // no popup if already authorized
+        callback:(response)=>{
+          if(!response.error){
+            accessToken=response.access_token;
+            driveConnected=true;
+            localStorage.setItem('tf_drive_token',response.access_token);
+            localStorage.setItem('tf_drive_connected','true');
+            localStorage.setItem('tf_drive_expiry',(Date.now()+(3600*1000)).toString());
+          }
+          resolve();
+        },
+      });
+      client.requestAccessToken();
+    }catch(e){
+      console.log('Silent Drive connect failed',e);
+      resolve();
+    }
+  });
 }
 function doLogout(){document.getElementById('scr-app').classList.remove('active');document.getElementById('scr-login').classList.add('active')}
 
+// ── NAV ──
 function vLabel(v){return{dashboard:'Dashboard',clients:'Clients',pipeline:'Pipeline',projects:'All Projects',mis:'MIS'}[v]||v}
 function goView(v){
-  currentClientId=null;currentProjectId=null;driveStack=[];expandedRow=null;driveTab='folders';clientEditOpen=null;
+  currentClientId=null;currentProjectId=null;driveStack=[];expandedRow=null;driveTab='folders';clientEditOpen=null;queuedFiles=[];taskSearch='';taskSearchTask='';
   navStack=[{type:'view',id:v,label:vLabel(v)}];
   document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
   const ni=document.getElementById('nav-'+v);if(ni)ni.classList.add('active');
@@ -403,7 +851,7 @@ function goView(v){
 }
 function navBack(){
   if(navStack.length<=1)return;
-  navStack.pop();expandedRow=null;clientEditOpen=null;
+  navStack.pop();expandedRow=null;clientEditOpen=null;queuedFiles=[];
   const last=navStack[navStack.length-1];
   if(last.type==='view'){document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));const ni=document.getElementById('nav-'+last.id);if(ni)ni.classList.add('active')}
   if(last.type!=='folder')driveStack=[];
@@ -412,7 +860,7 @@ function navBack(){
 }
 function navTo(idx){
   if(idx>=navStack.length-1)return;
-  navStack=navStack.slice(0,idx+1);expandedRow=null;clientEditOpen=null;
+  navStack=navStack.slice(0,idx+1);expandedRow=null;clientEditOpen=null;queuedFiles=[];
   const last=navStack[navStack.length-1];
   if(last.type==='view'){document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));const ni=document.getElementById('nav-'+last.id);if(ni)ni.classList.add('active')}
   if(last.type!=='folder')driveStack=[];
@@ -425,13 +873,14 @@ function renderNav(){
   let backBar='';
   if(navStack.length>1){
     const prev=navStack[navStack.length-2];
-    backBar=`<div class="back-bar"><button class="back-btn primary" onclick="navBack()"><i class="ti ti-arrow-left" aria-hidden="true"></i> ${prev.label}</button><div class="bc-trail">${navStack.map((s,i)=>`${i>0?'<span class="bc-sep">/</span>':''}<div class="bc-seg ${i===navStack.length-1?'last':''}"><span onclick="navTo(${i})">${s.label}</span></div>`).join('')}</div></div>`;
+    backBar=`<div class="back-bar"><button class="back-btn primary" onclick="navBack()"><i class="ti ti-arrow-left"></i> ${prev.label}</button><div class="bc-trail">${navStack.map((s,i)=>`${i>0?'<span class="bc-sep">/</span>':''}<div class="bc-seg ${i===navStack.length-1?'last':''}"><span onclick="navTo(${i})">${s.label}</span></div>`).join('')}</div></div>`;
   }
   let content='';
-  if(last.type==='view'){const v=last.id;if(v==='dashboard')content=renderDashboard();else if(v==='clients')content=renderClients();else if(v==='pipeline')content=renderPipeline();else if(v==='projects')content=renderAllProjects();else if(v==='mis')content=renderMIS();}
+  if(last.type==='view'){const v=last.id;if(v==='dashboard')content=renderDashboard();else if(v==='clients')content=renderClients();else if(v==='pipeline')content=renderPipeline();else if(v==='projects')content=renderAllProjects();else if(v==='tasks')content=renderGlobalTasks();else if(v==='mis')content=renderMIS();}
   else if(last.type==='client')content=renderClientDetail(last.id);
   else if(last.type==='project'||last.type==='folder')content=renderDrive();
   c.innerHTML=(navStack.length>1?backBar:'')+'<div class="inner">'+content+'</div>';
+  if(last.type==='project'||last.type==='folder')renderUploadPanel();
 }
 function openClient(cid){
   currentClientId=cid;currentProjectId=null;driveStack=[];expandedRow=null;clientEditOpen=null;
@@ -442,7 +891,7 @@ function openClient(cid){
   renderNav();
 }
 function openProject(pid){
-  currentProjectId=pid;driveStack=[];expandedRow=null;driveTab='folders';
+  currentProjectId=pid;driveStack=[];expandedRow=null;driveTab='folders';queuedFiles=[];
   const p=projects.find(x=>x.id===pid);currentClientId=p.clientId;
   const cl=clients.find(c=>c.id===p.clientId);
   const base=navStack.find(s=>s.type==='view')||{type:'view',id:'clients',label:'Clients'};
@@ -458,71 +907,892 @@ function enterFolder(fid,fname){
   renderNav();
 }
 function cfid(){return driveStack.length>0?driveStack[driveStack.length-1].id:null}
-function editIcon(onclick){return`<span class="edit-icon" onclick="${onclick}" title="Edit"><i class="ti ti-pencil" aria-hidden="true"></i></span>`}
+function editIcon(onclick){return`<span class="edit-icon" onclick="${onclick}" title="Edit"><i class="ti ti-pencil"></i></span>`}
 
+// ── EDIT ──
 function toggleProjEdit(pid,e){if(e)e.stopPropagation();expandedRow=expandedRow===`p_${pid}`?null:`p_${pid}`;renderNav()}
-function saveProject(pid){const p=projects.find(x=>x.id===pid);p.name=document.getElementById(`e-pn-${pid}`).value.trim()||p.name;p.clientId=document.getElementById(`e-pc-${pid}`).value;p.stage=document.getElementById(`e-ps-${pid}`).value;expandedRow=null;renderNav();}
-function delProject(pid){projects=projects.filter(p=>p.id!==pid);folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);expandedRow=null;renderNav()}
+function saveProject(pid){const p=projects.find(x=>x.id===pid);p.name=document.getElementById(`e-pn-${pid}`).value.trim()||p.name;p.clientId=document.getElementById(`e-pc-${pid}`).value;p.stage=document.getElementById(`e-ps-${pid}`).value;expandedRow=null;scheduleSave();renderNav();}
+function delProject(pid){projects=projects.filter(p=>p.id!==pid);folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);expandedRow=null;scheduleSave();renderNav()}
 function projEditRow(p,cols){return`<tr class="edit-row"><td colspan="${cols}"><div class="edit-row-inner"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="e-pn-${p.id}" value="${p.name}" style="width:160px"></div><div class="edit-field"><span class="edit-lbl">Client</span><select class="edit-sel" id="e-pc-${p.id}">${clients.map(c=>`<option value="${c.id}"${c.id===p.clientId?' selected':''}>${c.name}</option>`).join('')}</select></div><div class="edit-field"><span class="edit-lbl">Stage</span><select class="edit-sel" id="e-ps-${p.id}">${STAGES.map(s=>`<option${s===p.stage?' selected':''}>${s}</option>`).join('')}</select></div><div class="edit-actions"><button class="cancel-btn" onclick="expandedRow=null;renderNav()">Cancel</button><button class="del-btn" onclick="delProject('${p.id}')">Delete</button><button class="save-btn" onclick="saveProject('${p.id}')">Save</button></div></div></td></tr>`;}
-
 function toggleClientEdit(cid,e){if(e)e.stopPropagation();clientEditOpen=clientEditOpen===cid?null:cid;renderNav()}
-function saveClientDetail(cid){const cl=clients.find(c=>c.id===cid);cl.name=document.getElementById(`e-cn-${cid}`).value.trim()||cl.name;cl.industry=document.getElementById(`e-ci-${cid}`).value.trim();cl.contact=document.getElementById(`e-cc-${cid}`).value.trim();cl.email=document.getElementById(`e-ce-${cid}`).value.trim();clientEditOpen=null;const seg=navStack.find(s=>s.type==='client'&&s.id===cid);if(seg)seg.label=cl.name;renderNav();}
-function delClientDetail(cid){const pids=projects.filter(p=>p.clientId===cid).map(p=>p.id);clients=clients.filter(c=>c.id!==cid);projects=projects.filter(p=>p.clientId!==cid);pids.forEach(pid=>{folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);});clientEditOpen=null;goView('clients');}
+function saveClientDetail(cid){const cl=clients.find(c=>c.id===cid);cl.name=document.getElementById(`e-cn-${cid}`).value.trim()||cl.name;cl.industry=document.getElementById(`e-ci-${cid}`).value.trim();cl.contact=document.getElementById(`e-cc-${cid}`).value.trim();cl.email=document.getElementById(`e-ce-${cid}`).value.trim();clientEditOpen=null;const seg=navStack.find(s=>s.type==='client'&&s.id===cid);if(seg)seg.label=cl.name;scheduleSave();renderNav();}
+function delClientDetail(cid){const pids=projects.filter(p=>p.clientId===cid).map(p=>p.id);clients=clients.filter(c=>c.id!==cid);projects=projects.filter(p=>p.clientId!==cid);pids.forEach(pid=>{folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);});clientEditOpen=null;scheduleSave();goView('clients');}
 function toggleClientGridEdit(cid,e){if(e)e.stopPropagation();expandedRow=expandedRow===`c_${cid}`?null:`c_${cid}`;renderNav()}
-function saveClientGrid(cid){const cl=clients.find(c=>c.id===cid);cl.name=document.getElementById(`eg-cn-${cid}`).value.trim()||cl.name;cl.industry=document.getElementById(`eg-ci-${cid}`).value.trim();expandedRow=null;renderNav();}
-function delClientGrid(cid){const pids=projects.filter(p=>p.clientId===cid).map(p=>p.id);clients=clients.filter(c=>c.id!==cid);projects=projects.filter(p=>p.clientId!==cid);pids.forEach(pid=>{folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);});expandedRow=null;renderNav();}
+function saveClientGrid(cid){const cl=clients.find(c=>c.id===cid);cl.name=document.getElementById(`eg-cn-${cid}`).value.trim()||cl.name;cl.industry=document.getElementById(`eg-ci-${cid}`).value.trim();expandedRow=null;scheduleSave();renderNav();}
+function delClientGrid(cid){const pids=projects.filter(p=>p.clientId===cid).map(p=>p.id);clients=clients.filter(c=>c.id!==cid);projects=projects.filter(p=>p.clientId!==cid);pids.forEach(pid=>{folders=folders.filter(f=>f.projectId!==pid);files=files.filter(f=>f.projectId!==pid);});expandedRow=null;scheduleSave();renderNav();}
 
+// ── VIEWS ──
 function renderDashboard(){
   const recent=projects.slice().reverse().slice(0,6);const isM=canManage();let rows='';
-  if(projects.length===0){rows=`<tr><td colspan="3" style="text-align:center;color:var(--text3);padding:2rem">No projects yet</td></tr>`;}
+  if(projects.length===0){rows=`<tr><td colspan="3" style="text-align:center;color:var(--text3);padding:2rem">No projects yet — add your first client to get started</td></tr>`;}
   else{recent.forEach(p=>{const cl=clients.find(c=>c.id===p.clientId);const isExp=expandedRow===`p_${p.id}`;rows+=`<tr><td><span class="row-open" onclick="openProject('${p.id}')">${cl?cl.name:'—'}</span></td><td><div class="row-name"><span class="row-open" onclick="openProject('${p.id}')">${p.name}</span>${isM?editIcon(`toggleProjEdit('${p.id}',event)`):''}</div></td><td style="color:var(--text3)">${files.filter(f=>f.projectId===p.id).length}</td></tr>`;if(isExp)rows+=projEditRow(p,3);});}
   return`<div class="stats-grid"><div class="stat-cell"><div class="stat-lbl">Clients</div><div class="stat-val">${clients.length}</div></div><div class="stat-cell"><div class="stat-lbl">Active</div><div class="stat-val">${projects.filter(p=>p.stage==='Active').length}</div></div><div class="stat-cell"><div class="stat-lbl">In Review</div><div class="stat-val">${projects.filter(p=>p.stage==='Review').length}</div></div><div class="stat-cell"><div class="stat-lbl">Delivered</div><div class="stat-val">${projects.filter(p=>p.stage==='Delivered').length}</div></div></div><div class="sec-hd"><span class="sec-title">Recent Projects</span></div><table class="tf-table"><thead><tr><th>Client</th><th>Project</th><th>Files</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 function renderClients(){
   const isM=canManage();
-  if(clients.length===0)return`<div class="sec-hd"><span class="sec-title">Clients</span>${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus" aria-hidden="true"></i> Add Client</button>`:''}</div><div class="empty-state"><i class="ti ti-building" aria-hidden="true"></i><p>No clients yet${isM?' — add your first client':''}</p></div>`;
-  return`<div class="sec-hd"><span class="sec-title">Clients</span>${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus" aria-hidden="true"></i> Add Client</button>`:''}</div><div class="clients-grid">${clients.map(cl=>{const cp=projects.filter(p=>p.clientId===cl.id);const isExp=expandedRow===`c_${cl.id}`;return`<div style="background:${isExp?'var(--bg3)':'var(--bg2)'};position:relative;border-bottom:1px solid var(--border)"><div class="client-card" style="background:transparent"><div class="cc-init">${ini(cl.name)}</div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="cc-name" onclick="openClient('${cl.id}')">${cl.name}</div><div class="cc-type">${cl.industry||'—'}</div><div class="cc-meta"><span>${cp.length} project${cp.length!==1?'s':''}</span><span>${cp.filter(p=>p.stage==='Active').length} active</span></div></div>${isM?`<span class="edit-icon" onclick="toggleClientGridEdit('${cl.id}',event)" title="Edit"><i class="ti ti-pencil" aria-hidden="true"></i></span>`:''}</div></div>${isExp?`<div style="padding:0 1.25rem 1rem"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:.75rem;border-top:1px solid var(--border)"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="eg-cn-${cl.id}" value="${cl.name}" style="width:130px"></div><div class="edit-field"><span class="edit-lbl">Industry</span><input class="edit-inp" id="eg-ci-${cl.id}" value="${cl.industry||''}" style="width:120px"></div><div class="edit-actions"><button class="cancel-btn" onclick="expandedRow=null;renderNav()">Cancel</button><button class="del-btn" onclick="delClientGrid('${cl.id}')">Delete</button><button class="save-btn" onclick="saveClientGrid('${cl.id}')">Save</button></div></div></div>`:''}</div>`;}).join('')}</div>`;
+  if(clients.length===0)return`<div class="sec-hd"><span class="sec-title">Clients</span>${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div><div class="empty-state"><i class="ti ti-building"></i><p>No clients yet${isM?' — add your first client':''}</p></div>`;
+  return`<div class="sec-hd"><span class="sec-title">Clients</span>${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div><div class="clients-grid">${clients.map(cl=>{const cp=projects.filter(p=>p.clientId===cl.id);const isExp=expandedRow===`c_${cl.id}`;return`<div style="background:${isExp?'var(--bg3)':'var(--bg2)'};position:relative;border-bottom:1px solid var(--border)"><div class="client-card" style="background:transparent"><div class="cc-init">${ini(cl.name)}</div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="cc-name" onclick="openClient('${cl.id}')">${cl.name}</div><div class="cc-type">${cl.industry||'—'}</div><div class="cc-meta"><span>${cp.length} project${cp.length!==1?'s':''}</span><span>${cp.filter(p=>p.stage==='Active').length} active</span></div></div>${isM?`<span class="edit-icon" onclick="toggleClientGridEdit('${cl.id}',event)"><i class="ti ti-pencil"></i></span>`:''}</div></div>${isExp?`<div style="padding:0 1.25rem 1rem"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:.75rem;border-top:1px solid var(--border)"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="eg-cn-${cl.id}" value="${cl.name}" style="width:130px"></div><div class="edit-field"><span class="edit-lbl">Industry</span><input class="edit-inp" id="eg-ci-${cl.id}" value="${cl.industry||''}" style="width:120px"></div><div class="edit-actions"><button class="cancel-btn" onclick="expandedRow=null;renderNav()">Cancel</button><button class="del-btn" onclick="delClientGrid('${cl.id}')">Delete</button><button class="save-btn" onclick="saveClientGrid('${cl.id}')">Save</button></div></div></div>`:''}</div>`;}).join('')}</div>`;
 }
 function renderClientDetail(cid){
   const cl=clients.find(c=>c.id===cid);const cp=projects.filter(p=>p.clientId===cid);const isM=canManage();const isEO=clientEditOpen===cid;let rows='';
-  cp.forEach(p=>{const isExp=expandedRow===`p_${p.id}`;rows+=`<tr><td><div class="row-name"><i class="ti ti-folder-filled" style="color:var(--amber);font-size:14px;flex-shrink:0" aria-hidden="true"></i><span class="row-open" onclick="openProject('${p.id}')">${p.name}</span>${isM?editIcon(`toggleProjEdit('${p.id}',event)`):''}</div></td><td>${files.filter(f=>f.projectId===p.id).length}</td><td>${spill(p.stage)}</td></tr>`;if(isExp)rows+=projEditRow(p,3);});
-  return`<div class="client-hd-wrap"><div class="client-hd-top"><div><div class="client-hd-name">${cl.name}</div><div class="client-hd-meta">${cl.industry||''}${cl.contact?' · '+cl.contact:''}${cl.email?' · '+cl.email:''}</div></div>${isM?`<div class="client-hd-actions"><button class="btn-ghost" onclick="toggleClientEdit('${cid}',event)"><i class="ti ti-pencil" aria-hidden="true"></i> ${isEO?'Cancel':'Edit'}</button><button class="btn-danger" onclick="delClientDetail('${cid}')"><i class="ti ti-trash" aria-hidden="true"></i> Delete</button></div>`:''}</div>${isEO?`<div class="client-edit-form"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="e-cn-${cid}" value="${cl.name}" style="width:140px"></div><div class="edit-field"><span class="edit-lbl">Industry</span><input class="edit-inp" id="e-ci-${cid}" value="${cl.industry||''}" style="width:120px"></div><div class="edit-field"><span class="edit-lbl">Contact</span><input class="edit-inp" id="e-cc-${cid}" value="${cl.contact||''}" style="width:110px"></div><div class="edit-field"><span class="edit-lbl">Email</span><input class="edit-inp" id="e-ce-${cid}" value="${cl.email||''}" style="width:150px"></div><button class="save-btn" onclick="saveClientDetail('${cid}')">Save</button></div>`:''}</div><div class="sec-hd"><span class="sec-title">Projects</span>${isM?`<button class="btn-add" onclick="om('mod-proj')"><i class="ti ti-plus" aria-hidden="true"></i> Add Project</button>`:''}</div><table class="tf-table"><thead><tr><th>Project</th><th>Files</th><th>Stage</th></tr></thead><tbody>${cp.length===0?`<tr><td colspan="3" style="text-align:center;color:var(--text3);padding:2rem">No projects yet</td></tr>`:rows}</tbody></table>`;
+  cp.forEach(p=>{const isExp=expandedRow===`p_${p.id}`;rows+=`<tr><td><div class="row-name"><i class="ti ti-folder-filled" style="color:var(--amber);font-size:14px;flex-shrink:0"></i><span class="row-open" onclick="openProject('${p.id}')">${p.name}</span>${isM?editIcon(`toggleProjEdit('${p.id}',event)`):''}</div></td><td>${files.filter(f=>f.projectId===p.id).length}</td><td>${isM?stageDropdown(p.id,p.stage):spill(p.stage)}</td></tr>`;if(isExp)rows+=projEditRow(p,3);});
+  return`<div class="client-hd-wrap"><div class="client-hd-top"><div><div class="client-hd-name">${cl.name}</div><div class="client-hd-meta">${cl.industry||''}${cl.contact?' · '+cl.contact:''}${cl.email?' · '+cl.email:''}</div></div>${isM?`<div class="client-hd-actions"><button class="btn-ghost" onclick="toggleClientEdit('${cid}',event)"><i class="ti ti-pencil"></i> ${isEO?'Cancel':'Edit'}</button><button class="btn-danger" onclick="delClientDetail('${cid}')"><i class="ti ti-trash"></i> Delete</button></div>`:''}</div>${isEO?`<div class="client-edit-form"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="e-cn-${cid}" value="${cl.name}" style="width:140px"></div><div class="edit-field"><span class="edit-lbl">Industry</span><input class="edit-inp" id="e-ci-${cid}" value="${cl.industry||''}" style="width:120px"></div><div class="edit-field"><span class="edit-lbl">Contact</span><input class="edit-inp" id="e-cc-${cid}" value="${cl.contact||''}" style="width:110px"></div><div class="edit-field"><span class="edit-lbl">Email</span><input class="edit-inp" id="e-ce-${cid}" value="${cl.email||''}" style="width:150px"></div><button class="save-btn" onclick="saveClientDetail('${cid}')">Save</button></div>`:''}</div><div class="sec-hd"><span class="sec-title">Projects</span>${isM?`<button class="btn-add" onclick="om('mod-proj')"><i class="ti ti-plus"></i> Add Project</button>`:''}</div><table class="tf-table"><thead><tr><th>Project</th><th>Files</th><th>Stage</th></tr></thead><tbody>${cp.length===0?`<tr><td colspan="3" style="text-align:center;color:var(--text3);padding:2rem">No projects yet</td></tr>`:rows}</tbody></table>`;
 }
 function renderPipeline(){
   return`<div class="sec-hd"><span class="sec-title">Pipeline</span></div><div class="pipeline-scroll"><div class="pipeline-stages">${STAGES.map(s=>{const sp=projects.filter(p=>p.stage===s);return`<div class="stage-col"><div class="stage-head"><span class="stage-name">${s}</span><span class="stage-count">${sp.length}</span></div><div class="stage-body">${sp.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<div class="kcard" onclick="openProject('${p.id}')"><div class="kc-name">${p.name}</div><div class="kc-client">${cl?cl.name:'—'}</div><span class="kc-tag">${p.service}</span></div>`;}).join('')}</div></div>`;}).join('')}</div></div>`;
 }
+function quickStage(pid, newStage){
+  const p=projects.find(x=>x.id===pid);
+  if(p){p.stage=newStage;scheduleSave();renderNav();}
+}
+
+function stageDropdown(pid, currentStage){
+  return `<select class="edit-sel" onchange="quickStage('${pid}',this.value)" onclick="event.stopPropagation()" style="font-size:10px;padding:2px 6px;border-radius:2px">
+    ${STAGES.map(s=>`<option value="${s}" ${s===currentStage?'selected':''}>${s}</option>`).join('')}
+  </select>`;
+}
+
 function renderAllProjects(){
   const isM=canManage();let rows='';
-  projects.forEach(p=>{const cl=clients.find(c=>c.id===p.clientId);const isExp=expandedRow===`p_${p.id}`;rows+=`<tr><td><span class="row-open" onclick="openProject('${p.id}')">${cl?cl.name:'—'}</span></td><td><div class="row-name"><span class="row-open" onclick="openProject('${p.id}')">${p.name}</span>${isM?editIcon(`toggleProjEdit('${p.id}',event)`):''}</div></td><td>${files.filter(f=>f.projectId===p.id).length}</td><td>${spill(p.stage)}</td></tr>`;if(isExp)rows+=projEditRow(p,4);});
+  projects.forEach(p=>{const cl=clients.find(c=>c.id===p.clientId);const isExp=expandedRow===`p_${p.id}`;rows+=`<tr><td><span class="row-open" onclick="openProject('${p.id}')">${cl?cl.name:'—'}</span></td><td><div class="row-name"><span class="row-open" onclick="openProject('${p.id}')">${p.name}</span>${isM?editIcon(`toggleProjEdit('${p.id}',event)`):''}</div></td><td>${files.filter(f=>f.projectId===p.id).length}</td><td>${isM?stageDropdown(p.id,p.stage):spill(p.stage)}</td></tr>`;if(isExp)rows+=projEditRow(p,4);});
   return`<div class="sec-hd"><span class="sec-title">All Projects</span></div><table class="tf-table"><thead><tr><th>Client</th><th>Project</th><th>Files</th><th>Stage</th></tr></thead><tbody>${rows||`<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:2rem">No projects yet</td></tr>`}</tbody></table>`;
 }
 function renderDrive(){
   const p=projects.find(x=>x.id===currentProjectId);const fid=cfid();const isFolder=driveStack.length>0;const curName=isFolder?driveStack[driveStack.length-1].name:p.name;
-  const tabs=!isFolder?`<div class="drive-tabs"><div class="drive-tab ${driveTab==='folders'?'active':''}" onclick="driveTab='folders';renderNav()">Folders</div><div class="drive-tab ${driveTab==='all'?'active':''}" onclick="driveTab='all';renderNav()">All Files</div></div>`:'';
-  const toolbar=`<div class="sec-hd"><div><div style="font-size:16px;font-weight:400;color:var(--text)">${curName}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${spill(p.stage)} <span style="margin-left:6px">${p.service}</span></div></div><div style="display:flex;gap:6px">${!isFolder&&driveTab==='folders'?`<button class="btn-ghost" onclick="om('mod-folder')"><i class="ti ti-folder-plus" aria-hidden="true"></i> New Folder</button>`:''}<button class="btn-add" onclick="openUploadModal()"><i class="ti ti-upload" aria-hidden="true"></i> Upload Files</button></div></div>`;
+  const tabs=!isFolder?`<div class="drive-tabs"><div class="drive-tab ${driveTab==='folders'?'active':''}" onclick="driveTab='folders';renderNav()">Folders</div><div class="drive-tab ${driveTab==='all'?'active':''}" onclick="driveTab='all';renderNav()">All Files</div><div class="drive-tab ${driveTab==='shared'?'active':''}" onclick="driveTab='shared';renderNav()">Shared Files</div></div>`:'';
+  const toolbar=`<div class="sec-hd"><div><div style="font-size:16px;font-weight:400;color:var(--text)">${curName}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${spill(p.stage)} <span style="margin-left:6px">${p.service}</span>${driveConnected?`<span style="margin-left:8px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><i class="ti ti-brand-google-drive" style="font-size:12px"></i> Drive sync on</span>`:''}</div></div><div style="display:flex;gap:6px">${!isFolder&&driveTab==='folders'?`<button class="btn-ghost" onclick="om('mod-folder')"><i class="ti ti-folder-plus"></i> New Folder</button>`:''}<button class="btn-ghost" onclick="openShareModal('${p.id}')"><i class="ti ti-share"></i> Share File</button></div></div>`;
   let body='';
-  if(driveTab==='all'&&!isFolder){
+  if(driveTab==='shared'&&!isFolder){
+    const pShared=sharedFiles.filter(sf=>sf.projectId===p.id);
+    if(pShared.length===0){body=`<div class="empty-state"><i class="ti ti-share" aria-hidden="true"></i><p>No files shared in this project yet</p></div>`;}
+    else{
+      body=`<div style="border:1px solid var(--border);margin-bottom:12px">`;
+      pShared.slice().reverse().forEach(sf=>{
+        const recipientName=sf.sentTo==='all'?'Entire Team':teamMembers.find(m=>m.id===sf.sentTo)?.name||sf.sentTo;
+        body+=`<div class="file-list-row">
+          <i class="ti ti-share fl-icon" style="color:var(--blue)"></i>
+          <div class="fl-info">
+            <div class="fl-name">${sf.fileName}</div>
+            <div class="fl-meta">Shared by ${sf.sentBy} → ${recipientName} · ${sf.date}${sf.note?' · '+sf.note:''}</div>
+          </div>
+          <div class="fl-acts">
+            ${sf.driveLink?`<a href="${sf.driveLink}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open</a>`:''}
+          </div>
+        </div>`;
+      });
+      body+=`</div>`;
+    }
+    body+=`<button class="btn-ghost" style="margin-top:8px" onclick="openShareModal('${p.id}')"><i class="ti ti-share"></i> Share a File</button>`;
+  } else if(driveTab==='all'&&!isFolder){
     const allFiles=files.filter(f=>f.projectId===p.id);
-    if(allFiles.length===0){body=`<div class="empty-state"><i class="ti ti-file-off" aria-hidden="true"></i><p>No files yet</p></div>`;}
-    else{body=`<div style="border:1px solid var(--border)">`;allFiles.forEach(fi=>{body+=`<div class="file-list-row"><i class="ti ${ficon(fi.name)} fl-icon" aria-hidden="true"></i><div class="fl-info"><div class="fl-name">${fi.name}</div><div class="fl-meta">${folderPath(fi.folderId)} · ${fi.by} · ${fi.date}${fi.size?' · '+fi.size:''}</div></div><div class="fl-acts"><button class="fl-act" aria-label="Download"><i class="ti ti-download" aria-hidden="true"></i></button>${canManage()?`<button class="fl-act" onclick="delFile('${fi.id}')" aria-label="Delete"><i class="ti ti-trash" aria-hidden="true"></i></button>`:''}</div></div>`;});body+=`</div>`;}
-    body+=`<div class="upload-zone" style="margin-top:10px" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="openUploadModal()"><i class="ti ti-cloud-upload" aria-hidden="true"></i><div class="upload-zone-title">Drag & drop files here</div><div class="upload-zone-sub">or click to open upload panel</div></div>`;
+    if(allFiles.length===0){body=`<div class="empty-state"><i class="ti ti-file-off"></i><p>No files yet — upload or attach a Drive link below</p></div>`;}
+    else{
+      body=`<div style="border:1px solid var(--border);margin-bottom:12px">`;
+      allFiles.forEach(fi=>{
+        const isLnk=fi.isLink==='true'||fi.isLink===true;
+        const icon=isLnk?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));
+        const openEl=fi.link?`<a href="${fi.link}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open in Drive</a>`:'';
+        const dateStr=fmtDate(fi.date);
+        const loc=fi.folderId?folderPath(fi.folderId):'Root';
+        body+=`<div class="file-list-row">
+          <i class="ti ${icon} fl-icon" style="${fi.link?'color:#4285f4':'color:var(--text3)'}"></i>
+          <div class="fl-info">
+            <div class="fl-name">${fi.name}</div>
+            <div class="fl-meta">${loc} · ${fi.by||'Team'} · ${dateStr}${fi.size?' · '+fi.size:''}${fi.link&&!isLnk?' · <span style="color:var(--green);font-weight:500">✓ In Drive</span>':isLnk?' · <span style="color:#4285f4">Drive link</span>':''}</div>
+          </div>
+          <div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="delFile('${fi.id}')" title="Delete"><i class="ti ti-trash"></i></button>`:''}</div>
+        </div>`;
+      });
+      body+=`</div>`;
+    }
   } else {
-    const lf=folders.filter(f=>f.projectId===p.id&&f.parentId===fid);const lfi=files.filter(f=>f.projectId===p.id&&f.folderId===fid);
-    if(lf.length===0&&lfi.length===0){body=`<div class="empty-state"><i class="ti ti-folder-open" aria-hidden="true"></i><p>Empty — create a folder or upload files</p></div>`;}
-    else{body=`<div class="drive-grid">${lf.map(fo=>{const cnt=cif(fo.id,p.id);return`<div class="di" onclick="enterFolder('${fo.id}','${fo.name}')"><div class="di-acts">${canManage()?`<button class="di-act" onclick="event.stopPropagation();delFolder('${fo.id}')" aria-label="Delete"><i class="ti ti-trash" aria-hidden="true"></i></button>`:''}</div><i class="ti ti-folder-filled di-icon folder" aria-hidden="true"></i><div class="di-name">${fo.name}</div><div class="di-meta">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('')}${lfi.map(fi=>`<div class="di"><div class="di-acts"><button class="di-act" aria-label="Download"><i class="ti ti-download" aria-hidden="true"></i></button>${canManage()?`<button class="di-act" onclick="delFile('${fi.id}')" aria-label="Delete"><i class="ti ti-trash" aria-hidden="true"></i></button>`:''}</div><i class="ti ${ficon(fi.name)} di-icon" aria-hidden="true"></i><div class="di-name">${fi.name}</div><div class="di-meta">${fi.by} · ${fi.date}</div></div>`).join('')}</div>`;}
-    body+=`<div class="upload-zone" style="margin-top:10px" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="openUploadModal()"><i class="ti ti-cloud-upload" aria-hidden="true"></i><div class="upload-zone-title">Drag & drop files here</div><div class="upload-zone-sub">or click to open upload panel</div></div>`;
+    const lf=folders.filter(f=>f.projectId===p.id&&(f.parentId||'')===(fid||''));const lfi=files.filter(f=>f.projectId===p.id&&(f.folderId||'')===(fid||''));
+    if(lf.length===0&&lfi.length===0){body=`<div class="empty-state"><i class="ti ti-folder-open"></i><p>Empty — create a folder or add files below</p></div>`;}
+    else{
+      if(lf.length===0){body=`<div class="empty-state"><i class="ti ti-folder-open"></i><p>No folders yet — create one above</p></div>`;}
+      else{body=`<div class="drive-grid">${lf.map(fo=>{const cnt=cif(fo.id,p.id);return`<div class="di" onclick="enterFolder('${fo.id}','${fo.name}')"><div class="di-acts">${canManage()?`<button class="di-act" onclick="event.stopPropagation();delFolder('${fo.id}')"><i class="ti ti-trash"></i></button>`:''}</div><i class="ti ti-folder-filled di-icon folder"></i><div class="di-name">${fo.name}</div><div class="di-meta">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('')}</div>`;}
+    }
   }
-  return toolbar+tabs+body;
+  return toolbar+tabs+body+`<div id="upload-panel-wrap"></div>`;
 }
-function cif(fid,pid){let c=files.filter(f=>f.projectId===pid&&f.folderId===fid).length;folders.filter(f=>f.projectId===pid&&f.parentId===fid).forEach(s=>{c+=cif(s.id,pid)});return c;}
-function delFolder(fid){folders=folders.filter(f=>f.id!==fid);files=files.filter(f=>f.folderId!==fid);renderNav()}
-function delFile(fid){files=files.filter(f=>f.id!==fid);renderNav()}
-function addFolder(){const name=document.getElementById('if-name').value.trim();if(!name)return;folders.push({id:'fo'+Date.now(),projectId:currentProjectId,parentId:cfid(),name});cm('mod-folder');document.getElementById('if-name').value='';renderNav();}
-
+function cif(fid,pid){let c=files.filter(f=>f.projectId===pid&&(f.folderId||'')===fid).length;folders.filter(f=>f.projectId===pid&&(f.parentId||'')===fid).forEach(s=>{c+=cif(s.id,pid)});return c;}
+function delFolder(fid){folders=folders.filter(f=>f.id!==fid);files=files.filter(f=>(f.folderId||'')!==fid);scheduleSave();renderNav()}
+function delFile(fid){files=files.filter(f=>f.id!==fid);scheduleSave();renderNav()}
+async function addFolder(){
+  const name=document.getElementById('if-name').value.trim();if(!name)return;
+  const fo={id:'fo'+Date.now(),projectId:currentProjectId,parentId:cfid()||'',name};
+  folders.push(fo);
+  cm('mod-folder');document.getElementById('if-name').value='';
+  if(driveConnected)await createDriveFolder(name,currentProjectId,cfid());
+  scheduleSave();renderNav();
+}
 function renderMIS(){
   const svc={Strategy:0,Research:0,Creative:0,Production:0};projects.forEach(p=>{if(svc[p.service]!==undefined)svc[p.service]++});const mx=Math.max(...Object.values(svc),1);
   return`<div class="sec-hd"><span class="sec-title">MIS — Overview</span></div><div class="stats-grid" style="margin-bottom:1.25rem"><div class="stat-cell"><div class="stat-lbl">Total Projects</div><div class="stat-val">${projects.length}</div></div><div class="stat-cell"><div class="stat-lbl">Total Files</div><div class="stat-val">${files.length}</div></div><div class="stat-cell"><div class="stat-lbl">Clients</div><div class="stat-val">${clients.length}</div></div><div class="stat-cell"><div class="stat-lbl">Delivered</div><div class="stat-val">${projects.filter(p=>p.stage==='Delivered').length}</div></div></div><div class="mis-grid"><div class="mis-cell"><div class="mis-lbl">Projects by service</div>${Object.entries(svc).map(([k,v])=>`<div class="brow"><span class="blbl">${k}</span><div class="btrack"><div class="bfill" style="width:${Math.round(v/mx*100)}%"></div></div><span class="bval">${v}</span></div>`).join('')}</div><div class="mis-cell"><div class="mis-lbl">Pipeline</div>${STAGES.map(s=>{const c=projects.filter(p=>p.stage===s).length;return`<div class="brow"><span class="blbl">${s}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(projects.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div><div class="mis-cell"><div class="mis-lbl">Files by client</div>${clients.length===0?'<p style="font-size:11px;color:var(--text3)">No data yet</p>':clients.map(cl=>{const c=files.filter(f=>{const p=projects.find(x=>x.id===f.projectId);return p&&p.clientId===cl.id}).length;return`<div class="brow"><span class="blbl" style="font-size:10px;width:88px">${cl.name.split(' ')[0]}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(files.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div><div class="mis-cell"><div class="mis-lbl">Stage summary</div>${STAGES.map(s=>{const c=projects.filter(p=>p.stage===s).length;return`<div class="brow"><span class="blbl">${s}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(projects.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div></div>`;
 }
-function addClient(){const name=document.getElementById('ic-name').value.trim();if(!name)return;clients.push({id:'c'+Date.now(),name,industry:document.getElementById('ic-ind').value.trim(),contact:document.getElementById('ic-con').value.trim(),email:document.getElementById('ic-mail').value.trim()});cm('mod-client');goView('clients');}
-function addProject(){const name=document.getElementById('ip-name').value.trim();if(!name)return;projects.push({id:'p'+Date.now(),clientId:currentClientId,name,service:document.getElementById('ip-svc').value,stage:document.getElementById('ip-stage').value,notes:document.getElementById('ip-notes').value.trim()});cm('mod-proj');navStack.pop();renderNav();}
+function addClient(){const name=document.getElementById('ic-name').value.trim();if(!name)return;clients.push({id:'c'+Date.now(),name,industry:document.getElementById('ic-ind').value.trim(),contact:'',email:''});cm('mod-client');scheduleSave();goView('clients');}
+function addProject(){const name=document.getElementById('ip-name').value.trim();if(!name)return;projects.push({id:'p'+Date.now(),clientId:currentClientId,name,service:document.getElementById('ip-svc').value,stage:document.getElementById('ip-stage').value,notes:document.getElementById('ip-notes').value.trim()});cm('mod-proj');scheduleSave();navStack.pop();renderNav();}
+
+
+// ── TASKS ──
+let tasks = [];
+let teamMembers = [
+  {id:'m1', name:'Aditi Sinde', phone:'8169287446', email:'team@thought-found.com'},
+  {id:'m2', name:'Sanjay', phone:'9845169183', email:'team2@thought-found.com'},
+  {id:'m3', name:'Dilip', phone:'8977559817', email:'operations@thought-found.com'},
+  {id:'m4', name:'Palak', phone:'8850894058', email:'ea@thought-found.com'},
+  {id:'m5', name:'Aaradhya', phone:'585998917', email:'outreach@thought-found.com'},
+  {id:'m6', name:'Aananya', phone:'9638535322', email:'intern@thought-found.com'},
+];
+let sharedFiles = [];
+let currentShareFileId = null;
+let currentShareProjectId = null;
+let shareFile = null;
+let currentSubmitTaskId = null;
+let submitFile = null;
+let taskView = 'all'; // 'all' | 'followup' | 'add'
+let taskSearch = '';
+let taskSearchTask = '';
+
+function taskDueStatus(dateStr){
+  if(!dateStr) return 'upcoming';
+  const due = new Date(dateStr);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  due.setHours(0,0,0,0);
+  const diff = (due - today) / (1000*60*60*24);
+  if(diff < 0) return 'overdue';
+  if(diff === 0) return 'today';
+  if(diff <= 2) return 'upcoming';
+  return 'normal';
+}
+
+function duePill(dateStr, done){
+  if(done==='true'||done===true) return `<span class="task-due due-done">Done</span>`;
+  const s = taskDueStatus(dateStr);
+  const labels = {overdue:'Overdue',today:'Today',upcoming:'Soon',normal:dateStr};
+  const cls = {overdue:'due-overdue',today:'due-today',upcoming:'due-upcoming',normal:'due-upcoming'};
+  return `<span class="task-due ${cls[s]}">${labels[s]}</span>`;
+}
+
+function openAddTaskModal(projectId){
+  // populate project dropdown
+  const sel = document.getElementById('it-proj');
+  sel.innerHTML = '<option value="">— No specific project —</option>';
+  projects.forEach(p => {
+    const cl = clients.find(c=>c.id===p.clientId);
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = (cl?cl.name+' — ':'')+p.name;
+    if(projectId && p.id===projectId) opt.selected=true;
+    sel.appendChild(opt);
+  });
+  // populate team member dropdown
+  const memberSel = document.getElementById('it-member');
+  memberSel.innerHTML = '<option value="">— Select team member —</option>' +
+    teamMembers.map(m=>`<option value="${m.id}">${m.name} — ${m.phone}</option>`).join('') +
+    '<option value="__custom__">+ Add new team member…</option>';
+  document.getElementById('custom-member-fields').style.display='none';
+  document.getElementById('it-name').value='';
+  document.getElementById('it-phone').value='';
+  document.getElementById('it-email').value='';
+  document.getElementById('it-task').value='';
+  document.getElementById('it-date').value='';
+  om('mod-task');
+}
+
+function fillMemberDetails(){
+  const sel=document.getElementById('it-member');
+  const customDiv=document.getElementById('custom-member-fields');
+  if(sel.value==='__custom__'){
+    customDiv.style.display='block';
+    document.getElementById('it-name').value='';
+    document.getElementById('it-phone').value='';
+    document.getElementById('it-email').value='';
+  } else if(sel.value){
+    customDiv.style.display='none';
+    const m=teamMembers.find(x=>x.id===sel.value);
+    if(m){
+      document.getElementById('it-name').value=m.name;
+      document.getElementById('it-phone').value=m.phone;
+      document.getElementById('it-email').value=m.email;
+    }
+  } else {
+    customDiv.style.display='none';
+    document.getElementById('it-name').value='';
+    document.getElementById('it-phone').value='';
+    document.getElementById('it-email').value='';
+  }
+}
+
+function saveNewMember(){
+  const name=document.getElementById('it-name-new').value.trim();
+  const phone=document.getElementById('it-phone-new').value.trim();
+  const email=document.getElementById('it-email-new').value.trim();
+  if(!name){showToast('Please enter a name');return;}
+  const newMember={id:'m'+Date.now(), name, phone, email};
+  teamMembers.push(newMember);
+  document.getElementById('it-name').value=name;
+  document.getElementById('it-phone').value=phone;
+  document.getElementById('it-email').value=email;
+  scheduleSave();
+  showToast('Team member added ✓');
+  renderNav();
+}
+
+function openManageTeam(){
+  renderTeamList();
+  om('mod-team');
+}
+function renderTeamList(){
+  const el=document.getElementById('team-list');
+  if(!el)return;
+  el.innerHTML=teamMembers.map((m,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:500;color:var(--text)">${m.name}</div>
+        <div style="font-size:10px;color:var(--text3)">${m.phone} · ${m.email}</div>
+      </div>
+      <button class="edit-icon" onclick="editTeamMember(${i})" title="Edit"><i class="ti ti-pencil"></i></button>
+      <button class="edit-icon" onclick="deleteTeamMember(${i})" title="Delete" style="color:var(--red)"><i class="ti ti-trash"></i></button>
+    </div>
+  `).join('');
+}
+function addTeamMember(){
+  const name=document.getElementById('nm-name').value.trim();
+  if(!name){showToast('Please enter a name');return;}
+  teamMembers.push({id:'m'+Date.now(),name,phone:document.getElementById('nm-phone').value.trim(),email:document.getElementById('nm-email').value.trim()});
+  document.getElementById('nm-name').value='';
+  document.getElementById('nm-phone').value='';
+  document.getElementById('nm-email').value='';
+  scheduleSave();renderTeamList();showToast('Team member added ✓');
+}
+function deleteTeamMember(i){
+  if(confirm('Delete '+teamMembers[i].name+'?')){teamMembers.splice(i,1);scheduleSave();renderTeamList();}
+}
+function editTeamMember(i){
+  const m=teamMembers[i];
+  const name=prompt('Name:',m.name);if(name===null)return;
+  const phone=prompt('Phone:',m.phone);if(phone===null)return;
+  const email=prompt('Email:',m.email);if(email===null)return;
+  teamMembers[i]={...m,name,phone,email};
+  scheduleSave();renderTeamList();showToast('Updated ✓');
+}
+
+function generateTaskId(){
+  // Generate a short unique ID like the sheet (e.g. dyc78xl)
+  return Math.random().toString(36).substring(2,9);
+}
+
+function addTask(){
+  const name=document.getElementById('it-name').value.trim();
+  const task=document.getElementById('it-task').value.trim();
+  const date=document.getElementById('it-date').value;
+  if(!name||!task||!date){showToast('Please select a team member, fill task and due date');return;}
+  const t={
+    id:'t'+Date.now(),
+    taskId:generateTaskId(),
+    name,
+    phone:document.getElementById('it-phone').value.trim(),
+    email:document.getElementById('it-email').value.trim(),
+    task,
+    projectId:document.getElementById('it-proj').value||'',
+    dueDate:date,
+    firstDate:today(),
+    revision1:'',
+    revision2:'',
+    latestRevision:today(),
+    totalRevisions:'0',
+    done:'false',
+    submittedFile:'',
+    submittedLink:'',
+    createdDate:today()
+  };
+  tasks.push(t);
+  cm('mod-task');
+  scheduleSave();
+  showToast('Task added ✓');
+  renderNav();
+}
+
+function markTaskDone(tid){
+  const t=tasks.find(x=>x.id===tid);
+  if(t){t.done='true';t.latestRevision=today();scheduleSave();renderNav();}
+}
+
+let currentReviseTaskId=null;
+
+function openReviseModal(tid){
+  currentReviseTaskId=tid;
+  const t=tasks.find(x=>x.id===tid);
+  if(!t)return;
+  document.getElementById('revise-taskid').textContent=t.taskId||t.id;
+  document.getElementById('revise-name').textContent=t.name;
+  document.getElementById('revise-task').textContent=t.task;
+  document.getElementById('revise-date').value=t.dueDate;
+  om('mod-revise');
+}
+
+function confirmRevise(){
+  const t=tasks.find(x=>x.id===currentReviseTaskId);
+  if(!t)return;
+  const newDate=document.getElementById('revise-date').value;
+  if(!newDate){showToast('Please select a new planned date');return;}
+
+  t.done='false';
+  t.submittedFile='';
+  t.submittedLink='';
+  // Track revision history like the sheet (Revision 1, Revision 2 columns)
+  const revCount=parseInt(t.totalRevisions||'0')+1;
+  t.totalRevisions=String(revCount);
+  if(revCount===1) t.revision1=today();
+  else if(revCount===2) t.revision2=today();
+  t.latestRevision=today();
+  t.dueDate=newDate; // update planned date to the new one
+
+  cm('mod-revise');
+  scheduleSave();
+  showToast('Task revised — new date set ✓');
+  renderNav();
+}
+
+function openSubmitModal(tid){
+  currentSubmitTaskId=tid;
+  submitFile=null;
+  const t=tasks.find(x=>x.id===tid);
+  document.getElementById('submit-task-info').innerHTML=`<strong>${t.task}</strong><br><span style="color:var(--text3)">Due: ${t.dueDate}</span>`;
+  document.getElementById('submit-file-name').textContent='';
+  document.getElementById('submit-confirm-btn').style.display='none';
+  document.getElementById('mod-submit').style.display='flex';
+}
+
+function handleSubmitDrop(e){
+  e.preventDefault();
+  const f=e.dataTransfer.files[0];
+  if(f) setSubmitFile(f);
+}
+function handleSubmitFile(e){
+  const f=e.target.files[0];
+  if(f) setSubmitFile(f);
+}
+function setSubmitFile(f){
+  submitFile=f;
+  document.getElementById('submit-file-name').textContent='Selected: '+f.name;
+  document.getElementById('submit-confirm-btn').style.display='flex';
+}
+
+async function confirmSubmit(){
+  if(!submitFile||!currentSubmitTaskId) return;
+  const t=tasks.find(x=>x.id===currentSubmitTaskId);
+  if(!t) return;
+  showToast('Submitting…');
+
+  // Upload to Drive if connected
+  let driveLink='';
+  if(driveConnected && t.projectId){
+    const info = await uploadToDrive(submitFile, t.projectId, null);
+    if(info) driveLink=info.driveLink;
+  }
+
+  // Mark done
+  t.done='true';
+  t.submittedFile=submitFile.name;
+  t.submittedLink=driveLink;
+  t.latestRevision=today();
+
+  // Send email via Apps Script
+  try{
+    await fetch(SCRIPT_URL, {
+      method:'POST',
+      body: JSON.stringify({
+        action:'sendSubmission',
+        taskName: t.task,
+        assignedName: t.name,
+        assignedEmail: t.email,
+        dueDate: t.dueDate,
+        submittedFile: submitFile.name,
+        driveLink: driveLink,
+        projectId: t.projectId
+      }),
+      headers:{'Content-Type':'text/plain;charset=utf-8'}
+    });
+  }catch(e){console.error('Email send error',e);}
+
+  scheduleSave();
+  document.getElementById('mod-submit').style.display='none';
+  showToast('Task submitted ✓ Owner notified!');
+  renderNav();
+}
+
+function renderTasks(projectId){
+  const isM=canManage();
+  const filtered = projectId
+    ? tasks.filter(t=>t.projectId===projectId)
+    : tasks;
+
+  const search1=(taskSearch||'').toLowerCase();
+  const search2=(taskSearchTask||'').toLowerCase();
+  const shown = filtered.filter(t=>{
+    const matchName=!search1||t.name.toLowerCase().includes(search1);
+    const matchTask=!search2||t.task.toLowerCase().includes(search2);
+    return matchName&&matchTask;
+  });
+
+  // For global view split by tab
+  let list = shown;
+  if(!projectId){
+    if(taskView==='followup') list=shown.filter(t=>t.done!=='true'&&taskDueStatus(t.dueDate)!=='normal');
+    else if(taskView==='all') list=shown.filter(t=>t.done!=='true');
+  }
+
+  const addBtn = isM ? `<button class="btn-add" onclick="openAddTaskModal('${projectId||''}')"><i class="ti ti-plus"></i> Add Task</button>` : '';
+
+  let tabs='';
+  if(!projectId){
+    tabs=`<div class="task-tabs">
+      <div class="task-tab ${taskView==='add'?'active':''}" onclick="taskView='add';renderNav()"><i class="ti ti-plus" style="font-size:12px;margin-right:4px"></i>Add Task</div>
+      <div class="task-tab ${taskView==='followup'?'active':''}" onclick="taskView='followup';renderNav()"><i class="ti ti-bell" style="font-size:12px;margin-right:4px"></i>Follow Up</div>
+      <div class="task-tab ${taskView==='all'?'active':''}" onclick="taskView='all';renderNav()"><i class="ti ti-list" style="font-size:12px;margin-right:4px"></i>All Pending</div>
+      <div class="task-tab ${taskView==='share'?'active':''}" onclick="taskView='share';renderNav()"><i class="ti ti-share" style="font-size:12px;margin-right:4px"></i>Share Files</div>
+    </div>`;
+  }
+
+  if(!projectId && taskView==='share'){
+    return tabs + renderShareFilesView();
+  }
+
+  if(!projectId && taskView==='add'){
+    // inline add form
+    return `${tabs}<div style="border:1px solid var(--border);background:var(--bg2);padding:1.25rem">
+      <div class="form-row"><label class="form-lbl">Assign to</label>
+        <select class="form-sel" id="it-member" onchange="fillMemberDetails()">
+          <option value="">— Select team member —</option>
+          ${teamMembers.map(m=>`<option value="${m.id}">${m.name} — ${m.phone}</option>`).join('')}
+          <option value="__custom__">+ Add new team member…</option>
+        </select>
+      </div>
+      <div id="custom-member-fields" style="display:none">
+        <div class="form-row"><label class="form-lbl">Name</label><input class="form-inp" id="it-name-new" type="text" placeholder="e.g. Sanjay"></div>
+        <div class="form-row"><label class="form-lbl">Phone / WhatsApp</label><input class="form-inp" id="it-phone-new" type="text"></div>
+        <div class="form-row"><label class="form-lbl">Email</label><input class="form-inp" id="it-email-new" type="email"></div>
+        <button class="btn-ghost" onclick="saveNewMember()" style="margin-bottom:10px"><i class="ti ti-plus"></i> Save Team Member</button>
+      </div>
+      <input type="hidden" id="it-name" value="">
+      <input type="hidden" id="it-phone" value="">
+      <input type="hidden" id="it-email" value="">
+      <div class="form-row"><label class="form-lbl">Task description</label><textarea class="form-ta" id="it-task" style="min-height:60px;resize:vertical" placeholder="Describe exactly what needs to be done…"></textarea></div>
+      <div class="form-row"><label class="form-lbl">Project</label><select class="form-sel" id="it-proj"><option value="">— No specific project —</option>${projects.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<option value="${p.id}">${cl?cl.name+' — ':''}${p.name}</option>`;}).join('')}</select></div>
+      <div class="form-row"><label class="form-lbl">Due date</label><input class="form-inp" id="it-date" type="date"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn-add" onclick="addTask()">Add Task</button></div>
+    </div>`;
+  }
+
+  const searchRow=`<div class="task-search-row">
+    <input class="task-search" placeholder="Search by name…" value="${taskSearch}" oninput="taskSearch=this.value;renderNav()">
+    <input class="task-search" placeholder="Search by task…" value="${taskSearchTask}" oninput="taskSearchTask=this.value;renderNav()">
+  </div>`;
+
+  let rows='';
+  if(list.length===0){
+    rows=`<div class="empty-state" style="border:none"><i class="ti ti-checkbox"></i><p>No tasks here</p></div>`;
+  } else {
+    list.forEach(t=>{
+      const isDone=t.done==='true'||t.done===true;
+      const p=t.projectId?projects.find(x=>x.id===t.projectId):null;
+      const cl=p?clients.find(c=>c.id===p.clientId):null;
+      const projLabel=p?`${cl?cl.name+' — ':''}${p.name}`:'General';
+      let actions='';
+      if(isDone){
+        actions=`<span style="font-size:10px;color:var(--green);font-weight:500;letter-spacing:1px;text-transform:uppercase">✓ Done</span>`;
+        if(isM) actions+=` <button class="revise-btn" onclick="openReviseModal('${t.id}')">Revise</button>`;
+      } else {
+        if(isM) actions+=`<button class="done-btn" onclick="markTaskDone('${t.id}')">✓ Done</button>`;
+        if(!isM) actions+=`<button class="submit-btn" onclick="openSubmitModal('${t.id}')"><i class="ti ti-upload" style="font-size:12px"></i> Submit</button>`;
+        if(isM) actions+=` <button class="revise-btn" onclick="openReviseModal('${t.id}')">Revise</button>`;
+      }
+      rows+=`<div class="task-row">
+        <div class="task-info">
+          <div class="task-name-text">${t.task}</div>
+          <div class="task-meta-text">${t.name}${t.phone?' · '+t.phone:''} · ${projLabel} · Due ${t.dueDate}${t.submittedFile?' · Submitted: '+t.submittedFile:''}${t.totalRevisions&&parseInt(t.totalRevisions)>0?' · Revised '+t.totalRevisions+'x':''}</div>
+        </div>
+        ${duePill(t.dueDate,t.done)}
+        <div class="task-actions">${actions}</div>
+      </div>`;
+    });
+  }
+
+  const hd = projectId
+    ? `<div class="sec-hd"><span class="sec-title">Tasks</span>${addBtn}</div>`
+    : `<div class="sec-hd"><span class="sec-title">${taskView==='followup'?'Follow Up Tasks':'All Pending Tasks'}</span></div>`;
+
+  return tabs+hd+searchRow+`<div style="border:1px solid var(--border);background:var(--bg2)">${rows}</div>`;
+}
+
+function renderGlobalTasks(){
+  return renderTasks(null);
+}
+
+// ── SHARE FILES VIEW (under Tasks) ──
+let shareSelProject='';
+let shareSelFolder='';
+let shareSelFiles=[]; // now an array for multi-select
+let shareSelMember='';
+
+function toggleShareFile(fid){
+  const idx=shareSelFiles.indexOf(fid);
+  if(idx===-1) shareSelFiles.push(fid);
+  else shareSelFiles.splice(idx,1);
+  // re-render just the send section without full re-render
+  const sendSection=document.getElementById('sf-send-section');
+  if(sendSection) sendSection.style.display=shareSelFiles.length>0?'block':'none';
+  const countEl=document.getElementById('sf-count');
+  if(countEl) countEl.textContent=shareSelFiles.length+' file'+( shareSelFiles.length!==1?'s':'')+' selected';
+  // update checkbox visuals
+  shareSelFiles.forEach(id=>{
+    const cb=document.getElementById('cb-'+id);
+    if(cb) cb.checked=true;
+  });
+}
+
+function renderShareFilesView(){
+  const projFolders=shareSelProject?folders.filter(f=>f.projectId===shareSelProject&&(f.parentId||'')===(shareSelFolder||'')):[]; 
+  const projFiles=shareSelProject?files.filter(f=>f.projectId===shareSelProject&&(f.folderId||'')===(shareSelFolder||'')):[]; 
+
+  let folderBreadcrumb='';
+  if(shareSelFolder){
+    const fo=folders.find(f=>f.id===shareSelFolder);
+    folderBreadcrumb=`<div style="font-size:11px;color:var(--text3);margin-bottom:8px">
+      <span style="cursor:pointer;color:var(--accent)" onclick="shareSelFolder='';shareSelFiles=[];renderNav()">Root</span>
+      ${fo?' / '+fo.name:''}
+    </div>`;
+  }
+
+  return `<div style="border:1px solid var(--border);background:var(--bg2);padding:1.25rem">
+    <div class="sec-hd" style="margin-bottom:1rem"><span class="sec-title">Share Files with Team</span></div>
+
+    <div class="form-row">
+      <label class="form-lbl">1. Select Project</label>
+      <select class="form-sel" id="sf-proj" onchange="shareSelProject=this.value;shareSelFolder='';shareSelFiles=[];renderNav()">
+        <option value="">— Select a project —</option>
+        ${projects.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<option value="${p.id}" ${p.id===shareSelProject?'selected':''}>${cl?cl.name+' — ':''}${p.name}</option>`;}).join('')}
+      </select>
+    </div>
+
+    ${shareSelProject?`
+    <div class="form-row">
+      <label class="form-lbl">2. Select files to share (tick one or more)</label>
+      ${folderBreadcrumb}
+      <div style="border:1px solid var(--border);background:var(--bg);max-height:260px;overflow-y:auto">
+        ${shareSelFolder?`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);color:var(--text3)" onclick="shareSelFolder='';shareSelFiles=[];renderNav()"><i class="ti ti-arrow-left" style="font-size:14px"></i> Back to Root</div>`:''}
+        ${projFolders.map(fo=>`
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border)" onclick="shareSelFolder='${fo.id}';shareSelFiles=[];renderNav()" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+            <i class="ti ti-folder-filled" style="font-size:18px;color:var(--amber)"></i>
+            <span style="font-size:12px;color:var(--text)">${fo.name}</span>
+            <i class="ti ti-chevron-right" style="margin-left:auto;font-size:14px;color:var(--text3)"></i>
+          </div>`).join('')}
+        ${projFiles.length===0&&projFolders.length===0?`<div style="padding:1.5rem;text-align:center;color:var(--text3);font-size:12px">No files in this location</div>`:''}
+        ${projFiles.map(fi=>{
+          const checked=shareSelFiles.includes(fi.id);
+          return`<label style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;background:${checked?'var(--bg3)':''};transition:background .1s">
+            <input type="checkbox" id="cb-${fi.id}" ${checked?'checked':''} onchange="toggleShareFile('${fi.id}')" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
+            <i class="ti ${fi.isLink==='true'?'ti-link':ficon(fi.name)}" style="font-size:18px;color:var(--text3);flex-shrink:0"></i>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;color:var(--text);font-weight:${checked?'600':'400'}">${fi.name}</div>
+              <div style="font-size:10px;color:var(--text3)">${fi.date}${fi.size?' · '+fi.size:''}</div>
+            </div>
+            ${checked?`<i class="ti ti-check" style="color:var(--green);font-size:16px;flex-shrink:0"></i>`:''}
+          </label>`;
+        }).join('')}
+      </div>
+      ${shareSelFiles.length>0?`<div style="font-size:11px;color:var(--green);margin-top:5px;font-weight:500" id="sf-count">${shareSelFiles.length} file${shareSelFiles.length!==1?'s':''} selected</div>`:''}
+    </div>
+    `:''}
+
+    <div id="sf-send-section" style="display:${shareSelFiles.length>0?'block':'none'}">
+      <div class="form-row">
+        <label class="form-lbl">3. Send to</label>
+        <select class="form-sel" id="sf-member">
+          <option value="">— Select team member —</option>
+          <option value="all">Entire Team</option>
+          ${teamMembers.map(m=>`<option value="${m.id}" ${m.id===shareSelMember?'selected':''}>${m.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-lbl">Note (optional)</label>
+        <input class="form-inp" id="sf-note" type="text" placeholder="e.g. Please review these files">
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px">
+        <button class="btn-add" onclick="sendSharedFile()"><i class="ti ti-send"></i> Send ${shareSelFiles.length} File${shareSelFiles.length!==1?'s':''}</button>
+      </div>
+    </div>
+
+    ${sharedFiles.length>0?`
+    <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem">
+      <div class="sec-title" style="margin-bottom:10px">Recently Shared</div>
+      ${sharedFiles.slice().reverse().slice(0,5).map(sf=>{
+        const p=projects.find(x=>x.id===sf.projectId);
+        const cl=p?clients.find(c=>c.id===p.clientId):null;
+        const recipientName=sf.sentTo==='all'?'Entire Team':teamMembers.find(m=>m.id===sf.sentTo)?.name||sf.sentTo;
+        return`<div class="file-list-row" style="padding:8px 0">
+          <i class="ti ti-share fl-icon" style="color:var(--blue)"></i>
+          <div class="fl-info">
+            <div class="fl-name">${sf.fileName}</div>
+            <div class="fl-meta">${sf.sentBy} → ${recipientName} · ${p?(cl?cl.name+' — ':'')+p.name:''} · ${sf.date}${sf.note?' · '+sf.note:''}</div>
+          </div>
+          ${sf.driveLink?`<a href="${sf.driveLink}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open</a>`:''}
+        </div>`;}).join('')}
+    </div>`:''}
+  </div>`;
+}
+
+async function sendSharedFile(){
+  const memberId=document.getElementById('sf-member')?document.getElementById('sf-member').value:'';
+  if(!memberId){showToast('Please select a team member');return;}
+  if(shareSelFiles.length===0){showToast('Please select at least one file');return;}
+
+  const p=projects.find(x=>x.id===shareSelProject);
+  const cl=clients.find(c=>c.id===p?.clientId);
+  const senderName=role==='owner'?'Owner':role==='operations'?'Operations':'Designer';
+  const note=document.getElementById('sf-note')?document.getElementById('sf-note').value.trim():'';
+  const recipientName=memberId==='all'?'the entire team':teamMembers.find(m=>m.id===memberId)?.name||'team';
+  const recipientEmail=memberId==='all'?null:teamMembers.find(m=>m.id===memberId)?.email;
+  const projectLabel=p?(cl?cl.name+' — ':'')+p.name:'';
+
+  showToast('Sending '+shareSelFiles.length+' file(s)…');
+
+  const selectedFileObjs=shareSelFiles.map(fid=>files.find(f=>f.id===fid)).filter(Boolean);
+  const fileNames=selectedFileObjs.map(f=>f.name).join(', ');
+  const driveLinks=selectedFileObjs.filter(f=>f.link).map(f=>f.link);
+
+  // Save shared file records (one per file)
+  selectedFileObjs.forEach(fi=>{
+    sharedFiles.push({
+      id:'sf'+Date.now()+Math.random(),
+      projectId:shareSelProject,
+      fileName:fi.name,
+      driveLink:fi.link||'',
+      sentBy:senderName,
+      sentTo:memberId,
+      note,
+      date:today()
+    });
+  });
+
+  // Google Chat notification
+  const chatMsg={
+    text:`📎 *${senderName}* shared ${selectedFileObjs.length} file${selectedFileObjs.length!==1?'s':''} with *${recipientName}*\n*Files:* ${fileNames}\n*Project:* ${projectLabel}${note?'\n*Note:* '+note:''}${driveLinks.length>0?'\n'+driveLinks.map(l=>'<'+l+'|Open in Drive>').join(' · '):''}`
+  };
+  try{
+    await fetch(CHAT_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(chatMsg)});
+  }catch(e){console.error('Chat notification failed',e);}
+
+  // Email notification
+  try{
+    await fetch(SCRIPT_URL,{
+      method:'POST',
+      body:JSON.stringify({
+        action:'sendFileShare',
+        fileName:fileNames,
+        driveLink:driveLinks.join('\n'),
+        sentBy:senderName,
+        recipientName,
+        recipientEmail,
+        projectLabel,
+        note
+      }),
+      headers:{'Content-Type':'text/plain;charset=utf-8'}
+    });
+  }catch(e){console.error('Email failed',e);}
+
+  scheduleSave();
+  shareSelFiles=[];
+  shareSelMember='';
+  showToast('Files sent ✓ Team notified!');
+  renderNav();
+}
+
+function renderShareFilesView(){
+  // Get folders and files for selected project
+  const projFolders=shareSelProject?folders.filter(f=>f.projectId===shareSelProject&&(f.parentId||'')===(shareSelFolder||'')):[]; 
+  const projFiles=shareSelProject?files.filter(f=>f.projectId===shareSelProject&&(f.folderId||'')===(shareSelFolder||'')):[]; 
+
+  // Breadcrumb for folder navigation
+  let folderBreadcrumb='';
+  if(shareSelFolder){
+    const fo=folders.find(f=>f.id===shareSelFolder);
+    folderBreadcrumb=`<div style="font-size:11px;color:var(--text3);margin-bottom:8px">
+      <span style="cursor:pointer;color:var(--accent)" onclick="shareSelFolder='';shareSelFile='';renderNav()">Root</span>
+      ${fo?' / '+fo.name:''}
+    </div>`;
+  }
+
+  return `<div style="border:1px solid var(--border);background:var(--bg2);padding:1.25rem">
+    <div class="sec-hd" style="margin-bottom:1rem"><span class="sec-title">Share Files with Team</span></div>
+
+    <!-- Step 1: Select Project -->
+    <div class="form-row">
+      <label class="form-lbl">1. Select Project</label>
+      <select class="form-sel" id="sf-proj" onchange="shareSelProject=this.value;shareSelFolder='';shareSelFile='';renderNav()">
+        <option value="">— Select a project —</option>
+        ${projects.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<option value="${p.id}" ${p.id===shareSelProject?'selected':''}>${cl?cl.name+' — ':''}${p.name}</option>`;}).join('')}
+      </select>
+    </div>
+
+    ${shareSelProject?`
+    <!-- Step 2: Browse Folders/Files -->
+    <div class="form-row">
+      <label class="form-lbl">2. Select File</label>
+      ${folderBreadcrumb}
+      <div style="border:1px solid var(--border);background:var(--bg);max-height:220px;overflow-y:auto">
+        ${shareSelFolder?`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);color:var(--text3)" onclick="shareSelFolder='';shareSelFile='';renderNav()"><i class="ti ti-arrow-left" style="font-size:14px"></i> Back to Root</div>`:''}
+        ${projFolders.map(fo=>`
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s" onclick="shareSelFolder='${fo.id}';shareSelFile='';renderNav()" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+            <i class="ti ti-folder-filled" style="font-size:18px;color:var(--amber)"></i>
+            <span style="font-size:12px;color:var(--text)">${fo.name}</span>
+          </div>`).join('')}
+        ${projFiles.length===0&&projFolders.length===0?`<div style="padding:1.5rem;text-align:center;color:var(--text3);font-size:12px">No files in this location</div>`:''}
+        ${projFiles.map(fi=>`
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border);background:${fi.id===shareSelFile?'var(--bg3)':''};transition:background .1s" onclick="shareSelFile='${fi.id}';renderNav()">
+            <i class="ti ${fi.isLink==='true'?'ti-link':ficon(fi.name)}" style="font-size:18px;color:var(--text3)"></i>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;color:var(--text);font-weight:${fi.id===shareSelFile?'600':'400'}">${fi.name}</div>
+              <div style="font-size:10px;color:var(--text3)">${fi.date}${fi.size?' · '+fi.size:''}</div>
+            </div>
+            ${fi.id===shareSelFile?`<i class="ti ti-check" style="color:var(--green);font-size:16px"></i>`:''}
+          </div>`).join('')}
+      </div>
+    </div>
+    `:''}
+
+    ${shareSelFile?`
+    <!-- Step 3: Select Recipient -->
+    <div class="form-row">
+      <label class="form-lbl">3. Send to</label>
+      <select class="form-sel" id="sf-member" onchange="shareSelMember=this.value">
+        <option value="">— Select team member —</option>
+        <option value="all">Entire Team</option>
+        ${teamMembers.map(m=>`<option value="${m.id}" ${m.id===shareSelMember?'selected':''}>${m.name}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Note (optional)</label>
+      <input class="form-inp" id="sf-note" type="text" placeholder="e.g. Please review this file">
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px">
+      <button class="btn-add" onclick="sendSharedFile()"><i class="ti ti-send"></i> Send File</button>
+    </div>
+    `:''}
+
+    ${sharedFiles.length>0?`
+    <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem">
+      <div class="sec-title" style="margin-bottom:10px">Recently Shared</div>
+      ${sharedFiles.slice().reverse().slice(0,5).map(sf=>{
+        const p=projects.find(x=>x.id===sf.projectId);
+        const cl=p?clients.find(c=>c.id===p.clientId):null;
+        const recipientName=sf.sentTo==='all'?'Entire Team':teamMembers.find(m=>m.id===sf.sentTo)?.name||sf.sentTo;
+        return`<div class="file-list-row" style="padding:8px 0">
+          <i class="ti ti-share fl-icon" style="color:var(--blue)"></i>
+          <div class="fl-info">
+            <div class="fl-name">${sf.fileName}</div>
+            <div class="fl-meta">${sf.sentBy} → ${recipientName} · ${p?(cl?cl.name+' — ':'')+p.name:''} · ${sf.date}${sf.note?' · '+sf.note:''}</div>
+          </div>
+          ${sf.driveLink?`<a href="${sf.driveLink}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open</a>`:''}
+        </div>`;}).join('')}
+    </div>`:''}
+  </div>`;
+}
+
+function openShareModal(projectId){
+  currentShareProjectId=projectId;
+  shareFile=null;
+  document.getElementById('share-file-name').textContent='';
+  document.getElementById('share-confirm-btn').style.display='none';
+  document.getElementById('share-note').value='';
+  // populate recipient options
+  const sel=document.getElementById('share-to');
+  sel.innerHTML='<option value="all">Entire Team</option>'+
+    teamMembers.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+  const p=projects.find(x=>x.id===projectId);
+  document.getElementById('share-project-name').textContent=p?p.name:'';
+  om('mod-share');
+}
+
+function handleShareFileDrop(e){
+  e.preventDefault();
+  const f=e.dataTransfer.files[0];
+  if(f)setShareFile(f);
+}
+function handleShareFileSelect(e){
+  const f=e.target.files[0];
+  if(f)setShareFile(f);
+  e.target.value='';
+}
+function setShareFile(f){
+  shareFile=f;
+  document.getElementById('share-file-name').textContent='Selected: '+f.name;
+  document.getElementById('share-confirm-btn').style.display='flex';
+}
+
+async function confirmShare(){
+  if(!shareFile||!currentShareProjectId)return;
+  const toVal=document.getElementById('share-to').value;
+  const note=document.getElementById('share-note').value.trim();
+  const senderName=role==='owner'?'Owner':role==='operations'?'Operations':'Designer';
+  const p=projects.find(x=>x.id===currentShareProjectId);
+  const cl=clients.find(c=>c.id===p?.clientId);
+
+  showToast('Sharing file…');
+
+  // Upload to Drive
+  let driveLink='';
+  if(driveConnected){
+    const info=await uploadToDrive(shareFile,currentShareProjectId,null);
+    if(info)driveLink=info.driveLink;
+  }
+
+  // Save shared file record
+  const sf={
+    id:'sf'+Date.now(),
+    projectId:currentShareProjectId,
+    fileName:shareFile.name,
+    driveLink,
+    sentBy:senderName,
+    sentTo:toVal, // 'all' or member id
+    note,
+    date:today()
+  };
+  sharedFiles.push(sf);
+
+  // Determine recipient name for notification
+  const recipientName=toVal==='all'?'the entire team':teamMembers.find(m=>m.id===toVal)?.name||'team';
+  const projectLabel=p?(cl?cl.name+' — ':'')+p.name:'';
+
+  // Send Google Chat notification
+  const chatMsg={
+    text:`📎 *${senderName}* shared a file with *${recipientName}*\n*File:* ${shareFile.name}\n*Project:* ${projectLabel}${note?'\n*Note:* '+note:''}${driveLink?'\n<'+driveLink+'|Open in Drive>':''}`
+  };
+  try{
+    await fetch(CHAT_WEBHOOK,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(chatMsg)
+    });
+  }catch(e){console.error('Chat notification failed',e);}
+
+  scheduleSave();
+  cm('mod-share');
+  showToast('File shared ✓ Team notified in Google Chat!');
+  renderNav();
+}
+
+// ── SAVE/LOAD sharedFiles ──
+
+// init
+checkSavedToken();
+if(driveConnected){
+  showDriveStatus('Google Drive connected ✓',true);
+  setTimeout(updateDriveButton,100);
+}
 </script>
+</body>
+</html>
