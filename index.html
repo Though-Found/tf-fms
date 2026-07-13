@@ -388,6 +388,12 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 <div class="submit-modal">
   <div class="submit-modal-title">Submit Task</div>
   <div id="submit-task-info" style="font-size:12px;color:var(--text2);margin-bottom:1rem;padding:8px;background:var(--bg3);border:1px solid var(--border)"></div>
+  <div class="form-row">
+    <label class="form-lbl">Project<span style="color:var(--red)">*</span></label>
+    <select class="form-sel" id="submit-proj-sel">
+      <option value="">— Select project —</option>
+    </select>
+  </div>
   <label class="form-lbl">Upload your work</label>
   <div class="submit-drop" id="submit-drop" onclick="document.getElementById('submit-file-inp').click()" ondragover="event.preventDefault()" ondrop="handleSubmitDrop(event)">
     <i class="ti ti-cloud-upload"></i>
@@ -418,6 +424,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
     <label class="form-lbl">Task</label>
     <div id="revise-task" style="font-size:12px;color:var(--text2);padding:8px 10px;background:var(--bg3);border:1px solid var(--border)"></div>
   </div>
+  <div id="revise-request-box" style="display:none;margin-bottom:10px;padding:8px 10px;background:var(--amber-bg);border:1px solid var(--amber);font-size:12px;color:var(--amber)"></div>
   <div class="form-row">
     <label class="form-lbl">New Planned Date</label>
     <input class="form-inp" id="revise-date" type="date">
@@ -425,6 +432,29 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   <div class="modal-actions">
     <button class="btn-cancel" onclick="cm('mod-revise')">Cancel</button>
     <button class="btn-add" onclick="confirmRevise()"><i class="ti ti-refresh"></i> Revise Task Plan</button>
+  </div>
+</div>
+</div>
+
+<!-- REQUEST REVISION MODAL (doer-initiated) -->
+<div class="submit-modal-backdrop" id="mod-reqrevision" style="display:none">
+<div class="submit-modal">
+  <div class="submit-modal-title">Request Revision</div>
+  <div class="form-row">
+    <label class="form-lbl">Task</label>
+    <div id="reqrev-task" style="font-size:13px;color:var(--text);font-weight:500;padding:8px 10px;background:var(--bg3);border:1px solid var(--border)"></div>
+  </div>
+  <div class="form-row">
+    <label class="form-lbl">Current Planned Date</label>
+    <div id="reqrev-date" style="font-size:12px;color:var(--text3);padding:8px 10px;background:var(--bg3);border:1px solid var(--border)"></div>
+  </div>
+  <div class="form-row">
+    <label class="form-lbl">Why does this need revision?</label>
+    <textarea class="form-ta" id="reqrev-reason" style="min-height:70px;resize:vertical" placeholder="e.g. Need more time to source samples, waiting on client feedback…"></textarea>
+  </div>
+  <div class="modal-actions">
+    <button class="btn-cancel" onclick="cm('mod-reqrevision')">Cancel</button>
+    <button class="btn-add" onclick="confirmRequestRevision()"><i class="ti ti-send"></i> Send Request</button>
   </div>
 </div>
 </div>
@@ -675,7 +705,9 @@ async function uploadToDrive(file,projectId,subFolderId){
     form.append('file',file);
     const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+accessToken},body:form});
     const data=await res.json();
-    showSuccessPopup('File saved to Google Drive ✓', 'T&F FMS → '+getCurrentClientName()+' → '+getCurrentProjectName());
+    const p=projects.find(x=>x.id===projectId);
+    const cl=p?clients.find(c=>c.id===p.clientId):null;
+    showSuccessPopup('File saved to Google Drive ✓', 'T&F FMS → '+(cl?cl.name:'')+' → '+(p?p.name:''));
     return{driveId:data.id,driveLink:data.webViewLink};
   }catch(e){console.error('Drive upload error',e);showToast('Drive upload failed');return null;}
 }
@@ -1245,6 +1277,14 @@ function openReviseModal(tid){
   document.getElementById('revise-name').textContent=t.name;
   document.getElementById('revise-task').textContent=t.task;
   document.getElementById('revise-date').value=t.dueDate;
+  const box=document.getElementById('revise-request-box');
+  if(t.revisionRequested==='true'){
+    box.style.display='block';
+    box.innerHTML=`<strong>${escHtml(t.name)} requested a revision:</strong><br>${escHtml(t.revisionReason||'')}`;
+  } else {
+    box.style.display='none';
+    box.innerHTML='';
+  }
   om('mod-revise');
 }
 
@@ -1257,6 +1297,8 @@ function confirmRevise(){
   t.done='false';
   t.submittedFile='';
   t.submittedLink='';
+  t.revisionRequested='false';
+  t.revisionReason='';
   // Track revision history like the sheet (Revision 1, Revision 2 columns)
   const revCount=parseInt(t.totalRevisions||'0')+1;
   t.totalRevisions=String(revCount);
@@ -1271,11 +1313,61 @@ function confirmRevise(){
   renderNav();
 }
 
+let currentRequestRevisionTaskId=null;
+
+function openRequestRevisionModal(tid){
+  currentRequestRevisionTaskId=tid;
+  const t=tasks.find(x=>x.id===tid);
+  if(!t)return;
+  document.getElementById('reqrev-task').textContent=t.task;
+  document.getElementById('reqrev-date').textContent=fmtDMY(t.dueDate);
+  document.getElementById('reqrev-reason').value='';
+  om('mod-reqrevision');
+}
+
+async function confirmRequestRevision(){
+  const t=tasks.find(x=>x.id===currentRequestRevisionTaskId);
+  if(!t) return;
+  const reason=document.getElementById('reqrev-reason').value.trim();
+  if(!reason){showToast('Please add a short reason');return;}
+
+  t.revisionRequested='true';
+  t.revisionReason=reason;
+  t.revisionRequestedAt=today();
+
+  try{
+    await fetch(SCRIPT_URL,{
+      method:'POST',
+      body:JSON.stringify({
+        action:'sendRevisionRequest',
+        taskName:t.task,
+        assignedName:t.name,
+        assignedEmail:t.email,
+        dueDate:t.dueDate,
+        reason:reason,
+        projectId:t.projectId
+      }),
+      headers:{'Content-Type':'text/plain;charset=utf-8'}
+    });
+  }catch(e){console.error('Revision request email error',e);}
+
+  cm('mod-reqrevision');
+  scheduleSave();
+  showToast('Revision requested — owner notified ✓');
+  renderNav();
+}
+
 function openSubmitModal(tid){
   currentSubmitTaskId=tid;
   submitFile=null;
   const t=tasks.find(x=>x.id===tid);
-  document.getElementById('submit-task-info').innerHTML=`<strong>${t.task}</strong><br><span style="color:var(--text3)">Due: ${t.dueDate}</span>`;
+  document.getElementById('submit-task-info').innerHTML=`<strong>${escHtml(t.task)}</strong><br><span style="color:var(--text3)">Due: ${fmtDMY(t.dueDate)}</span>`;
+  const sel=document.getElementById('submit-proj-sel');
+  sel.innerHTML='<option value="">— Select project —</option>'+projects.map(p=>{
+    const cl=clients.find(c=>c.id===p.clientId);
+    const label=(cl?cl.name+' — ':'')+p.name;
+    return `<option value="${p.id}" ${p.id===t.projectId?'selected':''}>${label}</option>`;
+  }).join('');
   document.getElementById('submit-file-name').textContent='';
   document.getElementById('submit-confirm-btn').style.display='none';
   document.getElementById('mod-submit').style.display='flex';
@@ -1300,11 +1392,14 @@ async function confirmSubmit(){
   if(!submitFile||!currentSubmitTaskId) return;
   const t=tasks.find(x=>x.id===currentSubmitTaskId);
   if(!t) return;
+  const chosenProj=document.getElementById('submit-proj-sel').value;
+  if(!chosenProj){showToast('Please select the project this belongs to');return;}
+  t.projectId=chosenProj;
   showToast('Submitting…');
 
-  // Upload to Drive if connected
+  // Upload to Drive — always goes to the selected project's folder
   let driveLink='';
-  if(driveConnected && t.projectId){
+  if(driveConnected){
     const info = await uploadToDrive(submitFile, t.projectId, null);
     if(info) driveLink=info.driveLink;
   }
@@ -1314,6 +1409,8 @@ async function confirmSubmit(){
   t.submittedFile=submitFile.name;
   t.submittedLink=driveLink;
   t.latestRevision=today();
+  t.revisionRequested='false';
+  t.revisionReason='';
 
   // Send email via Apps Script
   try{
@@ -1337,6 +1434,10 @@ async function confirmSubmit(){
   document.getElementById('mod-submit').style.display='none';
   showToast('Task submitted ✓ Owner notified!');
   renderNav();
+}
+
+function escHtml(str){
+  return String(str==null?'':str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 function fmtDMY(str){
@@ -1436,15 +1537,28 @@ function renderTasks(projectId){
       const projLabel=p?`${cl?cl.name+' — ':''}${p.name}`:'';
       let completeCell='';
       let reviseCell='';
+      const isOwner = role==='owner';
       if(isDone){
         completeCell=`<span class="dg-done-label"><i class="ti ti-circle-check-filled" style="color:var(--dg-green)"></i> Done</span>`;
-        if(isM) reviseCell=`<button class="revise-btn" onclick="openReviseModal('${t.id}')"><i class="ti ti-refresh"></i> Revise</button>`;
+        if(isOwner) reviseCell=`<button class="revise-btn" onclick="openReviseModal('${t.id}')"><i class="ti ti-refresh"></i> Revise</button>`;
       } else {
         if(isM) completeCell=`<button class="done-btn" onclick="markTaskDone('${t.id}')"><i class="ti ti-check"></i> Done</button>`;
         else completeCell=`<button class="submit-btn" onclick="openSubmitModal('${t.id}')"><i class="ti ti-upload"></i> Submit</button>`;
-        if(isM) reviseCell=`<button class="revise-btn" onclick="openReviseModal('${t.id}')"><i class="ti ti-refresh"></i> Revise</button>`;
+
+        if(isOwner){
+          reviseCell=`<button class="revise-btn" onclick="openReviseModal('${t.id}')"><i class="ti ti-refresh"></i> Revise</button>`;
+          if(t.revisionRequested==='true'){
+            reviseCell+=`<div style="font-size:9.5px;color:var(--amber);margin-top:5px;max-width:170px;line-height:1.4"><i class="ti ti-alert-triangle-filled" style="font-size:10px"></i> ${escHtml(t.name)} requested: ${escHtml(t.revisionReason||'')}</div>`;
+          }
+        } else {
+          if(t.revisionRequested==='true'){
+            reviseCell=`<span style="font-size:10.5px;color:var(--amber);font-weight:600;text-transform:uppercase;display:inline-flex;align-items:center;gap:4px"><i class="ti ti-clock-exclamation"></i> Requested</span>`;
+          } else {
+            reviseCell=`<button class="revise-btn" onclick="openRequestRevisionModal('${t.id}')"><i class="ti ti-message-2-exclamation"></i> Request Revision</button>`;
+          }
+        }
       }
-      const subBits=[projLabel,t.submittedFile?'Submitted: '+t.submittedFile:'',t.totalRevisions&&parseInt(t.totalRevisions)>0?'Revised '+t.totalRevisions+'x':''].filter(Boolean).join(' · ');
+      const subBits=[projLabel,t.submittedFile?(t.submittedLink?`Submitted: <a href="${escHtml(t.submittedLink)}" target="_blank" rel="noopener" style="color:var(--dg-blue)">${escHtml(t.submittedFile)}</a>`:'Submitted: '+escHtml(t.submittedFile)):'',t.totalRevisions&&parseInt(t.totalRevisions)>0?'Revised '+t.totalRevisions+'x':''].filter(Boolean).join(' · ');
       rowsHtml+=`<tr>
         <td>${t.name}</td>
         <td>${t.phone||''}</td>
