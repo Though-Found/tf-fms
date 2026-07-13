@@ -805,7 +805,7 @@ async function doLogin(){
   await silentConnectDrive();
   if(driveConnected)document.getElementById('drive-badge').style.display='flex';
   await loadFromSheets();
-  goView('dashboard');
+  goView('tasks');
 }
 
 function silentConnectDrive(){
@@ -1364,7 +1364,11 @@ function renderTasks(projectId){
   if(!projectId && taskView==='add'){
     // inline add form
     return `${tabs}<div style="border:1px solid var(--border);background:var(--bg2);padding:1.25rem">
-      <div class="form-row"><label class="form-lbl">Assign to <span style="float:right;cursor:pointer;color:var(--accent);font-size:10px;letter-spacing:1px;text-transform:uppercase" onclick="openManageTeam()">⚙ Manage Team</span></label>
+      <div class="form-row">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+          <label class="form-lbl" style="margin:0">Assign to</label>
+          <button onclick="openManageTeam()" style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;padding:0;display:flex;align-items:center;gap:4px"><i class="ti ti-settings" style="font-size:13px"></i> Manage Team</button>
+        </div>
         <select class="form-sel" id="it-member" onchange="fillMemberDetails()">
           <option value="">— Select team member —</option>
           ${teamMembers.map(m=>`<option value="${m.id}">${m.name} — ${m.phone}</option>`).join('')}
