@@ -1377,12 +1377,7 @@ function renderTasks(projectId){
       <div class="task-tab ${taskView==='add'?'active':''}" onclick="taskView='add';renderNav()"><i class="ti ti-square-rounded-plus-filled" style="font-size:14px"></i>Add New Task</div>
       <div class="task-tab ${taskView==='followup'?'active':''}" onclick="taskView='followup';renderNav()"><i class="ti ti-clock-check" style="font-size:14px"></i>Follow Up</div>
       <div class="task-tab ${taskView==='all'?'active':''}" onclick="taskView='all';renderNav()"><i class="ti ti-clipboard-list" style="font-size:14px"></i>All Pending Tasks</div>
-      <div class="task-tab ${taskView==='share'?'active':''}" onclick="taskView='share';renderNav()"><i class="ti ti-share" style="font-size:14px"></i>Share Files</div>
     </div>`;
-  }
-
-  if(!projectId && taskView==='share'){
-    return `<div class="dg-wrap">${tabs}${renderShareFilesView()}</div>`;
   }
 
   if(!projectId && taskView==='add'){
