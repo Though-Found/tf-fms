@@ -218,30 +218,48 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
 .toast.show{display:flex}
 .toast i{font-size:16px}
 
-.task-tabs{display:flex;gap:1px;border:1px solid var(--border);background:var(--border);margin-bottom:1rem}
-.task-tab{flex:1;padding:8px;text-align:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);cursor:pointer;background:var(--bg2);transition:all .12s}
-.task-tab:hover{color:var(--text);background:var(--bg3)}
-.task-tab.active{background:var(--accent);color:var(--accent-text)}
-.task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);transition:background .1s}
-.task-row:hover{background:var(--bg2)}.task-row:last-child{border-bottom:none}
-.task-info{flex:1;min-width:0}
-.task-name-text{font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px}
-.task-meta-text{font-size:10px;color:var(--text3)}
-.task-due{font-size:10px;padding:2px 7px;border-radius:100px;font-weight:500;flex-shrink:0}
-.due-today{background:var(--amber-bg);color:var(--amber)}
-.due-overdue{background:var(--red-bg);color:var(--red)}
-.due-upcoming{background:var(--green-bg);color:var(--green)}
-.due-done{background:var(--bg3);color:var(--text3)}
-.task-actions{display:flex;gap:6px;flex-shrink:0}
-.done-btn{background:var(--green-bg);color:var(--green);border:1px solid var(--green);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
-.done-btn:hover{background:var(--green);color:white}
-.submit-btn{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
-.submit-btn:hover{background:var(--blue);color:white}
-.revise-btn{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber);padding:4px 10px;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
-.revise-btn:hover{background:var(--amber);color:white}
-.task-search-row{display:flex;gap:8px;margin-bottom:1rem}
-.task-search{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:7px 10px;font-size:12px;font-family:inherit;outline:none}
-.task-search:focus{border-color:var(--border2)}
+/* ── DELEGATION-STYLE TASKS SECTION (blue/white) ── */
+:root{
+  --dg-blue:#1a73e8;--dg-blue-dark:#1557b0;--dg-blue-bg:#e8f0fe;
+  --dg-border:#dfe3e8;--dg-text:#202124;--dg-text2:#5f6368;--dg-text3:#9aa0a6;
+  --dg-red:#c5221f;--dg-green:#1e8e3e;--dg-panel:#f8f9fa;
+}
+.dg-wrap{font-family:'Helvetica Neue',Arial,sans-serif}
+.task-tabs{display:flex;gap:2px;background:#eef1f4;padding:4px;border-radius:8px;margin-bottom:1.25rem}
+.task-tab{flex:1;text-align:center;padding:11px 12px;font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--dg-text2);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;background:transparent}
+.task-tab:hover{color:var(--dg-blue)}
+.task-tab.active{background:#fff;color:var(--dg-blue);box-shadow:0 1px 3px rgba(32,33,36,.15)}
+.dg-card{background:#fff;border:1px solid var(--dg-border);border-radius:10px;padding:1.5rem}
+.dg-card-title{font-size:17px;font-weight:600;color:var(--dg-text);margin-bottom:1.25rem}
+.task-search-row{display:flex;gap:12px;margin-bottom:1.25rem}
+.task-search-wrap{position:relative;flex:1}
+.task-search-wrap i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--dg-text3);font-size:15px;pointer-events:none}
+.task-search{width:100%;background:#fff;border:1px solid var(--dg-border);border-radius:6px;color:var(--dg-text);padding:9px 12px 9px 34px;font-size:13px;font-family:inherit;outline:none}
+.task-search:focus{border-color:var(--dg-blue)}
+.dg-table{width:100%;border-collapse:collapse}
+.dg-table th{text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:var(--dg-text2);padding:10px 12px;border-bottom:2px solid #eef1f4;white-space:nowrap}
+.dg-table td{padding:12px;font-size:13px;color:var(--dg-text);border-bottom:1px solid #eef1f4;vertical-align:middle}
+.dg-table tr:last-child td{border-bottom:none}
+.dg-table tr:hover td{background:#f8f9fb}
+.dg-task-sub{font-size:10.5px;color:var(--dg-text3);margin-top:2px}
+.dg-empty{text-align:center;padding:2.5rem;color:var(--dg-text3);font-size:13px}
+.done-btn,.submit-btn,.revise-btn{background:#fff;border:1px solid #dadce0;color:var(--dg-text);padding:6px 13px;border-radius:6px;font-size:10.5px;font-weight:600;letter-spacing:.3px;cursor:pointer;text-transform:uppercase;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.done-btn i,.submit-btn i,.revise-btn i{font-size:13px;color:var(--dg-blue)}
+.done-btn:hover,.submit-btn:hover,.revise-btn:hover{background:#f8f9fb;border-color:var(--dg-blue)}
+.dg-done-label{font-size:11px;color:var(--dg-green);font-weight:600;letter-spacing:.3px;text-transform:uppercase;display:inline-flex;align-items:center;gap:4px}
+/* Add New Task form */
+.dg-back{font-size:12px;color:var(--dg-blue);cursor:pointer;display:inline-flex;align-items:center;gap:5px;margin-bottom:1rem;font-weight:500}
+.dg-back:hover{text-decoration:underline}
+.dg-add-title{font-size:19px;font-weight:600;color:var(--dg-text);margin:0 0 1.25rem}
+.dg-form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:1rem}
+.dg-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:var(--dg-text2);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.dg-label .req{color:var(--dg-red)}
+.dg-input,.dg-select,.dg-textarea{width:100%;background:var(--dg-panel);border:1px solid var(--dg-border);border-radius:6px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--dg-text);outline:none}
+.dg-input:focus,.dg-select:focus,.dg-textarea:focus{border-color:var(--dg-blue);background:#fff}
+.dg-textarea{min-height:110px;resize:vertical}
+.dg-submit-btn{width:100%;background:var(--dg-blue);color:#fff;border:none;padding:12px;border-radius:6px;font-size:13px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;margin-top:.5rem}
+.dg-submit-btn:hover{background:var(--dg-blue-dark)}
+.dg-manage-link{background:none;border:none;cursor:pointer;font-size:10.5px;color:var(--dg-blue);letter-spacing:.3px;text-transform:uppercase;padding:0;display:flex;align-items:center;gap:4px;font-weight:600}
 .submit-modal-backdrop{position:fixed;inset:0;background:rgba(30,42,30,.6);display:flex;align-items:center;justify-content:center;z-index:200}
 .submit-modal{background:var(--bg2);border:1px solid var(--border);width:90%;max-width:420px;padding:1.5rem}
 .submit-modal-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:1.25rem}
@@ -1087,7 +1105,7 @@ function openAddTaskModal(projectId){
   // populate team member dropdown
   const memberSel = document.getElementById('it-member');
   memberSel.innerHTML = '<option value="">— Select team member —</option>' +
-    teamMembers.map(m=>`<option value="${m.id}">${m.name} — ${m.phone}</option>`).join('') +
+    teamMembers.map(m=>`<option value="${m.id}">${m.name} (${m.email}) - ${m.phone}</option>`).join('') +
     '<option value="__custom__">+ Add new team member…</option>';
   document.getElementById('custom-member-fields').style.display='none';
   document.getElementById('it-name').value='';
@@ -1321,6 +1339,17 @@ async function confirmSubmit(){
   renderNav();
 }
 
+function fmtDMY(str){
+  if(!str) return '';
+  try{
+    const d=new Date(str);
+    if(isNaN(d)) return str;
+    const dd=String(d.getDate()).padStart(2,'0');
+    const mm=String(d.getMonth()+1).padStart(2,'0');
+    return `${dd}/${mm}/${d.getFullYear()}`;
+  }catch(e){return str;}
+}
+
 function renderTasks(projectId){
   const isM=canManage();
   const filtered = projectId
@@ -1342,91 +1371,106 @@ function renderTasks(projectId){
     else if(taskView==='all') list=shown.filter(t=>t.done!=='true');
   }
 
-  const addBtn = isM ? `<button class="btn-add" onclick="openAddTaskModal('${projectId||''}')"><i class="ti ti-plus"></i> Add Task</button>` : '';
-
   let tabs='';
   if(!projectId){
     tabs=`<div class="task-tabs">
-      <div class="task-tab ${taskView==='add'?'active':''}" onclick="taskView='add';renderNav()"><i class="ti ti-plus" style="font-size:12px;margin-right:4px"></i>Add Task</div>
-      <div class="task-tab ${taskView==='followup'?'active':''}" onclick="taskView='followup';renderNav()"><i class="ti ti-bell" style="font-size:12px;margin-right:4px"></i>Follow Up</div>
-      <div class="task-tab ${taskView==='all'?'active':''}" onclick="taskView='all';renderNav()"><i class="ti ti-list" style="font-size:12px;margin-right:4px"></i>All Pending</div>
-      <div class="task-tab ${taskView==='share'?'active':''}" onclick="taskView='share';renderNav()"><i class="ti ti-share" style="font-size:12px;margin-right:4px"></i>Share Files</div>
+      <div class="task-tab ${taskView==='add'?'active':''}" onclick="taskView='add';renderNav()"><i class="ti ti-square-rounded-plus-filled" style="font-size:14px"></i>Add New Task</div>
+      <div class="task-tab ${taskView==='followup'?'active':''}" onclick="taskView='followup';renderNav()"><i class="ti ti-clock-check" style="font-size:14px"></i>Follow Up</div>
+      <div class="task-tab ${taskView==='all'?'active':''}" onclick="taskView='all';renderNav()"><i class="ti ti-clipboard-list" style="font-size:14px"></i>All Pending Tasks</div>
+      <div class="task-tab ${taskView==='share'?'active':''}" onclick="taskView='share';renderNav()"><i class="ti ti-share" style="font-size:14px"></i>Share Files</div>
     </div>`;
   }
 
   if(!projectId && taskView==='share'){
-    return tabs + renderShareFilesView();
+    return `<div class="dg-wrap">${tabs}${renderShareFilesView()}</div>`;
   }
 
   if(!projectId && taskView==='add'){
-    // inline add form
-    return `${tabs}<div style="border:1px solid var(--border);background:var(--bg2);padding:1.25rem">
-      <div class="form-row">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
-          <label class="form-lbl" style="margin:0">Assign to</label>
-          <button onclick="openManageTeam()" style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;padding:0;display:flex;align-items:center;gap:4px"><i class="ti ti-settings" style="font-size:13px"></i> Manage Team</button>
+    // inline add form — styled like the Delegation System "Add New Task" screen
+    return `<div class="dg-wrap">${tabs}<div class="dg-card">
+      <div class="dg-back" onclick="taskView='all';renderNav()"><i class="ti ti-arrow-left"></i> Back to Dashboard</div>
+      <div class="dg-add-title">Add New Task</div>
+      <div class="dg-form-row-2">
+        <div>
+          <label class="dg-label"><span>Select Doer<span class="req">*</span></span><span class="dg-manage-link" onclick="openManageTeam()"><i class="ti ti-settings" style="font-size:12px"></i>Manage Team</span></label>
+          <select class="dg-select" id="it-member" onchange="fillMemberDetails()">
+            <option value="">— Select team member —</option>
+            ${teamMembers.map(m=>`<option value="${m.id}">${m.name} (${m.email}) - ${m.phone}</option>`).join('')}
+            <option value="__custom__">+ Add new team member…</option>
+          </select>
         </div>
-        <select class="form-sel" id="it-member" onchange="fillMemberDetails()">
-          <option value="">— Select team member —</option>
-          ${teamMembers.map(m=>`<option value="${m.id}">${m.name} — ${m.phone}</option>`).join('')}
-          <option value="__custom__">+ Add new team member…</option>
-        </select>
+        <div>
+          <label class="dg-label"><span>Planned Date<span class="req">*</span></span></label>
+          <input class="dg-input" id="it-date" type="date">
+        </div>
       </div>
       <div id="custom-member-fields" style="display:none">
-        <div class="form-row"><label class="form-lbl">Name</label><input class="form-inp" id="it-name-new" type="text" placeholder="e.g. Sanjay"></div>
-        <div class="form-row"><label class="form-lbl">Phone / WhatsApp</label><input class="form-inp" id="it-phone-new" type="text"></div>
-        <div class="form-row"><label class="form-lbl">Email</label><input class="form-inp" id="it-email-new" type="email"></div>
-        <button class="btn-ghost" onclick="saveNewMember()" style="margin-bottom:10px"><i class="ti ti-plus"></i> Save Team Member</button>
+        <div class="dg-form-row-2">
+          <div><label class="dg-label">Name</label><input class="dg-input" id="it-name-new" type="text" placeholder="e.g. Sanjay"></div>
+          <div><label class="dg-label">Phone / WhatsApp</label><input class="dg-input" id="it-phone-new" type="text"></div>
+        </div>
+        <label class="dg-label">Email</label><input class="dg-input" id="it-email-new" type="email" style="margin-bottom:.75rem">
+        <button class="btn-ghost" onclick="saveNewMember()" style="margin-bottom:1rem"><i class="ti ti-plus"></i> Save Team Member</button>
       </div>
       <input type="hidden" id="it-name" value="">
       <input type="hidden" id="it-phone" value="">
       <input type="hidden" id="it-email" value="">
-      <div class="form-row"><label class="form-lbl">Task description</label><textarea class="form-ta" id="it-task" style="min-height:60px;resize:vertical" placeholder="Describe exactly what needs to be done…"></textarea></div>
-      <div class="form-row"><label class="form-lbl">Project</label><select class="form-sel" id="it-proj"><option value="">— No specific project —</option>${projects.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<option value="${p.id}">${cl?cl.name+' — ':''}${p.name}</option>`;}).join('')}</select></div>
-      <div class="form-row"><label class="form-lbl">Due date</label><input class="form-inp" id="it-date" type="date"></div>
-      <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn-add" onclick="addTask()">Add Task</button></div>
-    </div>`;
+      <label class="dg-label">Describe the task in detail</label>
+      <textarea class="dg-textarea" id="it-task" placeholder="Describe the task in detail"></textarea>
+      <div class="dg-form-row-2" style="margin-top:1rem">
+        <div><label class="dg-label">Project (optional)</label><select class="dg-select" id="it-proj"><option value="">— No specific project —</option>${projects.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<option value="${p.id}">${cl?cl.name+' — ':''}${p.name}</option>`;}).join('')}</select></div>
+        <div></div>
+      </div>
+      <button class="dg-submit-btn" onclick="addTask()" style="margin-top:1.25rem">Submit</button>
+    </div></div>`;
   }
 
   const searchRow=`<div class="task-search-row">
-    <input class="task-search" placeholder="Search by name…" value="${taskSearch}" oninput="taskSearch=this.value;renderNav()">
-    <input class="task-search" placeholder="Search by task…" value="${taskSearchTask}" oninput="taskSearchTask=this.value;renderNav()">
+    <div class="task-search-wrap"><i class="ti ti-user"></i><input class="task-search" placeholder="Search by name…" value="${taskSearch}" oninput="taskSearch=this.value;renderNav()"></div>
+    <div class="task-search-wrap"><i class="ti ti-search"></i><input class="task-search" placeholder="Search by task…" value="${taskSearchTask}" oninput="taskSearchTask=this.value;renderNav()"></div>
   </div>`;
 
-  let rows='';
+  let rowsHtml='';
   if(list.length===0){
-    rows=`<div class="empty-state" style="border:none"><i class="ti ti-checkbox"></i><p>No tasks here</p></div>`;
+    rowsHtml=`<tr><td colspan="6" class="dg-empty">No tasks here</td></tr>`;
   } else {
     list.forEach(t=>{
       const isDone=t.done==='true'||t.done===true;
       const p=t.projectId?projects.find(x=>x.id===t.projectId):null;
       const cl=p?clients.find(c=>c.id===p.clientId):null;
-      const projLabel=p?`${cl?cl.name+' — ':''}${p.name}`:'General';
-      let actions='';
+      const projLabel=p?`${cl?cl.name+' — ':''}${p.name}`:'';
+      let completeCell='';
+      let reviseCell='';
       if(isDone){
-        actions=`<span style="font-size:10px;color:var(--green);font-weight:500;letter-spacing:1px;text-transform:uppercase">✓ Done</span>`;
-        if(isM) actions+=` <button class="revise-btn" onclick="openReviseModal('${t.id}')">Revise</button>`;
+        completeCell=`<span class="dg-done-label"><i class="ti ti-circle-check-filled" style="color:var(--dg-green)"></i> Done</span>`;
+        if(isM) reviseCell=`<button class="revise-btn" onclick="openReviseModal('${t.id}')"><i class="ti ti-refresh"></i> Revise</button>`;
       } else {
-        if(isM) actions+=`<button class="done-btn" onclick="markTaskDone('${t.id}')">✓ Done</button>`;
-        if(!isM) actions+=`<button class="submit-btn" onclick="openSubmitModal('${t.id}')"><i class="ti ti-upload" style="font-size:12px"></i> Submit</button>`;
-        if(isM) actions+=` <button class="revise-btn" onclick="openReviseModal('${t.id}')">Revise</button>`;
+        if(isM) completeCell=`<button class="done-btn" onclick="markTaskDone('${t.id}')"><i class="ti ti-check"></i> Done</button>`;
+        else completeCell=`<button class="submit-btn" onclick="openSubmitModal('${t.id}')"><i class="ti ti-upload"></i> Submit</button>`;
+        if(isM) reviseCell=`<button class="revise-btn" onclick="openReviseModal('${t.id}')"><i class="ti ti-refresh"></i> Revise</button>`;
       }
-      rows+=`<div class="task-row">
-        <div class="task-info">
-          <div class="task-name-text">${t.task}</div>
-          <div class="task-meta-text">${t.name}${t.phone?' · '+t.phone:''} · ${projLabel} · Due ${t.dueDate}${t.submittedFile?' · Submitted: '+t.submittedFile:''}${t.totalRevisions&&parseInt(t.totalRevisions)>0?' · Revised '+t.totalRevisions+'x':''}</div>
-        </div>
-        ${duePill(t.dueDate,t.done)}
-        <div class="task-actions">${actions}</div>
-      </div>`;
+      const subBits=[projLabel,t.submittedFile?'Submitted: '+t.submittedFile:'',t.totalRevisions&&parseInt(t.totalRevisions)>0?'Revised '+t.totalRevisions+'x':''].filter(Boolean).join(' · ');
+      rowsHtml+=`<tr>
+        <td>${t.name}</td>
+        <td>${t.phone||''}</td>
+        <td>${t.task}${subBits?`<div class="dg-task-sub">${subBits}</div>`:''}</td>
+        <td>${fmtDMY(t.dueDate)}</td>
+        <td>${completeCell}</td>
+        <td>${reviseCell}</td>
+      </tr>`;
     });
   }
 
-  const hd = projectId
-    ? `<div class="sec-hd"><span class="sec-title">Tasks</span>${addBtn}</div>`
-    : `<div class="sec-hd"><span class="sec-title">${taskView==='followup'?'Follow Up Tasks':'All Pending Tasks'}</span></div>`;
+  const title = projectId ? 'Tasks' : (taskView==='followup'?'Follow Up Tasks':'All Pending Tasks');
 
-  return tabs+hd+searchRow+`<div style="border:1px solid var(--border);background:var(--bg2)">${rows}</div>`;
+  return `<div class="dg-wrap">${tabs}<div class="dg-card">
+    <div class="dg-card-title">${title}</div>
+    ${searchRow}
+    <table class="dg-table">
+      <thead><tr><th>Name</th><th>Number</th><th>Task</th><th>Planned Date</th><th>Mark Complete</th><th>Revise</th></tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+  </div></div>`;
 }
 
 function renderGlobalTasks(){
