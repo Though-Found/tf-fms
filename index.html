@@ -560,7 +560,7 @@ const FICONS={pdf:'ti-file-type-pdf',pptx:'ti-presentation',docx:'ti-file-type-d
 
 let role='owner',selRole='owner',navStack=[];
 let currentClientId=null,currentProjectId=null,driveStack=[];
-let expandedRow=null,driveTab='folders',clientEditOpen=null;
+let expandedRow=null,driveTab='all',clientEditOpen=null;
 let uploadTab='dragdrop';
 let queuedFiles=[];
 let accessToken=null;
@@ -947,7 +947,7 @@ function doLogout(){document.getElementById('scr-app').classList.remove('active'
 // ── NAV ──
 function vLabel(v){return{dashboard:'Dashboard',clients:'Clients',pipeline:'Pipeline',projects:'All Projects',mis:'MIS'}[v]||v}
 function goView(v){
-  currentClientId=null;currentProjectId=null;driveStack=[];expandedRow=null;driveTab='folders';clientEditOpen=null;queuedFiles=[];taskSearch='';taskSearchTask='';
+  currentClientId=null;currentProjectId=null;driveStack=[];expandedRow=null;driveTab='all';clientEditOpen=null;queuedFiles=[];taskSearch='';taskSearchTask='';
   navStack=[{type:'view',id:v,label:vLabel(v)}];
   document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
   const ni=document.getElementById('nav-'+v);if(ni)ni.classList.add('active');
@@ -984,7 +984,7 @@ function renderNav(){
   else if(last.type==='client')content=renderClientDetail(last.id);
   else if(last.type==='project'||last.type==='folder')content=renderDrive();
   c.innerHTML=(navStack.length>1?backBar:'')+'<div class="inner">'+content+'</div>';
-  if(last.type==='project'||last.type==='folder')renderUploadPanel();
+  if(last.type==='folder')renderUploadPanel();
 }
 function openClient(cid){
   currentClientId=cid;currentProjectId=null;driveStack=[];expandedRow=null;clientEditOpen=null;
@@ -995,7 +995,7 @@ function openClient(cid){
   renderNav();
 }
 function openProject(pid){
-  currentProjectId=pid;driveStack=[];expandedRow=null;driveTab='folders';queuedFiles=[];
+  currentProjectId=pid;driveStack=[];expandedRow=null;driveTab='all';queuedFiles=[];
   const p=projects.find(x=>x.id===pid);currentClientId=p.clientId;
   const cl=clients.find(c=>c.id===p.clientId);
   const base=navStack.find(s=>s.type==='view')||{type:'view',id:'clients',label:'Clients'};
@@ -1063,17 +1063,28 @@ function renderAllProjects(){
 }
 function renderDrive(){
   const p=projects.find(x=>x.id===currentProjectId);const fid=cfid();const isFolder=driveStack.length>0;const curName=isFolder?driveStack[driveStack.length-1].name:p.name;
-  const tabs=!isFolder?`<div class="drive-tabs"><div class="drive-tab ${driveTab==='folders'?'active':''}" onclick="driveTab='folders';renderNav()">Folders</div><div class="drive-tab ${driveTab==='all'?'active':''}" onclick="driveTab='all';renderNav()">All Files</div><div class="drive-tab ${driveTab==='shared'?'active':''}" onclick="driveTab='shared';renderNav()">Shared Files</div></div>`:'';
-  const toolbar=`<div class="sec-hd"><div><div style="font-size:16px;font-weight:400;color:var(--text)">${curName}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${spill(p.stage)} <span style="margin-left:6px">${p.service}</span>${!isFolder&&p.deadline?`<span style="margin-left:8px">${deadlineBadge(p.deadline)}</span>`:''}${driveConnected?`<span style="margin-left:8px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><i class="ti ti-brand-google-drive" style="font-size:12px"></i> Drive sync on</span>`:''}</div></div><div style="display:flex;gap:6px">${!isFolder&&driveTab==='folders'?`<button class="btn-ghost" onclick="om('mod-folder')"><i class="ti ti-folder-plus"></i> New Folder</button>`:''}<button class="btn-ghost" onclick="openShareModal('${p.id}')"><i class="ti ti-share"></i> Share File</button></div></div>`;
+  const tabs=!isFolder?`<div class="drive-tabs"><div class="drive-tab ${driveTab==='all'?'active':''}" onclick="driveTab='all';renderNav()">All Files</div><div class="drive-tab ${driveTab==='shared'?'active':''}" onclick="driveTab='shared';renderNav()">Shared Files</div></div>`:'';
+  const toolbar=`<div class="sec-hd"><div><div style="font-size:16px;font-weight:400;color:var(--text)">${curName}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${spill(p.stage)} <span style="margin-left:6px">${p.service}</span>${!isFolder&&p.deadline?`<span style="margin-left:8px">${deadlineBadge(p.deadline)}</span>`:''}${driveConnected?`<span style="margin-left:8px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><i class="ti ti-brand-google-drive" style="font-size:12px"></i> Drive sync on</span>`:''}</div></div><div style="display:flex;gap:6px">${isFolder?`<button class="btn-ghost" onclick="om('mod-folder')"><i class="ti ti-folder-plus"></i> New Folder</button>`:''}<button class="btn-ghost" onclick="openShareModal('${p.id}')"><i class="ti ti-share"></i> Share File</button></div></div>`;
 
   let subProjSection='';
   if(!isFolder){
     const sps=subProjectsOf(p.id);
-    subProjSection=`<div class="sec-hd" style="margin-bottom:.75rem"><span class="sec-title">Sub-Projects</span><button class="btn-ghost" onclick="openAddSubProjectModal()"><i class="ti ti-sitemap"></i> Add Sub-Project</button></div>`;
+    subProjSection=`<div class="sec-hd" style="margin-bottom:.75rem"><span class="sec-title">Sub-Projects</span><button class="btn-add" onclick="openAddSubProjectModal()"><i class="ti ti-plus"></i> Add Sub-Project</button></div>`;
     if(sps.length===0){
-      subProjSection+=`<div class="empty-state" style="padding:1.25rem;margin-bottom:1.25rem"><i class="ti ti-sitemap"></i><p>No sub-projects yet — group work into phases like "Phase 1 — Strategy"</p></div>`;
+      subProjSection+=`<div class="empty-state" style="padding:1.25rem;margin-bottom:1.25rem"><i class="ti ti-sitemap"></i><p>No sub-projects yet — add one to start organizing folders, files and uploads for this project</p></div>`;
     } else {
-      subProjSection+=`<div class="drive-grid" style="margin-bottom:1.25rem">${sps.map(sp=>{const cnt=cif(sp.id,p.id);const names=assignedMemberNames(sp.assignedMembers);return`<div class="di" onclick="enterFolder('${sp.id}','${sp.name}')"><div class="di-acts">${canManage()?`<button class="di-act" onclick="event.stopPropagation();openEditSubProjectModal('${sp.id}')" title="Edit"><i class="ti ti-pencil"></i></button><button class="di-act" onclick="event.stopPropagation();delFolder('${sp.id}')" title="Delete"><i class="ti ti-trash"></i></button>`:''}</div><i class="ti ti-sitemap di-icon" style="color:var(--dg-blue,var(--blue))"></i><div class="di-name">${sp.name}</div><div class="di-meta">${cnt} item${cnt!==1?'s':''}</div>${sp.deadline?`<div style="margin-top:6px">${deadlineBadge(sp.deadline)}</div>`:''}${names?`<div style="font-size:9.5px;color:var(--text3);margin-top:4px">${escHtml(names)}</div>`:''}</div>`;}).join('')}</div>`;
+      const spRows=sps.map(sp=>{
+        const cnt=cif(sp.id,p.id);
+        const names=assignedMemberNames(sp.assignedMembers);
+        return `<tr>
+          <td><div class="row-name"><i class="ti ti-sitemap" style="color:var(--dg-blue,var(--blue));font-size:14px;flex-shrink:0"></i><span class="row-open" onclick="enterFolder('${sp.id}','${escHtml(sp.name)}')">${sp.name}</span>${canManage()?editIcon(`event.stopPropagation();openEditSubProjectModal('${sp.id}')`):''}</div></td>
+          <td>${cnt}</td>
+          <td>${sp.deadline?deadlineBadge(sp.deadline):'<span style="color:var(--text3)">—</span>'}</td>
+          <td>${names?escHtml(names):'<span style="color:var(--text3)">—</span>'}</td>
+          <td>${canManage()?`<button class="fl-act" onclick="delFolder('${sp.id}')" title="Delete"><i class="ti ti-trash"></i></button>`:''}</td>
+        </tr>`;
+      }).join('');
+      subProjSection+=`<table class="tf-table" style="margin-bottom:1.25rem"><thead><tr><th>Sub-Project</th><th>Files</th><th>Deadline</th><th>Assigned To</th><th></th></tr></thead><tbody>${spRows}</tbody></table>`;
     }
   }
 
@@ -1099,7 +1110,7 @@ function renderDrive(){
       body+=`</div>`;
     }
     body+=`<button class="btn-ghost" style="margin-top:8px" onclick="openShareModal('${p.id}')"><i class="ti ti-share"></i> Share a File</button>`;
-  } else if(driveTab==='all'&&!isFolder){
+  } else if(!isFolder){
     const allFiles=files.filter(f=>f.projectId===p.id);
     if(allFiles.length===0){body=`<div class="empty-state"><i class="ti ti-file-off"></i><p>No files yet — upload or attach a Drive link below</p></div>`;}
     else{
@@ -1129,7 +1140,7 @@ function renderDrive(){
       else{body=`<div class="drive-grid">${lf.map(fo=>{const cnt=cif(fo.id,p.id);return`<div class="di" onclick="enterFolder('${fo.id}','${fo.name}')"><div class="di-acts">${canManage()?`<button class="di-act" onclick="event.stopPropagation();delFolder('${fo.id}')"><i class="ti ti-trash"></i></button>`:''}</div><i class="ti ti-folder-filled di-icon folder"></i><div class="di-name">${fo.name}</div><div class="di-meta">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('')}</div>`;}
     }
   }
-  return toolbar+subProjSection+tabs+body+`<div id="upload-panel-wrap"></div>`;
+  return toolbar+subProjSection+tabs+body+(isFolder?`<div id="upload-panel-wrap"></div>`:'');
 }
 function cif(fid,pid){let c=files.filter(f=>f.projectId===pid&&(f.folderId||'')===fid).length;folders.filter(f=>f.projectId===pid&&(f.parentId||'')===fid).forEach(s=>{c+=cif(s.id,pid)});return c;}
 function delFolder(fid){
