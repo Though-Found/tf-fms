@@ -372,7 +372,11 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   <div class="modal-title" id="isp-modal-title">New Sub-Project</div>
   <input type="hidden" id="isp-edit-id" value="">
   <div class="form-row"><label class="form-lbl">Sub-project name</label><input class="form-inp" id="isp-name" type="text" placeholder="e.g. Phase 1 — Strategy"></div>
-  <div class="modal-actions"><button class="btn-cancel" onclick="cm('mod-subproject')">Cancel</button><button class="btn-add" id="isp-submit-btn" onclick="addSubProject()">Create</button></div>
+  <div class="modal-actions">
+    <button class="btn-danger" id="isp-delete-btn" onclick="deleteSubProjectFromModal()" style="display:none;margin-right:auto"><i class="ti ti-trash"></i> Delete</button>
+    <button class="btn-cancel" onclick="cm('mod-subproject')">Cancel</button>
+    <button class="btn-add" id="isp-submit-btn" onclick="addSubProject()">Create</button>
+  </div>
 </div></div>
 
 
@@ -1124,16 +1128,12 @@ function renderDrive(){
     } else {
       const spRows=sps.map(sp=>{
         const cnt=cif(sp.id,p.id);
-        const names=assignedMemberNames(sp.assignedMembers);
         return `<tr>
           <td><div class="row-name"><i class="ti ti-sitemap" style="color:var(--dg-blue,var(--blue));font-size:14px;flex-shrink:0"></i><span class="row-open" onclick="enterFolder('${sp.id}','${escHtml(sp.name)}')">${sp.name}</span>${canManage()?editIcon(`event.stopPropagation();openEditSubProjectModal('${sp.id}')`):''}</div></td>
           <td>${cnt}</td>
-          <td>${sp.deadline?deadlineBadge(sp.deadline):'<span style="color:var(--text3)">—</span>'}</td>
-          <td>${names?escHtml(names):'<span style="color:var(--text3)">—</span>'}</td>
-          <td>${canManage()?`<button class="fl-act" onclick="delFolder('${sp.id}')" title="Delete"><i class="ti ti-trash"></i></button>`:''}</td>
         </tr>`;
       }).join('');
-      subProjSection+=`<table class="tf-table" style="margin-bottom:1.25rem"><thead><tr><th>Sub-Project</th><th>Files</th><th>Deadline</th><th>Assigned To</th><th></th></tr></thead><tbody>${spRows}</tbody></table>`;
+      subProjSection+=`<table class="tf-table" style="margin-bottom:1.25rem"><thead><tr><th>Sub-Project</th><th>Files</th></tr></thead><tbody>${spRows}</tbody></table>`;
     }
   }
 
@@ -1214,6 +1214,7 @@ function openAddSubProjectModal(){
   document.getElementById('isp-edit-id').value='';
   document.getElementById('isp-name').value='';
   document.getElementById('isp-submit-btn').textContent='Create';
+  document.getElementById('isp-delete-btn').style.display='none';
   om('mod-subproject');
 }
 function openEditSubProjectModal(fid){
@@ -1222,7 +1223,14 @@ function openEditSubProjectModal(fid){
   document.getElementById('isp-edit-id').value=fid;
   document.getElementById('isp-name').value=fo.name;
   document.getElementById('isp-submit-btn').textContent='Save Changes';
+  document.getElementById('isp-delete-btn').style.display='inline-flex';
   om('mod-subproject');
+}
+function deleteSubProjectFromModal(){
+  const fid=document.getElementById('isp-edit-id').value;
+  if(!fid) return;
+  delFolder(fid);
+  cm('mod-subproject');
 }
 async function addSubProject(){
   const name=document.getElementById('isp-name').value.trim();if(!name)return;
