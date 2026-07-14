@@ -1116,7 +1116,7 @@ function renderAllProjects(){
 }
 function renderDrive(){
   const p=projects.find(x=>x.id===currentProjectId);const fid=cfid();const isFolder=driveStack.length>0;const curName=isFolder?driveStack[driveStack.length-1].name:p.name;
-  const tabs=!isFolder?`<div class="drive-tabs"><div class="drive-tab ${driveTab==='all'?'active':''}" onclick="driveTab='all';renderNav()">All Files</div><div class="drive-tab ${driveTab==='shared'?'active':''}" onclick="driveTab='shared';renderNav()">Shared Files</div></div>`:'';
+  const tabs='';
   const toolbar=`<div class="sec-hd"><div><div style="font-size:16px;font-weight:400;color:var(--text)">${curName}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${spill(p.stage)} <span style="margin-left:6px">${p.service}</span>${!isFolder&&p.deadline?`<span style="margin-left:8px">${deadlineBadge(p.deadline)}</span>`:''}${driveConnected?`<span style="margin-left:8px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><i class="ti ti-brand-google-drive" style="font-size:12px"></i> Drive sync on</span>`:''}</div></div><div style="display:flex;gap:6px">${isFolder?`<button class="btn-ghost" onclick="om('mod-folder')"><i class="ti ti-folder-plus"></i> New Folder</button>`:''}<button class="btn-ghost" onclick="openShareModal('${p.id}')"><i class="ti ti-share"></i> Share File</button></div></div>`;
 
   let subProjSection='';
@@ -1138,28 +1138,7 @@ function renderDrive(){
   }
 
   let body='';
-  if(driveTab==='shared'&&!isFolder){
-    const pShared=sharedFiles.filter(sf=>sf.projectId===p.id);
-    if(pShared.length===0){body=`<div class="empty-state"><i class="ti ti-share" aria-hidden="true"></i><p>No files shared in this project yet</p></div>`;}
-    else{
-      body=`<div style="border:1px solid var(--border);margin-bottom:12px">`;
-      pShared.slice().reverse().forEach(sf=>{
-        const recipientName=sf.sentTo==='all'?'Entire Team':teamMembers.find(m=>m.id===sf.sentTo)?.name||sf.sentTo;
-        body+=`<div class="file-list-row">
-          <i class="ti ti-share fl-icon" style="color:var(--blue)"></i>
-          <div class="fl-info">
-            <div class="fl-name">${sf.fileName}</div>
-            <div class="fl-meta">Shared by ${sf.sentBy} → ${recipientName} · ${sf.date}${sf.note?' · '+sf.note:''}</div>
-          </div>
-          <div class="fl-acts">
-            ${sf.driveLink?`<a href="${sf.driveLink}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open</a>`:''}
-          </div>
-        </div>`;
-      });
-      body+=`</div>`;
-    }
-    body+=`<button class="btn-ghost" style="margin-top:8px" onclick="openShareModal('${p.id}')"><i class="ti ti-share"></i> Share a File</button>`;
-  } else if(!isFolder){
+  if(!isFolder){
     const allFiles=files.filter(f=>f.projectId===p.id);
     if(allFiles.length===0){body=`<div class="empty-state"><i class="ti ti-file-off"></i><p>No files yet — upload or attach a Drive link below</p></div>`;}
     else{
