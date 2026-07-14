@@ -611,7 +611,7 @@ async function loadFromSheets(){
 
 function scheduleSave(){
   clearTimeout(saveTimeout);
-  saveTimeout=setTimeout(saveToSheets, 1500);
+  saveTimeout=setTimeout(saveToSheets, 400);
 }
 
 async function saveToSheets(){
@@ -627,6 +627,18 @@ async function saveToSheets(){
     showToast('Could not save — check connection');
   }
 }
+
+// Flush any pending save immediately if the tab is closed, refreshed, or navigated away from —
+// otherwise a save still sitting in the debounce window would be lost.
+window.addEventListener('beforeunload',()=>{
+  if(saveTimeout){
+    clearTimeout(saveTimeout);
+    try{
+      const blob=new Blob([JSON.stringify({action:'save',clients,projects,folders,files,tasks,teamMembers,sharedFiles})],{type:'text/plain;charset=utf-8'});
+      navigator.sendBeacon(SCRIPT_URL, blob);
+    }catch(e){/* best effort */}
+  }
+});
 
 // ── GOOGLE DRIVE ──
 function connectDrive(){
