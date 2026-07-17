@@ -890,7 +890,7 @@ async function confirmUpload(){
   for(const f of queuedFiles){
     let driveInfo=null;
     if(driveConnected)driveInfo=await uploadToDrive(f,currentProjectId,fid);
-    files.push({id:'fi'+Date.now()+Math.random(),projectId:currentProjectId,folderId:fid||'',name:f.name,by,date:today(),size:fmtSize(f.size),link:driveInfo?driveInfo.driveLink:'',isLink:'false'});
+    files.push({id:'fi'+Date.now()+Math.random(),projectId:currentProjectId,folderId:fid||'',name:f.name,by,date:today(),size:fmtSize(f.size),link:driveInfo?driveInfo.driveLink:'',driveId:driveInfo?driveInfo.driveId:'',isLink:'false'});
   }
   queuedFiles=[];
   scheduleSave();
@@ -1174,7 +1174,7 @@ function renderDrive(){
             <div class="fl-name">${fi.name}</div>
             <div class="fl-meta">${loc} · ${fi.by||'Team'} · ${dateStr}${fi.size?' · '+fi.size:''}${fi.link&&!isLnk?' · <span style="color:var(--green);font-weight:500">✓ In Drive</span>':isLnk?' · <span style="color:#4285f4">Drive link</span>':''}</div>
           </div>
-          <div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="if(confirm('Delete \\'${escHtml(fi.name)}\\'? This only removes it from T&F FMS, not from Drive.'))delFile('${fi.id}')" title="Delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`:''}</div>
+          <div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="if(confirm('Delete \\'${escHtml(fi.name)}\\'? This also permanently deletes it from Google Drive.'))delFile('${fi.id}')" title="Delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`:''}</div>
         </div>`;
       });
       body+=`</div>`;
@@ -1200,7 +1200,7 @@ function renderDrive(){
               <div class="fl-name">${fi.name}</div>
               <div class="fl-meta">${fi.by||'Team'} · ${dateStr}${fi.size?' · '+fi.size:''}${fi.link&&!isLnk?' · <span style="color:var(--green);font-weight:500">✓ In Drive</span>':isLnk?' · <span style="color:#4285f4">Drive link</span>':''}</div>
             </div>
-            <div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="if(confirm('Delete \\'${escHtml(fi.name)}\\'? This only removes it from T&F FMS, not from Drive.'))delFile('${fi.id}')" title="Delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`:''}</div>
+            <div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="if(confirm('Delete \\'${escHtml(fi.name)}\\'? This also permanently deletes it from Google Drive.'))delFile('${fi.id}')" title="Delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`:''}</div>
           </div>`;
         });
         body+=`</div>`;
@@ -1218,7 +1218,34 @@ function delFolder(fid){
   files=files.filter(f=>!idsToDelete.includes(f.folderId||''));
   scheduleSave();renderNav();
 }
-function delFile(fid){files=files.filter(f=>f.id!==fid);scheduleSave();renderNav()}
+function extractDriveFileId(link){
+  if(!link) return null;
+  const m = link.match(/\/d\/([a-zA-Z0-9_-]{10,})/) || link.match(/[?&]id=([a-zA-Z0-9_-]{10,})/);
+  return m ? m[1] : null;
+}
+async function delFile(fid){
+  const f=files.find(x=>x.id===fid);
+  if(!f){ scheduleSave(); renderNav(); return; }
+  const driveFileId = f.driveId || extractDriveFileId(f.link);
+  files=files.filter(x=>x.id!==fid);
+  scheduleSave();
+  renderNav();
+  if(driveConnected && accessToken && driveFileId && (f.isLink!=='true' && f.isLink!==true)){
+    try{
+      const res=await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}`,{
+        method:'DELETE',
+        headers:{Authorization:'Bearer '+accessToken}
+      });
+      if(res.ok || res.status===404){ showToast('Deleted from T&F FMS and Drive ✓'); }
+      else{ showToast('Removed from T&F FMS — could not delete from Drive'); }
+    }catch(e){
+      console.error('Drive delete error',e);
+      showToast('Removed from T&F FMS — could not delete from Drive');
+    }
+  } else {
+    showToast('Removed from T&F FMS ✓');
+  }
+}
 async function addFolder(){
   const name=document.getElementById('if-name').value.trim();if(!name)return;
   const fo={id:'fo'+Date.now(),projectId:currentProjectId,parentId:cfid()||'',name,isSubProject:'false'};
