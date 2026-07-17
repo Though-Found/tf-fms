@@ -569,7 +569,7 @@ const FICONS={pdf:'ti-file-type-pdf',pptx:'ti-presentation',docx:'ti-file-type-d
 
 let role='owner',selRole='owner',navStack=[];
 let currentClientId=null,currentProjectId=null,driveStack=[];
-let expandedRow=null,driveTab='all',clientEditOpen=null,showProjectFiles=false;
+let expandedRow=null,driveTab='all',clientEditOpen=null;
 let uploadTab='dragdrop';
 let queuedFiles=[];
 let accessToken=null;
@@ -1067,7 +1067,7 @@ function openClient(cid){
   renderNav();
 }
 function openProject(pid){
-  currentProjectId=pid;driveStack=[];expandedRow=null;driveTab='all';queuedFiles=[];showProjectFiles=false;
+  currentProjectId=pid;driveStack=[];expandedRow=null;driveTab='all';queuedFiles=[];
   const p=projects.find(x=>x.id===pid);currentClientId=p.clientId;
   const cl=clients.find(c=>c.id===p.clientId);
   const base=navStack.find(s=>s.type==='view')||{type:'view',id:'clients',label:'Clients'};
@@ -1159,48 +1159,7 @@ function renderDrive(){
 
   let body='';
   if(!isFolder){
-    const allFiles=files.filter(f=>f.projectId===p.id);
-    const filesToggle=`<div class="sec-hd" style="margin-bottom:.75rem"><span class="sec-title">Files</span><button class="btn-ghost" onclick="showProjectFiles=!showProjectFiles;renderNav()"><i class="ti ti-${showProjectFiles?'chevron-up':'files'}"></i> ${showProjectFiles?'Hide':'Show'} Files (${allFiles.length})</button></div>`;
-
-    if(!showProjectFiles){
-      body=filesToggle;
-    } else if(allFiles.length===0){
-      body=filesToggle+`<div class="empty-state"><i class="ti ti-file-off"></i><p>No files yet — upload or attach a Drive link below</p></div>`;
-    } else {
-      // Group files by their folder path, same structure as Drive: Project → Sub-Project → nested folders
-      const groups={};
-      allFiles.forEach(fi=>{
-        const path = fi.folderId ? folderPath(fi.folderId) : 'Root';
-        if(!groups[path]) groups[path]=[];
-        groups[path].push(fi);
-      });
-      const sortedPaths=Object.keys(groups).sort((a,b)=>{
-        if(a==='Root') return -1;
-        if(b==='Root') return 1;
-        return a.localeCompare(b);
-      });
-
-      body=filesToggle;
-      sortedPaths.forEach(path=>{
-        body+=`<div style="font-size:11px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;color:var(--text3);margin:14px 0 6px;display:flex;align-items:center;gap:5px"><i class="ti ti-folder" style="font-size:13px"></i>${escHtml(path)}</div>`;
-        body+=`<div style="border:1px solid var(--border);margin-bottom:8px">`;
-        groups[path].forEach(fi=>{
-          const isLnk=fi.isLink==='true'||fi.isLink===true;
-          const icon=isLnk?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));
-          const openEl=fi.link?`<a href="${fi.link}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open in Drive</a>`:'';
-          const dateStr=fmtDate(fi.date);
-          body+=`<div class="file-list-row">
-            <i class="ti ${icon} fl-icon" style="${fi.link?'color:#4285f4':'color:var(--text3)'}"></i>
-            <div class="fl-info">
-              <div class="fl-name">${fi.name}</div>
-              <div class="fl-meta">${fi.by||'Team'} · ${dateStr}${fi.size?' · '+fi.size:''}${fi.link&&!isLnk?' · <span style="color:var(--green);font-weight:500">✓ In Drive</span>':isLnk?' · <span style="color:#4285f4">Drive link</span>':''}</div>
-            </div>
-            <div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="if(confirm('Delete \\'${escHtml(fi.name)}\\'? This also permanently deletes it from Google Drive.'))delFile('${fi.id}')" title="Delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`:''}</div>
-          </div>`;
-        });
-        body+=`</div>`;
-      });
-    }
+    body=''; // project root shows only Sub-Projects above — click into one to see its files, just like Drive
   } else {
     const lf=folders.filter(f=>f.projectId===p.id&&(f.parentId||'')===(fid||'')&&(fid?true:!(f.isSubProject==='true'||f.isSubProject===true)));const lfi=files.filter(f=>f.projectId===p.id&&(f.folderId||'')===(fid||''));
     if(lf.length===0&&lfi.length===0){body=`<div class="empty-state"><i class="ti ti-folder-open"></i><p>Empty — create a folder or add files below</p></div>`;}
