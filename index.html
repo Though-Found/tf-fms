@@ -1624,6 +1624,8 @@ function escHtml(str){
   return String(str==null?'':str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+function isTaskDone(t){ return t.done==='true'||t.done===true; }
+
 function fmtDMY(str){
   if(!str) return '';
   try{
@@ -1652,8 +1654,8 @@ function renderTasks(projectId){
   // For global view split by tab
   let list = shown;
   if(!projectId){
-    if(taskView==='followup') list=shown.filter(t=>t.done!=='true'&&taskDueStatus(t.dueDate)!=='normal');
-    else if(taskView==='all') list=shown.filter(t=>t.done!=='true');
+    if(taskView==='followup') list=shown.filter(t=>!isTaskDone(t)&&taskDueStatus(t.dueDate)!=='normal');
+    else if(taskView==='all') list=shown.filter(t=>!isTaskDone(t));
   }
 
   let tabs='';
@@ -1715,7 +1717,7 @@ function renderTasks(projectId){
     rowsHtml=`<tr><td colspan="6" class="dg-empty">No tasks here</td></tr>`;
   } else {
     list.forEach(t=>{
-      const isDone=t.done==='true'||t.done===true;
+      const isDone=isTaskDone(t);
       const p=t.projectId?projects.find(x=>x.id===t.projectId):null;
       const cl=p?clients.find(c=>c.id===p.clientId):null;
       const sp=t.subFolderId?folders.find(f=>f.id===t.subFolderId):null;
