@@ -909,6 +909,10 @@ async function confirmLink(){
   const by=role.charAt(0).toUpperCase()+role.slice(1);
   const {id:driveId,isFolder}=extractDriveFileId(url);
 
+  if(!driveId && url.includes('drive.google.com')){
+    alert('This looks like a Google Drive link, but the file/folder ID couldn\'t be read from it cleanly:\n\n"'+url+'"\n\nThis usually means extra text got copied along with the link. Please go back to Drive, right-click the file/folder → Share → Copy link, then paste ONLY that here and try again.');
+  }
+
   // If it's a real Google Drive link and Drive is connected, actually copy/shortcut it into the right folder
   if(driveId && driveConnected && accessToken){
     try{
@@ -939,9 +943,14 @@ async function confirmLink(){
         renderNav();
         return;
       }
-      // fall through to plain-link fallback if the API call failed (e.g. no access to source file)
+      // Surface the real reason it failed, so we don't have to guess
+      let errMsg='';
+      try{ const errBody=await res.json(); errMsg=errBody.error?.message||JSON.stringify(errBody); }catch(_){ errMsg='HTTP '+res.status; }
+      console.error('Drive copy/shortcut failed',res.status,errMsg);
+      alert('Drive copy failed:\n\nStatus: '+res.status+'\nMessage: '+errMsg+'\n\nSaved as a plain link instead — please screenshot this and send it to Claude.');
     }catch(e){
       console.error('Drive copy/shortcut error',e);
+      alert('Drive copy error:\n\n'+(e.message||e)+'\n\nSaved as a plain link instead — please screenshot this and send it to Claude.');
     }
     showToast('Could not copy from Drive — saved as a plain link instead');
   }
