@@ -891,7 +891,7 @@ function removeFromQueue(i){queuedFiles.splice(i,1);renderUploadPanel();}
 
 async function confirmUpload(){
   if(queuedFiles.length===0)return;
-  const by=document.getElementById('up-by')?document.getElementById('up-by').value.trim()||'Team':'Team';
+  const by=role.charAt(0).toUpperCase()+role.slice(1);
   const fid=cfid();
   for(const f of queuedFiles){
     let driveInfo=null;
@@ -905,22 +905,20 @@ async function confirmUpload(){
 
 function confirmLink(){
   const url=document.getElementById('up-link')?document.getElementById('up-link').value.trim():'';
-  if(!url)return;
-  let name=document.getElementById('up-lname')?document.getElementById('up-lname').value.trim():'';
-  // Auto-extract name from URL if not provided
-  if(!name){
-    try{
-      const u=new URL(url);
-      // Try to get file name from path
-      const parts=u.pathname.split('/').filter(Boolean);
-      name=decodeURIComponent(parts[parts.length-1]||'')
-        .replace(/\.[^.]+$/,'') // remove extension
-        .replace(/[-_]/g,' ')
-        .trim();
-      if(!name||name.length<2) name='Linked File';
-    }catch(e){name='Linked File';}
-  }
-  const by=document.getElementById('up-by')?document.getElementById('up-by').value.trim()||'Team':'Team';
+  if(!url){showToast('Paste a link first');return;}
+  let name='';
+  // Auto-extract name from URL
+  try{
+    const u=new URL(url);
+    // Try to get file name from path
+    const parts=u.pathname.split('/').filter(Boolean);
+    name=decodeURIComponent(parts[parts.length-1]||'')
+      .replace(/\.[^.]+$/,'') // remove extension
+      .replace(/[-_]/g,' ')
+      .trim();
+    if(!name||name.length<2) name='Linked File';
+  }catch(e){name='Linked File';}
+  const by=role.charAt(0).toUpperCase()+role.slice(1);
   files.push({id:'fi'+Date.now(),projectId:currentProjectId,folderId:cfid()||'',name,by,date:today(),size:'',link:url,isLink:'true'});
   scheduleSave();
   showToast('Drive link attached ✓');
@@ -930,9 +928,7 @@ function confirmLink(){
 function renderUploadPanel(){
   const el=document.getElementById('upload-panel-wrap');
   if(!el)return;
-  const byVal=document.getElementById('up-by')?document.getElementById('up-by').value:'';
   const lnVal=document.getElementById('up-link')?document.getElementById('up-link').value:'';
-  const lnName=document.getElementById('up-lname')?document.getElementById('up-lname').value:'';
   const p=projects.find(x=>x.id===currentProjectId);
   const cl=clients.find(c=>c.id===p?.clientId);
   el.innerHTML=`
@@ -942,7 +938,6 @@ function renderUploadPanel(){
     <div class="upload-tab ${uploadTab==='link'?'active':''}" onclick="uploadTab='link';renderUploadPanel()"><i class="ti ti-brand-google-drive" style="font-size:12px;margin-right:4px"></i>Attach Drive Link</div>
   </div>
   <div class="upload-body">
-    <div class="by-row"><label class="by-lbl">Your name</label><input class="form-inp" id="up-by" type="text" placeholder="e.g. Aditi" value="${byVal}"></div>
     ${uploadTab==='dragdrop'?`
       ${driveConnected?`<div style="font-size:11px;color:var(--green);background:var(--green-bg);padding:6px 10px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><i class="ti ti-brand-google-drive" style="font-size:14px"></i>Files will save to: T&F FMS → ${cl?.name||''} → ${p?.name||''}</div>`:''}
       <div class="drop-zone" id="dz" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="document.getElementById('file-inp').click()">
@@ -956,11 +951,9 @@ function renderUploadPanel(){
       ${queuedFiles.length>0?`<div class="upload-actions"><button class="btn-add" onclick="confirmUpload()"><i class="ti ti-upload"></i> Upload ${queuedFiles.length} file${queuedFiles.length>1?'s':''}${driveConnected?' + Save to Drive':''}</button></div>`:''}
     `:`
       <label class="by-lbl">Paste Google Drive / Dropbox / Figma link</label>
-      <input class="link-inp" id="up-link" type="url" placeholder="https://drive.google.com/..." value="${lnVal}" oninput="renderUploadPanel()">
-      ${lnVal?`<div class="link-preview"><i class="ti ${linkIcon(lnVal)}"></i><span style="word-break:break-all;font-size:11px;color:var(--text3)">${lnVal}</span></div>`:''}
-      <label class="by-lbl">Name (optional — auto-filled if left blank)</label>
-      <input class="link-inp" id="up-lname" type="text" placeholder="e.g. Moodboard v2 — or leave blank" value="${lnName}" oninput="renderUploadPanel()">
-      ${lnVal?`<div class="upload-actions"><button class="btn-add" onclick="confirmLink()"><i class="ti ti-link"></i> Attach Link</button></div>`:'<p style="font-size:11px;color:var(--text3)">Paste any Google Drive, Dropbox or Figma link to attach it</p>'}
+      <input class="link-inp" id="up-link" type="url" placeholder="https://drive.google.com/..." value="${lnVal}">
+      <div class="upload-actions"><button class="btn-add" onclick="confirmLink()"><i class="ti ti-link"></i> Attach Link</button></div>
+      <p style="font-size:11px;color:var(--text3);margin-top:6px">Paste any Google Drive, Dropbox or Figma link, then click Attach Link</p>
     `}
   </div>
 </div>`;
