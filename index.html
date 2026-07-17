@@ -875,10 +875,7 @@ function folderPath(fid){
   if(!fid) return '';
   const fo=folders.find(f=>f.id===fid);
   if(!fo) return '';
-  if(!fo.parentId){
-    const proj=projects.find(pr=>pr.id===fo.projectId);
-    return (proj?proj.name+' / ':'')+fo.name;
-  }
+  if(!fo.parentId) return fo.name;
   return folderPath(fo.parentId)+' / '+fo.name;
 }
 function fmtSize(b){if(!b)return'';if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
@@ -1173,11 +1170,15 @@ function renderDrive(){
       // Group files by their folder path, same structure as Drive: Project → Sub-Project → nested folders
       const groups={};
       allFiles.forEach(fi=>{
-        const path = fi.folderId ? folderPath(fi.folderId) : p.name;
+        const path = fi.folderId ? folderPath(fi.folderId) : 'Root';
         if(!groups[path]) groups[path]=[];
         groups[path].push(fi);
       });
-      const sortedPaths=Object.keys(groups).sort((a,b)=>a.localeCompare(b));
+      const sortedPaths=Object.keys(groups).sort((a,b)=>{
+        if(a==='Root') return -1;
+        if(b==='Root') return 1;
+        return a.localeCompare(b);
+      });
 
       body=filesToggle;
       sortedPaths.forEach(path=>{
