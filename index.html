@@ -720,11 +720,19 @@ function checkSavedToken(){
 async function getDriveFolder(name,parentId){
   const key=(parentId||'root')+'/'+name;
   if(driveFolderCache[key])return driveFolderCache[key];
-  const q=`name='${name}' and mimeType='application/vnd.google-apps.folder' and '${parentId||'root'}' in parents and trashed=false`;
+  const q=`name='${name.replace(/'/g,"\\'")}' and mimeType='application/vnd.google-apps.folder' and '${parentId||'root'}' in parents and trashed=false`;
   const sr=await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`,{headers:{Authorization:'Bearer '+accessToken}});
+  if(!sr.ok){
+    const err=await sr.json().catch(()=>({}));
+    throw new Error(`Drive search failed (${sr.status}): ${err.error?.message||'unknown error'}`);
+  }
   const sd=await sr.json();
   if(sd.files&&sd.files.length>0){driveFolderCache[key]=sd.files[0].id;return sd.files[0].id;}
   const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({name,mimeType:'application/vnd.google-apps.folder',parents:[parentId||'root']})});
+  if(!cr.ok){
+    const err=await cr.json().catch(()=>({}));
+    throw new Error(`Drive folder creation failed (${cr.status}): ${err.error?.message||'unknown error'}`);
+  }
   const cd=await cr.json();
   driveFolderCache[key]=cd.id;return cd.id;
 }
@@ -1154,20 +1162,27 @@ function renderClients(){
 async function syncAllToDrive(){
   if(!driveConnected){showToast('Connect Drive first');return;}
   showToast('Syncing all clients & projects to Drive…');
-  let count=0;
+  let success=0;
+  let firstError=null;
+  const tryOne=async(fn)=>{
+    try{ await fn(); success++; }
+    catch(e){ if(!firstError) firstError=e.message||String(e); }
+  };
   for(const cl of clients){
-    await getDriveFolder(cl.name,TF_ROOT_FOLDER_ID);
-    count++;
+    await tryOne(()=>getDriveFolder(cl.name,TF_ROOT_FOLDER_ID));
   }
   for(const p of projects){
-    await getProjectDrivePath(p.id,null);
-    count++;
+    await tryOne(()=>getProjectDrivePath(p.id,null));
   }
   for(const fo of folders.filter(f=>f.isSubProject==='true'||f.isSubProject===true)){
-    await getProjectDrivePath(fo.projectId,fo.id);
-    count++;
+    await tryOne(()=>getProjectDrivePath(fo.projectId,fo.id));
   }
-  showToast(`Synced ${count} folders to Drive ✓`);
+  const total=clients.length+projects.length+folders.filter(f=>f.isSubProject==='true'||f.isSubProject===true).length;
+  if(firstError){
+    alert(`Sync finished: ${success}/${total} succeeded.\n\nFirst error hit:\n${firstError}\n\nPlease screenshot this and send it to Claude.`);
+  } else {
+    showToast(`Synced ${success} folders to Drive ✓`);
+  }
 }
 function renderClientDetail(cid){
   const cl=clients.find(c=>c.id===cid);const cp=projects.filter(p=>p.clientId===cid);const isM=canManage();const isEO=clientEditOpen===cid;let rows='';
