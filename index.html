@@ -903,22 +903,60 @@ async function confirmUpload(){
   renderNav();
 }
 
-function confirmLink(){
+async function confirmLink(){
   const url=document.getElementById('up-link')?document.getElementById('up-link').value.trim():'';
   if(!url){showToast('Paste a link first');return;}
+  const by=role.charAt(0).toUpperCase()+role.slice(1);
+  const {id:driveId,isFolder}=extractDriveFileId(url);
+
+  // If it's a real Google Drive link and Drive is connected, actually copy/shortcut it into the right folder
+  if(driveId && driveConnected && accessToken){
+    try{
+      showToast(isFolder?'Adding folder shortcut…':'Copying file into T&F FMS…');
+      const targetFolderId = await getProjectDrivePath(currentProjectId, cfid());
+
+      let res;
+      if(isFolder){
+        // Folders can't be copied via the API — add a shortcut to it instead
+        res = await fetch('https://www.googleapis.com/drive/v3/files?fields=id,name,webViewLink',{
+          method:'POST',
+          headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},
+          body:JSON.stringify({mimeType:'application/vnd.google-apps.shortcut',parents:[targetFolderId],shortcutDetails:{targetId:driveId}})
+        });
+      } else {
+        res = await fetch(`https://www.googleapis.com/drive/v3/files/${driveId}/copy?fields=id,name,webViewLink`,{
+          method:'POST',
+          headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},
+          body:JSON.stringify({parents:[targetFolderId]})
+        });
+      }
+
+      if(res.ok){
+        const data=await res.json();
+        files.push({id:'fi'+Date.now(),projectId:currentProjectId,folderId:cfid()||'',name:data.name||'Linked File',by,date:today(),size:'',link:data.webViewLink||url,driveId:data.id,isLink:isFolder?'true':'false'});
+        scheduleSave();
+        showToast(isFolder?'Folder shortcut added ✓':'File copied into T&F FMS ✓');
+        renderNav();
+        return;
+      }
+      // fall through to plain-link fallback if the API call failed (e.g. no access to source file)
+    }catch(e){
+      console.error('Drive copy/shortcut error',e);
+    }
+    showToast('Could not copy from Drive — saved as a plain link instead');
+  }
+
+  // Fallback: just save the pasted link as-is (non-Drive links, or Drive copy failed)
   let name='';
-  // Auto-extract name from URL
   try{
     const u=new URL(url);
-    // Try to get file name from path
     const parts=u.pathname.split('/').filter(Boolean);
     name=decodeURIComponent(parts[parts.length-1]||'')
-      .replace(/\.[^.]+$/,'') // remove extension
+      .replace(/\.[^.]+$/,'')
       .replace(/[-_]/g,' ')
       .trim();
     if(!name||name.length<2) name='Linked File';
   }catch(e){name='Linked File';}
-  const by=role.charAt(0).toUpperCase()+role.slice(1);
   files.push({id:'fi'+Date.now(),projectId:currentProjectId,folderId:cfid()||'',name,by,date:today(),size:'',link:url,isLink:'true'});
   scheduleSave();
   showToast('Drive link attached ✓');
@@ -1193,14 +1231,17 @@ function delFolder(fid){
   scheduleSave();renderNav();
 }
 function extractDriveFileId(link){
-  if(!link) return null;
-  const m = link.match(/\/d\/([a-zA-Z0-9_-]{10,})/) || link.match(/[?&]id=([a-zA-Z0-9_-]{10,})/);
-  return m ? m[1] : null;
+  if(!link) return {id:null,isFolder:false};
+  const folderMatch = link.match(/\/folders\/([a-zA-Z0-9_-]{10,})/);
+  if(folderMatch) return {id:folderMatch[1],isFolder:true};
+  const fileMatch = link.match(/\/d\/([a-zA-Z0-9_-]{10,})/) || link.match(/[?&]id=([a-zA-Z0-9_-]{10,})/);
+  if(fileMatch) return {id:fileMatch[1],isFolder:false};
+  return {id:null,isFolder:false};
 }
 async function delFile(fid){
   const f=files.find(x=>x.id===fid);
   if(!f){ scheduleSave(); renderNav(); return; }
-  const driveFileId = f.driveId || extractDriveFileId(f.link);
+  const driveFileId = f.driveId || extractDriveFileId(f.link).id;
   files=files.filter(x=>x.id!==fid);
   scheduleSave();
   renderNav();
