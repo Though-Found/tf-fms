@@ -569,7 +569,7 @@ const FICONS={pdf:'ti-file-type-pdf',pptx:'ti-presentation',docx:'ti-file-type-d
 
 let role='owner',selRole='owner',navStack=[];
 let currentClientId=null,currentProjectId=null,driveStack=[];
-let expandedRow=null,driveTab='all',clientEditOpen=null;
+let expandedRow=null,driveTab='all',clientEditOpen=null,showProjectFiles=false;
 let uploadTab='dragdrop';
 let queuedFiles=[];
 let accessToken=null;
@@ -1061,7 +1061,7 @@ function openClient(cid){
   renderNav();
 }
 function openProject(pid){
-  currentProjectId=pid;driveStack=[];expandedRow=null;driveTab='all';queuedFiles=[];
+  currentProjectId=pid;driveStack=[];expandedRow=null;driveTab='all';queuedFiles=[];showProjectFiles=false;
   const p=projects.find(x=>x.id===pid);currentClientId=p.clientId;
   const cl=clients.find(c=>c.id===p.clientId);
   const base=navStack.find(s=>s.type==='view')||{type:'view',id:'clients',label:'Clients'};
@@ -1154,9 +1154,14 @@ function renderDrive(){
   let body='';
   if(!isFolder){
     const allFiles=files.filter(f=>f.projectId===p.id);
-    if(allFiles.length===0){body=`<div class="empty-state"><i class="ti ti-file-off"></i><p>No files yet — upload or attach a Drive link below</p></div>`;}
-    else{
-      body=`<div style="border:1px solid var(--border);margin-bottom:12px">`;
+    const filesToggle=`<div class="sec-hd" style="margin-bottom:.75rem"><span class="sec-title">Files</span><button class="btn-ghost" onclick="showProjectFiles=!showProjectFiles;renderNav()"><i class="ti ti-${showProjectFiles?'chevron-up':'files'}"></i> ${showProjectFiles?'Hide':'Show'} Files (${allFiles.length})</button></div>`;
+
+    if(!showProjectFiles){
+      body=filesToggle;
+    } else if(allFiles.length===0){
+      body=filesToggle+`<div class="empty-state"><i class="ti ti-file-off"></i><p>No files yet — upload or attach a Drive link below</p></div>`;
+    } else {
+      body=filesToggle+`<div style="border:1px solid var(--border);margin-bottom:12px">`;
       allFiles.forEach(fi=>{
         const isLnk=fi.isLink==='true'||fi.isLink===true;
         const icon=isLnk?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));
