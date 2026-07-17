@@ -329,6 +329,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
     <div class="sidebar">
       <div class="nav-lbl">Workspace</div>
       <div class="nav-item active" id="nav-tasks" onclick="goView('tasks')"><i class="ti ti-checkbox"></i> Tasks</div>
+      <div class="nav-item" id="nav-checklist" onclick="goView('checklist')"><i class="ti ti-list-check"></i> Checklist</div>
       <div class="nav-item" id="nav-clients" onclick="goView('clients')"><i class="ti ti-building"></i> Clients</div>
       <div class="nav-item" id="nav-pipeline" onclick="goView('pipeline')"><i class="ti ti-columns"></i> Pipeline</div>
       <div class="nav-item" id="nav-projects" onclick="goView('projects')"><i class="ti ti-folder"></i> All Projects</div>
@@ -360,6 +361,20 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   <div class="form-row"><label class="form-lbl">Deadline</label><input class="form-inp" id="dl-date" type="date"></div>
   <div class="form-row"><label class="form-lbl">Assigned team members</label><div id="dl-members-box"></div></div>
   <div class="modal-actions"><button class="btn-cancel" onclick="cm('mod-deadline')">Cancel</button><button class="btn-add" id="dl-save-btn" onclick="saveDeadline()" disabled>Save</button></div>
+</div></div>
+
+<div class="modal-backdrop" id="mod-checklist" style="display:none"><div class="modal-box">
+  <div class="modal-title" id="ck-modal-title">New Checklist Item</div>
+  <input type="hidden" id="ck-edit-id" value="">
+  <div class="form-row"><label class="form-lbl">Assign to</label><select class="form-sel" id="ck-member"><option value="">— Select team member —</option></select></div>
+  <div class="form-row"><label class="form-lbl">Task</label><textarea class="form-ta" id="ck-title" style="min-height:60px;resize:vertical" placeholder="e.g. Post weekly Instagram update"></textarea></div>
+  <div class="form-row"><label class="form-lbl">Project (optional)</label><select class="form-sel" id="ck-proj"><option value="">— No specific project —</option></select></div>
+  <div class="form-row"><label class="form-lbl">Repeats</label><select class="form-sel" id="ck-repeat"><option value="none">No repeat — one time only</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select></div>
+  <div class="modal-actions">
+    <button class="btn-danger" id="ck-delete-btn" onclick="deleteChecklistFromModal()" style="display:none;margin-right:auto"><i class="ti ti-trash"></i> Delete</button>
+    <button class="btn-cancel" onclick="cm('mod-checklist')">Cancel</button>
+    <button class="btn-add" id="ck-save-btn" onclick="saveChecklistItem()">Add Item</button>
+  </div>
 </div></div>
 
 <div class="modal-backdrop" id="mod-folder" style="display:none"><div class="modal-box">
@@ -602,6 +617,7 @@ async function loadFromSheets(){
     if(data.tasks) tasks=data.tasks;
     if(data.teamMembers && data.teamMembers.length>0) teamMembers=data.teamMembers;
     if(data.sharedFiles) sharedFiles=data.sharedFiles;
+    if(data.checklists) checklists=data.checklists;
     showToast('Data loaded ✓');
   }catch(e){
     console.error('Load error',e);
@@ -619,7 +635,7 @@ async function saveToSheets(){
   try{
     await fetch(SCRIPT_URL,{
       method:'POST',
-      body:JSON.stringify({action:'save',clients,projects,folders,files,tasks,teamMembers,sharedFiles}),
+      body:JSON.stringify({action:'save',clients,projects,folders,files,tasks,teamMembers,sharedFiles,checklists}),
       headers:{'Content-Type':'text/plain;charset=utf-8'}
     });
     showToast('Saved ✓');
@@ -635,7 +651,7 @@ window.addEventListener('beforeunload',()=>{
   if(saveTimeout){
     clearTimeout(saveTimeout);
     try{
-      const blob=new Blob([JSON.stringify({action:'save',clients,projects,folders,files,tasks,teamMembers,sharedFiles})],{type:'text/plain;charset=utf-8'});
+      const blob=new Blob([JSON.stringify({action:'save',clients,projects,folders,files,tasks,teamMembers,sharedFiles,checklists})],{type:'text/plain;charset=utf-8'});
       navigator.sendBeacon(SCRIPT_URL, blob);
     }catch(e){/* best effort */}
   }
@@ -877,6 +893,112 @@ function saveDeadline(){
   showToast('Deadline saved ✓');
   renderNav();
 }
+
+// ── CHECKLIST ──
+function weekKey(dateStr){
+  if(!dateStr) return '';
+  const d=new Date(dateStr+'T00:00:00');
+  if(isNaN(d)) return '';
+  const onejan=new Date(d.getFullYear(),0,1);
+  const week=Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
+  return d.getFullYear()+'-'+week;
+}
+function isChecklistDone(it){
+  if(it.repeat==='daily') return it.lastCompletedDate===today();
+  if(it.repeat==='weekly') return weekKey(it.lastCompletedDate)===weekKey(today());
+  return it.done==='true'||it.done===true;
+}
+function toggleChecklistItem(id){
+  const it=checklists.find(x=>x.id===id);
+  if(!it) return;
+  const currentlyDone=isChecklistDone(it);
+  if(it.repeat==='daily'||it.repeat==='weekly'){
+    it.lastCompletedDate=currentlyDone?'':today();
+  } else {
+    it.done=currentlyDone?'false':'true';
+  }
+  scheduleSave();
+  renderNav();
+}
+function openAddChecklistModal(){
+  document.getElementById('ck-modal-title').textContent='New Checklist Item';
+  document.getElementById('ck-edit-id').value='';
+  document.getElementById('ck-title').value='';
+  document.getElementById('ck-repeat').value='none';
+  document.getElementById('ck-member').innerHTML='<option value="">— Select team member —</option>'+teamMembers.map(m=>`<option value="${m.id}">${m.name} (${m.email}) - ${m.phone}</option>`).join('');
+  document.getElementById('ck-proj').innerHTML='<option value="">— No specific project —</option>'+projects.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<option value="${p.id}">${cl?cl.name+' — ':''}${p.name}</option>`;}).join('');
+  document.getElementById('ck-save-btn').textContent='Add Item';
+  document.getElementById('ck-delete-btn').style.display='none';
+  om('mod-checklist');
+}
+function openEditChecklistModal(id){
+  const it=checklists.find(x=>x.id===id);if(!it)return;
+  document.getElementById('ck-modal-title').textContent='Edit Checklist Item';
+  document.getElementById('ck-edit-id').value=id;
+  document.getElementById('ck-title').value=it.title;
+  document.getElementById('ck-member').innerHTML='<option value="">— Select team member —</option>'+teamMembers.map(m=>`<option value="${m.id}" ${m.id===it.memberId?'selected':''}>${m.name} (${m.email}) - ${m.phone}</option>`).join('');
+  document.getElementById('ck-proj').innerHTML='<option value="">— No specific project —</option>'+projects.map(p=>{const cl=clients.find(c=>c.id===p.clientId);return`<option value="${p.id}" ${p.id===it.projectId?'selected':''}>${cl?cl.name+' — ':''}${p.name}</option>`;}).join('');
+  document.getElementById('ck-repeat').value=it.repeat||'none';
+  document.getElementById('ck-save-btn').textContent='Save Changes';
+  document.getElementById('ck-delete-btn').style.display='inline-flex';
+  om('mod-checklist');
+}
+function saveChecklistItem(){
+  const memberId=document.getElementById('ck-member').value;
+  const m=teamMembers.find(x=>x.id===memberId);
+  const title=document.getElementById('ck-title').value.trim();
+  if(!m||!title){showToast('Select a team member and enter a task');return;}
+  const projectId=document.getElementById('ck-proj').value||'';
+  const repeat=document.getElementById('ck-repeat').value;
+  const editId=document.getElementById('ck-edit-id').value;
+
+  if(editId){
+    const it=checklists.find(x=>x.id===editId);
+    if(it){
+      it.memberId=m.id;it.name=m.name;it.phone=m.phone;it.email=m.email;
+      it.title=title;it.projectId=projectId;it.repeat=repeat;
+    }
+  } else {
+    checklists.push({id:'ck'+Date.now(),memberId:m.id,name:m.name,phone:m.phone,email:m.email,title,projectId,repeat,done:'false',lastCompletedDate:'',createdDate:today()});
+  }
+  cm('mod-checklist');
+  scheduleSave();
+  renderNav();
+}
+function deleteChecklistFromModal(){
+  const id=document.getElementById('ck-edit-id').value;
+  if(!id)return;
+  checklists=checklists.filter(x=>x.id!==id);
+  cm('mod-checklist');
+  scheduleSave();
+  renderNav();
+}
+function renderChecklist(){
+  const isM=canManage();
+  const header=`<div class="sec-hd"><span class="sec-title">Checklist</span>${isM?`<button class="btn-add" onclick="openAddChecklistModal()"><i class="ti ti-plus"></i> Add Checklist Item</button>`:''}</div>`;
+  if(checklists.length===0){
+    return header+`<div class="empty-state"><i class="ti ti-list-check"></i><p>No checklist items yet — use this for repetitive tasks that don't need file submission, like "Post weekly Instagram update"</p></div>`;
+  }
+  const rows=checklists.map(it=>{
+    const done=isChecklistDone(it);
+    const p=it.projectId?projects.find(x=>x.id===it.projectId):null;
+    const cl=p?clients.find(c=>c.id===p.clientId):null;
+    const projLabel=p?(cl?cl.name+' — ':'')+p.name:'—';
+    const repeatLabel=it.repeat==='daily'?'Daily':it.repeat==='weekly'?'Weekly':'One-time';
+    return`<tr>
+      <td>${it.name}</td>
+      <td>${it.title}${it.repeat!=='none'?`<div class="dg-task-sub">${repeatLabel} · resets automatically</div>`:''}</td>
+      <td>${projLabel}</td>
+      <td><span class="pill ${it.repeat==='none'?'pill-done':'pill-new'}">${repeatLabel}</span></td>
+      <td><button class="${done?'done-btn':'revise-btn'}" onclick="toggleChecklistItem('${it.id}')"><i class="ti ${done?'ti-circle-check-filled':'ti-square'}"></i> ${done?'Done':'Mark Done'}</button></td>
+      <td>${isM?editIcon(`openEditChecklistModal('${it.id}')`):''}</td>
+    </tr>`;
+  }).join('');
+  return header+`<div class="dg-card"><table class="dg-table">
+    <thead><tr><th>Name</th><th>Task</th><th>Project</th><th>Repeats</th><th>Status</th><th></th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
 function om(id){document.getElementById(id).style.display='flex'}
 function cm(id){document.getElementById(id).style.display='none'}
 function folderPath(fid){
@@ -1065,7 +1187,7 @@ function silentConnectDrive(){
 function doLogout(){document.getElementById('scr-app').classList.remove('active');document.getElementById('scr-login').classList.add('active')}
 
 // ── NAV ──
-function vLabel(v){return{dashboard:'Dashboard',clients:'Clients',pipeline:'Pipeline',projects:'All Projects',mis:'MIS'}[v]||v}
+function vLabel(v){return{dashboard:'Dashboard',clients:'Clients',pipeline:'Pipeline',projects:'All Projects',mis:'MIS',checklist:'Checklist'}[v]||v}
 function goView(v){
   currentClientId=null;currentProjectId=null;driveStack=[];expandedRow=null;driveTab='all';clientEditOpen=null;queuedFiles=[];taskSearch='';taskSearchTask='';
   navStack=[{type:'view',id:v,label:vLabel(v)}];
@@ -1100,7 +1222,7 @@ function renderNav(){
     backBar=`<div class="back-bar"><button class="back-btn primary" onclick="navBack()"><i class="ti ti-arrow-left"></i> ${prev.label}</button><div class="bc-trail">${navStack.map((s,i)=>`${i>0?'<span class="bc-sep">/</span>':''}<div class="bc-seg ${i===navStack.length-1?'last':''}"><span onclick="navTo(${i})">${s.label}</span></div>`).join('')}</div></div>`;
   }
   let content='';
-  if(last.type==='view'){const v=last.id;if(v==='dashboard')content=renderDashboard();else if(v==='clients')content=renderClients();else if(v==='pipeline')content=renderPipeline();else if(v==='projects')content=renderAllProjects();else if(v==='tasks')content=renderGlobalTasks();else if(v==='mis')content=renderMIS();}
+  if(last.type==='view'){const v=last.id;if(v==='dashboard')content=renderDashboard();else if(v==='clients')content=renderClients();else if(v==='pipeline')content=renderPipeline();else if(v==='projects')content=renderAllProjects();else if(v==='tasks')content=renderGlobalTasks();else if(v==='mis')content=renderMIS();else if(v==='checklist')content=renderChecklist();}
   else if(last.type==='client')content=renderClientDetail(last.id);
   else if(last.type==='project'||last.type==='folder')content=renderDrive();
   c.innerHTML=(navStack.length>1?backBar:'')+'<div class="inner">'+content+'</div>';
@@ -1395,6 +1517,7 @@ let teamMembers = [
   {id:'m6', name:'Aananya', phone:'9638535322', email:'intern@thought-found.com'},
 ];
 let sharedFiles = [];
+let checklists = [];
 let currentShareFileId = null;
 let currentShareProjectId = null;
 let shareFile = null;
