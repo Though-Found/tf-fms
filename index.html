@@ -871,7 +871,16 @@ function saveDeadline(){
 }
 function om(id){document.getElementById(id).style.display='flex'}
 function cm(id){document.getElementById(id).style.display='none'}
-function folderPath(fid){if(!fid)return'Root';const fo=folders.find(f=>f.id===fid);if(!fo)return'Root';const p=folderPath(fo.parentId);return p==='Root'?fo.name:p+' / '+fo.name;}
+function folderPath(fid){
+  if(!fid) return '';
+  const fo=folders.find(f=>f.id===fid);
+  if(!fo) return '';
+  if(!fo.parentId){
+    const proj=projects.find(pr=>pr.id===fo.projectId);
+    return (proj?proj.name+' / ':'')+fo.name;
+  }
+  return folderPath(fo.parentId)+' / '+fo.name;
+}
 function fmtSize(b){if(!b)return'';if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
 function linkIcon(url){if(!url)return'ti-link';if(url.includes('drive.google'))return'ti-brand-google-drive';if(url.includes('dropbox'))return'ti-brand-dropbox';if(url.includes('figma'))return'ti-brand-figma';return'ti-link';}
 
@@ -1161,23 +1170,35 @@ function renderDrive(){
     } else if(allFiles.length===0){
       body=filesToggle+`<div class="empty-state"><i class="ti ti-file-off"></i><p>No files yet — upload or attach a Drive link below</p></div>`;
     } else {
-      body=filesToggle+`<div style="border:1px solid var(--border);margin-bottom:12px">`;
+      // Group files by their folder path, same structure as Drive: Project → Sub-Project → nested folders
+      const groups={};
       allFiles.forEach(fi=>{
-        const isLnk=fi.isLink==='true'||fi.isLink===true;
-        const icon=isLnk?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));
-        const openEl=fi.link?`<a href="${fi.link}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open in Drive</a>`:'';
-        const dateStr=fmtDate(fi.date);
-        const loc=fi.folderId?folderPath(fi.folderId):'Root';
-        body+=`<div class="file-list-row">
-          <i class="ti ${icon} fl-icon" style="${fi.link?'color:#4285f4':'color:var(--text3)'}"></i>
-          <div class="fl-info">
-            <div class="fl-name">${fi.name}</div>
-            <div class="fl-meta">${loc} · ${fi.by||'Team'} · ${dateStr}${fi.size?' · '+fi.size:''}${fi.link&&!isLnk?' · <span style="color:var(--green);font-weight:500">✓ In Drive</span>':isLnk?' · <span style="color:#4285f4">Drive link</span>':''}</div>
-          </div>
-          <div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="if(confirm('Delete \\'${escHtml(fi.name)}\\'? This also permanently deletes it from Google Drive.'))delFile('${fi.id}')" title="Delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`:''}</div>
-        </div>`;
+        const path = fi.folderId ? folderPath(fi.folderId) : p.name;
+        if(!groups[path]) groups[path]=[];
+        groups[path].push(fi);
       });
-      body+=`</div>`;
+      const sortedPaths=Object.keys(groups).sort((a,b)=>a.localeCompare(b));
+
+      body=filesToggle;
+      sortedPaths.forEach(path=>{
+        body+=`<div style="font-size:11px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;color:var(--text3);margin:14px 0 6px;display:flex;align-items:center;gap:5px"><i class="ti ti-folder" style="font-size:13px"></i>${escHtml(path)}</div>`;
+        body+=`<div style="border:1px solid var(--border);margin-bottom:8px">`;
+        groups[path].forEach(fi=>{
+          const isLnk=fi.isLink==='true'||fi.isLink===true;
+          const icon=isLnk?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));
+          const openEl=fi.link?`<a href="${fi.link}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open in Drive</a>`:'';
+          const dateStr=fmtDate(fi.date);
+          body+=`<div class="file-list-row">
+            <i class="ti ${icon} fl-icon" style="${fi.link?'color:#4285f4':'color:var(--text3)'}"></i>
+            <div class="fl-info">
+              <div class="fl-name">${fi.name}</div>
+              <div class="fl-meta">${fi.by||'Team'} · ${dateStr}${fi.size?' · '+fi.size:''}${fi.link&&!isLnk?' · <span style="color:var(--green);font-weight:500">✓ In Drive</span>':isLnk?' · <span style="color:#4285f4">Drive link</span>':''}</div>
+            </div>
+            <div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="if(confirm('Delete \\'${escHtml(fi.name)}\\'? This also permanently deletes it from Google Drive.'))delFile('${fi.id}')" title="Delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`:''}</div>
+          </div>`;
+        });
+        body+=`</div>`;
+      });
     }
   } else {
     const lf=folders.filter(f=>f.projectId===p.id&&(f.parentId||'')===(fid||'')&&(fid?true:!(f.isSubProject==='true'||f.isSubProject===true)));const lfi=files.filter(f=>f.projectId===p.id&&(f.folderId||'')===(fid||''));
