@@ -1147,8 +1147,27 @@ function renderDashboard(){
 }
 function renderClients(){
   const isM=canManage();
-  if(clients.length===0)return`<div class="sec-hd"><span class="sec-title">Clients</span>${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div><div class="empty-state"><i class="ti ti-building"></i><p>No clients yet${isM?' — add your first client':''}</p></div>`;
-  return`<div class="sec-hd"><span class="sec-title">Clients</span>${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div><div class="clients-grid">${clients.map(cl=>{const cp=projects.filter(p=>p.clientId===cl.id);const isExp=expandedRow===`c_${cl.id}`;return`<div style="background:${isExp?'var(--bg3)':'var(--bg2)'};position:relative;border-bottom:1px solid var(--border)"><div class="client-card" style="background:transparent"><div class="cc-init">${ini(cl.name)}</div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="cc-name" onclick="openClient('${cl.id}')">${cl.name}</div><div class="cc-type">${cl.industry||'—'}</div><div class="cc-meta"><span>${cp.length} project${cp.length!==1?'s':''}</span><span>${cp.filter(p=>p.stage==='Active').length} active</span></div></div>${isM?editIcon(`toggleClientGridEdit('${cl.id}',event)`):''}</div></div>${isExp?`<div style="padding:0 1.25rem 1rem"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:.75rem;border-top:1px solid var(--border)"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="eg-cn-${cl.id}" value="${cl.name}" style="width:130px"></div><div class="edit-field"><span class="edit-lbl">Industry</span><input class="edit-inp" id="eg-ci-${cl.id}" value="${cl.industry||''}" style="width:120px"></div><div class="edit-actions"><button class="cancel-btn" onclick="expandedRow=null;renderNav()">Cancel</button><button class="del-btn" onclick="delClientGrid('${cl.id}')">Delete</button><button class="save-btn" onclick="saveClientGrid('${cl.id}')">Save</button></div></div></div>`:''}</div>`;}).join('')}</div>`;
+  const syncBtn=isM&&driveConnected?`<button class="btn-ghost" onclick="syncAllToDrive()"><i class="ti ti-refresh"></i> Sync to Drive</button>`:'';
+  if(clients.length===0)return`<div class="sec-hd"><span class="sec-title">Clients</span><div style="display:flex;gap:8px">${syncBtn}${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div></div><div class="empty-state"><i class="ti ti-building"></i><p>No clients yet${isM?' — add your first client':''}</p></div>`;
+  return`<div class="sec-hd"><span class="sec-title">Clients</span><div style="display:flex;gap:8px">${syncBtn}${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div></div><div class="clients-grid">${clients.map(cl=>{const cp=projects.filter(p=>p.clientId===cl.id);const isExp=expandedRow===`c_${cl.id}`;return`<div style="background:${isExp?'var(--bg3)':'var(--bg2)'};position:relative;border-bottom:1px solid var(--border)"><div class="client-card" style="background:transparent"><div class="cc-init">${ini(cl.name)}</div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="cc-name" onclick="openClient('${cl.id}')">${cl.name}</div><div class="cc-type">${cl.industry||'—'}</div><div class="cc-meta"><span>${cp.length} project${cp.length!==1?'s':''}</span><span>${cp.filter(p=>p.stage==='Active').length} active</span></div></div>${isM?editIcon(`toggleClientGridEdit('${cl.id}',event)`):''}</div></div>${isExp?`<div style="padding:0 1.25rem 1rem"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:.75rem;border-top:1px solid var(--border)"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="eg-cn-${cl.id}" value="${cl.name}" style="width:130px"></div><div class="edit-field"><span class="edit-lbl">Industry</span><input class="edit-inp" id="eg-ci-${cl.id}" value="${cl.industry||''}" style="width:120px"></div><div class="edit-actions"><button class="cancel-btn" onclick="expandedRow=null;renderNav()">Cancel</button><button class="del-btn" onclick="delClientGrid('${cl.id}')">Delete</button><button class="save-btn" onclick="saveClientGrid('${cl.id}')">Save</button></div></div></div>`:''}</div>`;}).join('')}</div>`;
+}
+async function syncAllToDrive(){
+  if(!driveConnected){showToast('Connect Drive first');return;}
+  showToast('Syncing all clients & projects to Drive…');
+  let count=0;
+  for(const cl of clients){
+    await getDriveFolder(cl.name,TF_ROOT_FOLDER_ID);
+    count++;
+  }
+  for(const p of projects){
+    await getProjectDrivePath(p.id,null);
+    count++;
+  }
+  for(const fo of folders.filter(f=>f.isSubProject==='true'||f.isSubProject===true)){
+    await getProjectDrivePath(fo.projectId,fo.id);
+    count++;
+  }
+  showToast(`Synced ${count} folders to Drive ✓`);
 }
 function renderClientDetail(cid){
   const cl=clients.find(c=>c.id===cid);const cp=projects.filter(p=>p.clientId===cid);const isM=canManage();const isEO=clientEditOpen===cid;let rows='';
@@ -1331,11 +1350,23 @@ function renderMIS(){
   const svc={Strategy:0,Research:0,Creative:0,Production:0};projects.forEach(p=>{if(svc[p.service]!==undefined)svc[p.service]++});const mx=Math.max(...Object.values(svc),1);
   return`<div class="sec-hd"><span class="sec-title">MIS — Overview</span></div><div class="stats-grid" style="margin-bottom:1.25rem"><div class="stat-cell"><div class="stat-lbl">Total Projects</div><div class="stat-val">${projects.length}</div></div><div class="stat-cell"><div class="stat-lbl">Total Files</div><div class="stat-val">${files.length}</div></div><div class="stat-cell"><div class="stat-lbl">Clients</div><div class="stat-val">${clients.length}</div></div><div class="stat-cell"><div class="stat-lbl">Delivered</div><div class="stat-val">${projects.filter(p=>p.stage==='Delivered').length}</div></div></div><div class="mis-grid"><div class="mis-cell"><div class="mis-lbl">Projects by service</div>${Object.entries(svc).map(([k,v])=>`<div class="brow"><span class="blbl">${k}</span><div class="btrack"><div class="bfill" style="width:${Math.round(v/mx*100)}%"></div></div><span class="bval">${v}</span></div>`).join('')}</div><div class="mis-cell"><div class="mis-lbl">Pipeline</div>${STAGES.map(s=>{const c=projects.filter(p=>p.stage===s).length;return`<div class="brow"><span class="blbl">${s}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(projects.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div><div class="mis-cell"><div class="mis-lbl">Files by client</div>${clients.length===0?'<p style="font-size:11px;color:var(--text3)">No data yet</p>':clients.map(cl=>{const c=files.filter(f=>{const p=projects.find(x=>x.id===f.projectId);return p&&p.clientId===cl.id}).length;return`<div class="brow"><span class="blbl" style="font-size:10px;width:88px">${cl.name.split(' ')[0]}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(files.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div><div class="mis-cell"><div class="mis-lbl">Stage summary</div>${STAGES.map(s=>{const c=projects.filter(p=>p.stage===s).length;return`<div class="brow"><span class="blbl">${s}</span><div class="btrack"><div class="bfill" style="width:${Math.round(c/Math.max(projects.length,1)*100)}%"></div></div><span class="bval">${c}</span></div>`;}).join('')}</div></div>`;
 }
-function addClient(){const name=document.getElementById('ic-name').value.trim();if(!name)return;clients.push({id:'c'+Date.now(),name,industry:document.getElementById('ic-ind').value.trim(),contact:'',email:''});cm('mod-client');scheduleSave();goView('clients');}
+async function addClient(){
+  const name=document.getElementById('ic-name').value.trim();if(!name)return;
+  const client={id:'c'+Date.now(),name,industry:document.getElementById('ic-ind').value.trim(),contact:'',email:''};
+  clients.push(client);
+  cm('mod-client');scheduleSave();goView('clients');
+  if(driveConnected) await getDriveFolder(name,TF_ROOT_FOLDER_ID);
+}
 function openAddProjectModal(){
   om('mod-proj');
 }
-function addProject(){const name=document.getElementById('ip-name').value.trim();if(!name)return;projects.push({id:'p'+Date.now(),clientId:currentClientId,name,service:document.getElementById('ip-svc').value,stage:document.getElementById('ip-stage').value,notes:document.getElementById('ip-notes').value.trim(),deadline:'',assignedMembers:'',deadlineReminderSent:''});cm('mod-proj');scheduleSave();navStack.pop();renderNav();}
+async function addProject(){
+  const name=document.getElementById('ip-name').value.trim();if(!name)return;
+  const proj={id:'p'+Date.now(),clientId:currentClientId,name,service:document.getElementById('ip-svc').value,stage:document.getElementById('ip-stage').value,notes:document.getElementById('ip-notes').value.trim(),deadline:'',assignedMembers:'',deadlineReminderSent:''};
+  projects.push(proj);
+  cm('mod-proj');scheduleSave();navStack.pop();renderNav();
+  if(driveConnected) await getProjectDrivePath(proj.id,null);
+}
 
 
 // ── TASKS ──
