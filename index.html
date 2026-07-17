@@ -1169,7 +1169,7 @@ function renderDrive(){
             <div class="fl-name">${fi.name}</div>
             <div class="fl-meta">${loc} · ${fi.by||'Team'} · ${dateStr}${fi.size?' · '+fi.size:''}${fi.link&&!isLnk?' · <span style="color:var(--green);font-weight:500">✓ In Drive</span>':isLnk?' · <span style="color:#4285f4">Drive link</span>':''}</div>
           </div>
-          <div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="delFile('${fi.id}')" title="Delete"><i class="ti ti-trash"></i></button>`:''}</div>
+          <div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="if(confirm('Delete \\'${escHtml(fi.name)}\\'? This only removes it from T&F FMS, not from Drive.'))delFile('${fi.id}')" title="Delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`:''}</div>
         </div>`;
       });
       body+=`</div>`;
@@ -1178,8 +1178,28 @@ function renderDrive(){
     const lf=folders.filter(f=>f.projectId===p.id&&(f.parentId||'')===(fid||'')&&(fid?true:!(f.isSubProject==='true'||f.isSubProject===true)));const lfi=files.filter(f=>f.projectId===p.id&&(f.folderId||'')===(fid||''));
     if(lf.length===0&&lfi.length===0){body=`<div class="empty-state"><i class="ti ti-folder-open"></i><p>Empty — create a folder or add files below</p></div>`;}
     else{
-      if(lf.length===0){body=`<div class="empty-state"><i class="ti ti-folder-open"></i><p>No folders yet — create one above</p></div>`;}
-      else{body=`<div class="drive-grid">${lf.map(fo=>{const cnt=cif(fo.id,p.id);return`<div class="di" onclick="enterFolder('${fo.id}','${fo.name}')"><div class="di-acts">${canManage()?`<button class="di-act" onclick="event.stopPropagation();delFolder('${fo.id}')"><i class="ti ti-trash"></i></button>`:''}</div><i class="ti ti-folder-filled di-icon folder"></i><div class="di-name">${fo.name}</div><div class="di-meta">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('')}</div>`;}
+      body='';
+      if(lf.length>0){
+        body+=`<div class="drive-grid" style="margin-bottom:12px">${lf.map(fo=>{const cnt=cif(fo.id,p.id);return`<div class="di" onclick="enterFolder('${fo.id}','${escHtml(fo.name)}')"><div class="di-acts">${canManage()?`<button class="di-act" onclick="event.stopPropagation();if(confirm('Delete folder \\'${escHtml(fo.name)}\\'? This also deletes everything inside it.'))delFolder('${fo.id}')" title="Delete"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`:''}</div><i class="ti ti-folder-filled di-icon folder"></i><div class="di-name">${fo.name}</div><div class="di-meta">${cnt} item${cnt!==1?'s':''}</div></div>`;}).join('')}</div>`;
+      }
+      if(lfi.length>0){
+        body+=`<div style="border:1px solid var(--border)">`;
+        lfi.forEach(fi=>{
+          const isLnk=fi.isLink==='true'||fi.isLink===true;
+          const icon=isLnk?linkIcon(fi.link):(fi.link?'ti-brand-google-drive':ficon(fi.name));
+          const openEl=fi.link?`<a href="${fi.link}" target="_blank" class="open-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open in Drive</a>`:'';
+          const dateStr=fmtDate(fi.date);
+          body+=`<div class="file-list-row">
+            <i class="ti ${icon} fl-icon" style="${fi.link?'color:#4285f4':'color:var(--text3)'}"></i>
+            <div class="fl-info">
+              <div class="fl-name">${fi.name}</div>
+              <div class="fl-meta">${fi.by||'Team'} · ${dateStr}${fi.size?' · '+fi.size:''}${fi.link&&!isLnk?' · <span style="color:var(--green);font-weight:500">✓ In Drive</span>':isLnk?' · <span style="color:#4285f4">Drive link</span>':''}</div>
+            </div>
+            <div class="fl-acts">${openEl}${canManage()?`<button class="fl-act" onclick="if(confirm('Delete \\'${escHtml(fi.name)}\\'? This only removes it from T&F FMS, not from Drive.'))delFile('${fi.id}')" title="Delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`:''}</div>
+          </div>`;
+        });
+        body+=`</div>`;
+      }
     }
   }
   return toolbar+subProjSection+tabs+body+(isFolder?`<div id="upload-panel-wrap"></div>`:'');
