@@ -616,7 +616,7 @@ async function loadFromSheets(){
     if(data.projects) projects=data.projects;
     if(data.folders) folders=data.folders;
     if(data.files) files=data.files;
-    if(data.tasks) tasks=data.tasks;
+    if(data.tasks) tasks=data.tasks.map(normalizeTaskDates);
     if(data.teamMembers && data.teamMembers.length>0) teamMembers=data.teamMembers;
     if(data.sharedFiles) sharedFiles=data.sharedFiles;
     if(data.checklists) checklists=data.checklists;
@@ -813,6 +813,20 @@ function showToast(msg){
 // ── UTILS ──
 function ini(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
 function ficon(n){const e=(n.split('.').pop()||'').toLowerCase();return FICONS[e]||'ti-file'}
+function normalizeDueDate(val){
+  if(!val) return '';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(val)) return val; // already clean ISO format
+  const d=new Date(val);
+  if(isNaN(d)) return val; // can't parse — leave it, don't destroy data we don't understand
+  const yyyy=d.getFullYear();
+  const mm=String(d.getMonth()+1).padStart(2,'0');
+  const dd=String(d.getDate()).padStart(2,'0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+function normalizeTaskDates(t){
+  if(t.dueDate) t.dueDate=normalizeDueDate(t.dueDate);
+  return t;
+}
 function today(){const d=new Date();return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear()}
 function fmtDate(str){if(!str)return'';try{const d=new Date(str);if(isNaN(d))return str;return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear();}catch(e){return str;}}
 function spill(s){return`<span class="pill ${SPILL[s]||'pill-done'}">${s}</span>`}
@@ -1930,7 +1944,7 @@ function renderTasks(projectId){
     : tasks;
   // Designers only see tasks assigned to them specifically; Owner/Operations see everyone's, since they manage the team
   if(!isM && currentUserEmail){
-    filtered = filtered.filter(t=>t.email===currentUserEmail);
+    filtered = filtered.filter(t=>(t.email||'').trim().toLowerCase()===currentUserEmail.trim().toLowerCase());
   }
 
   const search1=(taskSearch||'').toLowerCase();
