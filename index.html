@@ -328,11 +328,10 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   <div class="app-body">
     <div class="sidebar">
       <div class="nav-lbl">Workspace</div>
-      <div class="nav-item active" id="nav-tasks" onclick="goView('tasks')"><i class="ti ti-checkbox"></i> Tasks</div>
+      <div class="nav-item active" id="nav-tasks" onclick="goView('tasks')"><i class="ti ti-checkbox"></i> Delegation Sheet</div>
       <div class="nav-item" id="nav-checklist" onclick="goView('checklist')"><i class="ti ti-list-check"></i> Checklist</div>
-      <div class="nav-item" id="nav-clients" onclick="goView('clients')"><i class="ti ti-building"></i> Clients</div>
+      <div class="nav-item" id="nav-clients" onclick="goView('clients')"><i class="ti ti-building"></i> Project File</div>
       <div class="nav-item" id="nav-pipeline" onclick="goView('pipeline')"><i class="ti ti-columns"></i> Pipeline</div>
-      <div class="nav-item" id="nav-projects" onclick="goView('projects')"><i class="ti ti-folder"></i> All Projects</div>
     </div>
     <div class="content" id="main-content"></div>
   </div>
@@ -493,6 +492,10 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:va
   <div class="form-row">
     <label class="form-lbl">Current Planned Date</label>
     <div id="reqrev-date" style="font-size:12px;color:var(--text3);padding:8px 10px;background:var(--bg3);border:1px solid var(--border)"></div>
+  </div>
+  <div class="form-row">
+    <label class="form-lbl">Requested New Date</label>
+    <input class="form-inp" id="reqrev-newdate" type="date">
   </div>
   <div class="form-row">
     <label class="form-lbl">Why does this need revision?</label>
@@ -1238,7 +1241,7 @@ function silentConnectDrive(){
 function doLogout(){currentUserId='';currentUserEmail='';currentUserName='';selectedMemberId='';document.getElementById('scr-app').classList.remove('active');document.getElementById('scr-login').classList.add('active');renderLoginMemberList();}
 
 // ── NAV ──
-function vLabel(v){return{dashboard:'Dashboard',clients:'Clients',pipeline:'Pipeline',projects:'All Projects',mis:'MIS',checklist:'Checklist'}[v]||v}
+function vLabel(v){return{dashboard:'Dashboard',clients:'Project File',pipeline:'Pipeline',tasks:'Delegation Sheet',mis:'MIS',checklist:'Checklist'}[v]||v}
 function goView(v){
   currentClientId=null;currentProjectId=null;driveStack=[];expandedRow=null;driveTab='all';clientEditOpen=null;queuedFiles=[];taskSearch='';taskSearchTask='';
   navStack=[{type:'view',id:v,label:vLabel(v)}];
@@ -1329,8 +1332,8 @@ function renderDashboard(){
 function renderClients(){
   const isM=canManage();
   const syncBtn=isM&&driveConnected?`<button class="btn-ghost" onclick="syncAllToDrive()"><i class="ti ti-refresh"></i> Sync to Drive</button>`:'';
-  if(clients.length===0)return`<div class="sec-hd"><span class="sec-title">Clients</span><div style="display:flex;gap:8px">${syncBtn}${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div></div><div class="empty-state"><i class="ti ti-building"></i><p>No clients yet${isM?' — add your first client':''}</p></div>`;
-  return`<div class="sec-hd"><span class="sec-title">Clients</span><div style="display:flex;gap:8px">${syncBtn}${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div></div><div class="clients-grid">${clients.map(cl=>{const cp=projects.filter(p=>p.clientId===cl.id);const isExp=expandedRow===`c_${cl.id}`;return`<div style="background:${isExp?'var(--bg3)':'var(--bg2)'};position:relative;border-bottom:1px solid var(--border)"><div class="client-card" style="background:transparent"><div class="cc-init">${ini(cl.name)}</div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="cc-name" onclick="openClient('${cl.id}')">${cl.name}</div><div class="cc-type">${cl.industry||'—'}</div><div class="cc-meta"><span>${cp.length} project${cp.length!==1?'s':''}</span><span>${cp.filter(p=>p.stage==='Active').length} active</span></div></div>${isM?editIcon(`toggleClientGridEdit('${cl.id}',event)`):''}</div></div>${isExp?`<div style="padding:0 1.25rem 1rem"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:.75rem;border-top:1px solid var(--border)"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="eg-cn-${cl.id}" value="${cl.name}" style="width:130px"></div><div class="edit-field"><span class="edit-lbl">Industry</span><input class="edit-inp" id="eg-ci-${cl.id}" value="${cl.industry||''}" style="width:120px"></div><div class="edit-actions"><button class="cancel-btn" onclick="expandedRow=null;renderNav()">Cancel</button><button class="del-btn" onclick="delClientGrid('${cl.id}')">Delete</button><button class="save-btn" onclick="saveClientGrid('${cl.id}')">Save</button></div></div></div>`:''}</div>`;}).join('')}</div>`;
+  if(clients.length===0)return`<div class="sec-hd"><span class="sec-title">Project File</span><div style="display:flex;gap:8px">${syncBtn}${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div></div><div class="empty-state"><i class="ti ti-building"></i><p>No clients yet${isM?' — add your first client':''}</p></div>`;
+  return`<div class="sec-hd"><span class="sec-title">Project File</span><div style="display:flex;gap:8px">${syncBtn}${isM?`<button class="btn-add" onclick="om('mod-client')"><i class="ti ti-plus"></i> Add Client</button>`:''}</div></div><div class="clients-grid">${clients.map(cl=>{const cp=projects.filter(p=>p.clientId===cl.id);const isExp=expandedRow===`c_${cl.id}`;return`<div style="background:${isExp?'var(--bg3)':'var(--bg2)'};position:relative;border-bottom:1px solid var(--border)"><div class="client-card" style="background:transparent"><div class="cc-init">${ini(cl.name)}</div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="cc-name" onclick="openClient('${cl.id}')">${cl.name}</div><div class="cc-type">${cl.industry||'—'}</div><div class="cc-meta"><span>${cp.length} project${cp.length!==1?'s':''}</span><span>${cp.filter(p=>p.stage==='Active').length} active</span></div></div>${isM?editIcon(`toggleClientGridEdit('${cl.id}',event)`):''}</div></div>${isExp?`<div style="padding:0 1.25rem 1rem"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:.75rem;border-top:1px solid var(--border)"><div class="edit-field"><span class="edit-lbl">Name</span><input class="edit-inp" id="eg-cn-${cl.id}" value="${cl.name}" style="width:130px"></div><div class="edit-field"><span class="edit-lbl">Industry</span><input class="edit-inp" id="eg-ci-${cl.id}" value="${cl.industry||''}" style="width:120px"></div><div class="edit-actions"><button class="cancel-btn" onclick="expandedRow=null;renderNav()">Cancel</button><button class="del-btn" onclick="delClientGrid('${cl.id}')">Delete</button><button class="save-btn" onclick="saveClientGrid('${cl.id}')">Save</button></div></div></div>`:''}</div>`;}).join('')}</div>`;
 }
 async function syncAllToDrive(){
   if(!driveConnected){showToast('Connect Drive first');return;}
@@ -1757,11 +1760,12 @@ function openReviseModal(tid){
   document.getElementById('revise-taskid').textContent=t.taskId||t.id;
   document.getElementById('revise-name').textContent=t.name;
   document.getElementById('revise-task').textContent=t.task;
-  document.getElementById('revise-date').value=t.dueDate;
+  // Pre-fill with the doer's requested date if there is one, so approving is a single click
+  document.getElementById('revise-date').value=t.revisionProposedDate||t.dueDate;
   const box=document.getElementById('revise-request-box');
   if(t.revisionRequested==='true'){
     box.style.display='block';
-    box.innerHTML=`<strong>${escHtml(t.name)} requested a revision:</strong><br>${escHtml(t.revisionReason||'')}`;
+    box.innerHTML=`<strong>${escHtml(t.name)} requested a revision:</strong><br>${escHtml(t.revisionReason||'')}${t.revisionProposedDate?`<br><strong>Requested date:</strong> ${fmtDMY(t.revisionProposedDate)}`:''}`;
   } else {
     box.style.display='none';
     box.innerHTML='';
@@ -1780,6 +1784,7 @@ function confirmRevise(){
   t.submittedLink='';
   t.revisionRequested='false';
   t.revisionReason='';
+  t.revisionProposedDate='';
   // Track revision history like the sheet (Revision 1, Revision 2 columns)
   const revCount=parseInt(t.totalRevisions||'0')+1;
   t.totalRevisions=String(revCount);
@@ -1802,6 +1807,7 @@ function openRequestRevisionModal(tid){
   if(!t)return;
   document.getElementById('reqrev-task').textContent=t.task;
   document.getElementById('reqrev-date').textContent=fmtDMY(t.dueDate);
+  document.getElementById('reqrev-newdate').value='';
   document.getElementById('reqrev-reason').value='';
   om('mod-reqrevision');
 }
@@ -1810,10 +1816,13 @@ async function confirmRequestRevision(){
   const t=tasks.find(x=>x.id===currentRequestRevisionTaskId);
   if(!t) return;
   const reason=document.getElementById('reqrev-reason').value.trim();
+  const proposedDate=document.getElementById('reqrev-newdate').value;
   if(!reason){showToast('Please add a short reason');return;}
+  if(!proposedDate){showToast('Please select the date you\'re requesting');return;}
 
   t.revisionRequested='true';
   t.revisionReason=reason;
+  t.revisionProposedDate=proposedDate;
   t.revisionRequestedAt=today();
 
   try{
@@ -1825,6 +1834,7 @@ async function confirmRequestRevision(){
         assignedName:t.name,
         assignedEmail:t.email,
         dueDate:t.dueDate,
+        proposedDate:proposedDate,
         reason:reason,
         projectId:t.projectId
       }),
@@ -2039,7 +2049,7 @@ function renderTasks(projectId){
         if(isOwner){
           reviseCell=`<button class="revise-btn" onclick="openReviseModal('${t.id}')"><i class="ti ti-refresh"></i> Revise</button>`;
           if(t.revisionRequested==='true'){
-            reviseCell+=`<div style="font-size:9.5px;color:var(--amber);margin-top:5px;max-width:170px;line-height:1.4"><i class="ti ti-alert-triangle-filled" style="font-size:10px"></i> ${escHtml(t.name)} requested: ${escHtml(t.revisionReason||'')}</div>`;
+            reviseCell+=`<div style="font-size:9.5px;color:var(--amber);margin-top:5px;max-width:170px;line-height:1.4"><i class="ti ti-alert-triangle-filled" style="font-size:10px"></i> ${escHtml(t.name)} wants ${t.revisionProposedDate?fmtDMY(t.revisionProposedDate):'a revision'}: ${escHtml(t.revisionReason||'')}</div>`;
           }
         } else {
           if(t.revisionRequested==='true'){
